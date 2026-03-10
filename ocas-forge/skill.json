@@ -1,0 +1,8 @@
+{
+  "name": "ocas-forge",
+  "version": "1.1.0",
+  "description": "Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory pipeline: existence gate, classify, scope, architecture, build, validate. Use when asked to create, review, critique, or repair a skill package. Default output is the finished installable package. Do not use for skill evaluation or variant proposals (Mentor).",
+  "author": "Indigo Karasu",
+  "email": "mx.indigo.karasu@gmail.com",
+  "skill_type": "system"
+}
