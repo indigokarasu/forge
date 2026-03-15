@@ -1,12 +1,12 @@
-# 🔨 forge
+# forge
 
-Agent skill builder and optimizer. Transforms natural prompts into production-ready agent capabilities.
+🔨 Agent skill builder and optimizer. Transforms natural prompts into production-ready agent capabilities.
 
 ---
 
 ## 📖 Overview
 
-Forge handles core responsibilities in the Indigo system. See SKILL.md for operational details.
+Uforge handles core responsibilities in the Indigo system. See SKILL.md for operational details.
 
 ---
 
