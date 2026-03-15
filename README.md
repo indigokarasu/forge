@@ -1,17 +1,36 @@
-# Forge
+# 🔨 forge
 
-Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory six-phase pipeline. Default output is the finished installable package.
+Agent skill builder and optimizer. Transforms natural prompts into production-ready agent capabilities.
 
-## Repository Structure
+---
 
-- `ocas-forge/` - Skill package source
-- `spec/` - Specification and build documentation
+## 📖 Overview
 
-## Installation
+Forge handles core responsibilities in the Indigo system. See SKILL.md for operational details.
 
-This skill package is available on GitHub. To use it, clone this repository and follow the installation instructions in your skill management system.
+---
 
+## 🚀 Quick Start
 
-## License
+### 📦 Installation
+
+Clone into your skill management system:
+```bash
+git clone https://github.com/indigokarasu/forge.git
+```
+
+### 🛠️ Configuration
+
+Read `SKILL.md` for:
+- ⚙️ Operational behavior
+- 🔗 Skill cooperation
+- 📋 Tool surface
+- 🔒 Privacy and data handling
+
+Read `references/` for detailed schemas, heuristics, and examples.
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
