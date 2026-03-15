@@ -24,7 +24,7 @@ Skill architect and builder. Designs, builds, and validates complete Agent Skill
 
 ## 📊 Output & Journals
 
-Produces: Produces skill validation reports, build logs, and quality assessments. Maintains architecture review records.
+Skill validation reports, build logs, and quality assessments. Architecture review records.
 
 ---
 
