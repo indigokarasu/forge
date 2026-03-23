@@ -37,6 +37,59 @@ Forge does not own: skill evaluation or variant testing (Mentor), behavioral pat
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
 
 
+
+## Functions
+
+### forge_build()
+
+**Purpose:** design, scope, build, and validate a complete skill package
+
+**Returns:** Operation result
+
+### forge_critique()
+
+**Purpose:** review a package and identify defects
+
+**Returns:** Operation result
+
+### forge_repair()
+
+**Purpose:** fix broken files in an existing package
+
+**Returns:** Operation result
+
+### forge_classify()
+
+**Purpose:** classify a proposed skill (shortcut, workflow, system)
+
+**Returns:** Operation result
+
+### forge_validate()
+
+**Purpose:** run validation checks on a package
+
+**Returns:** Operation result
+
+### forge_scaffold()
+
+**Purpose:** generate a minimal package skeleton
+
+**Returns:** Operation result
+
+### forge_status()
+
+**Purpose:** current build state if multi-step build in progress
+
+**Returns:** Operation result
+
+### forge_journal()
+
+**Purpose:** write journal for the current run; called at end of every run
+
+**Returns:** Operation result
+
+
+
 ## Commands
 
 - `forge.build` — design, scope, build, and validate a complete skill package
