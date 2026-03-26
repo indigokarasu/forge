@@ -1,40 +1,55 @@
 # 🔨 Forge
 
-Skill architect and builder with mandatory six-phase pipeline.
-
-**Skill name:** `ocas-forge`
-**Version:** 2.2.0
-**Type:** system
-**Layer:** System Evolution
-**Author:** Indigo Karasu
+Forge is the system's skill architect -- given a capability idea or broken existing package, it runs a mandatory six-phase internal pipeline covering existence gate, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
 
 ---
 
-## Files
+## Overview
 
-| File | Purpose |
+Forge is the only place where new OCAS skills are designed and built. Rather than generating a plan or brief, Forge runs a mandatory six-phase internal pipeline (existence gate, classify, scope, architecture, build, validate) before writing a single file, and the output is always the finished, installable package. Mentor can also route improvement proposals to Forge via intake files, which Forge processes at each heartbeat pass. Skill packages are classified by type -- shortcut (20-120 lines), workflow (80-250 lines), or system (150-300 lines) -- and each type has its own structural expectations.
+
+## Commands
+
+| Command | Description |
 |---|---|
-| `skill.json` | Package metadata and routing description |
-| `SKILL.md` | Operational instructions for the agent |
-| `references/` | Support files referenced by SKILL.md |
+| `forge.build` | Design, scope, build, and validate a complete skill package |
+| `forge.critique` | Review a package and identify defects |
+| `forge.repair` | Fix broken files in an existing package |
+| `forge.classify` | Classify a proposed skill (shortcut, workflow, system) |
+| `forge.validate` | Run validation checks on a package |
+| `forge.scaffold` | Generate a minimal package skeleton |
+| `forge.status` | Current build state if a multi-step build is in progress |
+| `forge.journal` | Write journal for the current run |
 
----
+## Setup
+
+`forge.init` runs automatically on first invocation and creates all required directories, config.json, and JSONL files. It also registers the `forge:intake` heartbeat entry to process incoming VariantProposal and VariantDecision files from Mentor. No manual setup is required.
+
+## Dependencies
+
+**OCAS Skills**
+- [Mentor](https://github.com/indigokarasu/mentor) -- receives VariantProposal and VariantDecision files via intake directory
+
+**External**
+- None
+
+## Scheduled Tasks
+
+| Job | Mechanism | Schedule | Command |
+|---|---|---|---|
+| `forge:intake` | heartbeat | Every heartbeat pass | Process VariantProposal and VariantDecision files from Mentor intake |
 
 ## Changelog
 
-### 2.2.0 (2026-03-22)
+### v2.2.0 -- March 22, 2026
+- Routing improvements
 
-- Added short-name routing aliases to skill.json description and SKILL.md frontmatter for natural invocation ('Scout', 'Sift', etc.)
-- Added trigger phrases to descriptions for improved routing accuracy
-- Cross-skill references in descriptions now use 'use X' format for routing clarity
+### v2.1.0 -- March 22, 2026
+- Run completion with Mentor intake integration
+- Initialization with heartbeat registration
 
-### 2.1.0 (2026-03-22)
+### v2.0.0 -- March 18, 2026
+- Initial release as part of the unified OCAS skill suite
+---
 
-- Added Run completion section with explicit intake processing and journal write
-- Added Initialization section with heartbeat registration
-- Added Background tasks section: forge:intake (heartbeat)
-- Removed non-conformant OCAS_ROOT environment variable reference
-
-### 2.0.0 (2026-03-18)
-
-- Initial build of all OCAS skills as a unified suite
+*Forge is part of the [OpenClaw Agent Suite](https://github.com/indigokarasu) -- a collection of interconnected skills for personal intelligence, autonomous research, and continuous self-improvement. Each skill owns a narrow responsibility and communicates with others through structured signal files, shared journals, and Chronicle, a long-term knowledge graph that accumulates verified facts over time.*
