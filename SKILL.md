@@ -1,14 +1,14 @@
 ---
 name: ocas-forge
-description: Forge: skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Trigger phrases: 'create a new skill', 'build a skill', 'design a skill', 'review this skill', 'repair this skill', 'validate skill package'. Default output is the finished installable package. Do not use for skill evaluation or variant proposals (use Mentor).
+source: https://github.com/indigokarasu/forge
+install: openclaw skill install https://github.com/indigokarasu/forge
+description: Use when creating, building, reviewing, repairing, or validating Agent Skill packages. Runs a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Trigger phrases: 'create a new skill', 'build a skill', 'design a skill', 'review this skill', 'repair this skill', 'validate skill package'. Do not use for skill evaluation or variant proposals (use Mentor).
 metadata: {"openclaw":{"emoji":"🔨"}}
 ---
 
 # Forge
 
-Forge builds complete, installable Agent Skill packages. Given a capability idea or existing package, it runs a mandatory internal pipeline and returns the finished package.
-
-Default output: the finished package with full file contents. Not a design brief.
+Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory six-phase internal pipeline covering existence gate, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
 
 
 ## When to use
@@ -35,59 +35,6 @@ Forge owns skill design, construction, and validation.
 Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow).
 
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
-
-
-
-## Functions
-
-### forge_build()
-
-**Purpose:** design, scope, build, and validate a complete skill package
-
-**Returns:** Operation result
-
-### forge_critique()
-
-**Purpose:** review a package and identify defects
-
-**Returns:** Operation result
-
-### forge_repair()
-
-**Purpose:** fix broken files in an existing package
-
-**Returns:** Operation result
-
-### forge_classify()
-
-**Purpose:** classify a proposed skill (shortcut, workflow, system)
-
-**Returns:** Operation result
-
-### forge_validate()
-
-**Purpose:** run validation checks on a package
-
-**Returns:** Operation result
-
-### forge_scaffold()
-
-**Purpose:** generate a minimal package skeleton
-
-**Returns:** Operation result
-
-### forge_status()
-
-**Purpose:** current build state if multi-step build in progress
-
-**Returns:** Operation result
-
-### forge_journal()
-
-**Purpose:** write journal for the current run; called at end of every run
-
-**Returns:** Operation result
-
 
 
 ## Commands
@@ -266,8 +213,9 @@ public
 
 ## Support file map
 
-File | When to read
-`references/authoring_rules.md` | Before any build, critique, or validation
-`references/package_patterns.md` | When deciding package shape by skill type
-`references/examples.md` | When reviewing descriptions or detecting anti-patterns
-`references/journal.md` | Before forge.journal; at end of every run
+| File | When to read |
+|---|---|
+| `references/authoring_rules.md` | Before any build, critique, or validation |
+| `references/package_patterns.md` | When deciding package shape by skill type |
+| `references/examples.md` | When reviewing descriptions or detecting anti-patterns |
+| `references/journal.md` | Before forge.journal; at end of every run |
