@@ -7,11 +7,30 @@
   "filesystem": {
     "read": [
       "~/openclaw/data/ocas-forge/",
-      "~/openclaw/journals/ocas-forge/"
+      "~/openclaw/journals/ocas-forge/",
+      "~/openclaw/data/ocas-forge/intake/"
     ],
     "write": [
       "~/openclaw/data/ocas-forge/",
       "~/openclaw/journals/ocas-forge/"
     ]
-  }
+  },
+  "self_update": {
+    "source": "https://github.com/indigokarasu/forge",
+    "mechanism": "version-checked tarball from GitHub via gh CLI",
+    "command": "forge.update",
+    "requires_binaries": [
+      "gh",
+      "tar",
+      "python3"
+    ]
+  },
+  "scheduled_tasks": [
+    {
+      "name": "forge:update",
+      "schedule": "0 0 * * *",
+      "command": "forge.update",
+      "description": "Self-update from GitHub source"
+    }
+  ]
 }
