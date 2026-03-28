@@ -2,7 +2,7 @@
 name: ocas-forge
 source: https://github.com/indigokarasu/forge
 install: openclaw skill install https://github.com/indigokarasu/forge
-description: Use when creating, building, reviewing, repairing, or validating Agent Skill packages. Runs a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Trigger phrases: 'create a new skill', 'build a skill', 'design a skill', 'review this skill', 'repair this skill', 'validate skill package'. Do not use for skill evaluation or variant proposals (use Mentor).
+description: Use when creating, building, reviewing, repairing, or validating Agent Skill packages. Runs a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Trigger phrases: 'create a new skill', 'build a skill', 'design a skill', 'review this skill', 'repair this skill', 'validate skill package', 'update forge'. Do not use for skill evaluation or variant proposals (use Mentor).
 metadata: {"openclaw":{"emoji":"🔨"}}
 ---
 
