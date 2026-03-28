@@ -20,10 +20,11 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 | `forge.scaffold` | Generate a minimal package skeleton |
 | `forge.status` | Current build state if a multi-step build is in progress |
 | `forge.journal` | Write journal for the current run |
+| `forge.update` | Pull latest from GitHub source (preserves journals and data) |
 
 ## Setup
 
-`forge.init` runs automatically on first invocation and creates all required directories, config.json, and JSONL files. It also registers the `forge:intake` heartbeat entry to process incoming VariantProposal and VariantDecision files from Mentor. No manual setup is required.
+`forge.init` runs automatically on first invocation and creates all required directories, config.json, and JSONL files. It also registers the `forge:intake` heartbeat entry to process incoming VariantProposal and VariantDecision files from Mentor and `forge:update` (midnight daily, self-update). No manual setup is required.
 
 ## Dependencies
 
@@ -38,8 +39,12 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 | Job | Mechanism | Schedule | Command |
 |---|---|---|---|
 | `forge:intake` | heartbeat | Every heartbeat pass | Process VariantProposal and VariantDecision files from Mentor intake |
+| `forge:update` | cron | `0 0 * * *` (midnight daily) | Self-update from GitHub source |
 
 ## Changelog
+
+### v2.2.1 -- March 27, 2026
+- Added `forge.update` command and midnight cron for automatic version-checked self-updates
 
 ### v2.2.0 -- March 22, 2026
 - Routing improvements
