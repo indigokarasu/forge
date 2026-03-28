@@ -43,7 +43,7 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
-### v2.2.1 -- March 27, 2026
+### v2.3.0 -- March 27, 2026
 - Added `forge.update` command and midnight cron for automatic version-checked self-updates
 
 ### v2.2.0 -- March 22, 2026
