@@ -47,6 +47,7 @@ Forge receives VariantProposal and VariantDecision files from Mentor. It builds 
 - `forge.scaffold` — generate a minimal package skeleton
 - `forge.status` — current build state if multi-step build in progress
 - `forge.journal` — write journal for the current run; called at end of every run
+- `forge.update` — pull latest from GitHub source; preserves journals and data
 
 
 ## Mandatory design pipeline
@@ -194,7 +195,8 @@ On first invocation of any Forge command, run `forge.init`:
 3. Create empty JSONL files: `build_log.jsonl`, `decisions.jsonl`
 4. Create `~/openclaw/journals/ocas-forge/`
 5. Register heartbeat entry `forge:intake` in `HEARTBEAT.md` if not already present
-6. Log initialization as a DecisionRecord in `decisions.jsonl`
+6. Register cron job `forge:update` if not already present (check `openclaw cron list` first)
+7. Log initialization as a DecisionRecord in `decisions.jsonl`
 
 
 ## Background tasks
@@ -202,8 +204,37 @@ On first invocation of any Forge command, run `forge.init`:
 | Job name | Mechanism | Schedule | Command |
 |---|---|---|---|
 | `forge:intake` | heartbeat | every heartbeat pass | Check `~/openclaw/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/` |
+| `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
 
 Heartbeat registration: append `forge:intake` entry to `~/.openclaw/workspace/HEARTBEAT.md` if not already present.
+
+Registration during `forge.init`:
+```
+openclaw cron list
+# If forge:update absent:
+openclaw cron add --name forge:update --schedule "0 0 * * *" --command "forge.update" --sessionTarget isolated --lightContext true --timezone America/Los_Angeles
+```
+
+
+## Self-update
+
+`forge.update` pulls the latest package from the `source:` URL in this file's frontmatter. Runs silently — no output unless the version changed or an error occurred.
+
+1. Read `source:` from frontmatter → extract `{owner}/{repo}` from URL
+2. Read local version from `skill.json`
+3. Fetch remote version: `gh api "repos/{owner}/{repo}/contents/skill.json" --jq '.content' | base64 -d | python3 -c "import sys,json;print(json.load(sys.stdin)['version'])"`
+4. If remote version equals local version → stop silently
+5. Download and install:
+   ```bash
+   TMPDIR=$(mktemp -d)
+   gh api "repos/{owner}/{repo}/tarball/main" > "$TMPDIR/archive.tar.gz"
+   mkdir "$TMPDIR/extracted"
+   tar xzf "$TMPDIR/archive.tar.gz" -C "$TMPDIR/extracted" --strip-components=1
+   cp -R "$TMPDIR/extracted/"* ./
+   rm -rf "$TMPDIR"
+   ```
+6. On failure → retry once. If second attempt fails, report the error and stop.
+7. Output exactly: `I updated Forge from version {old} to {new}`
 
 
 ## Visibility
