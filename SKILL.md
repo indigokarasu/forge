@@ -32,7 +32,7 @@ Forge is the system's skill architect — given a capability idea or broken exis
 
 Forge owns skill design, construction, and validation.
 
-Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow).
+Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow), system health and skill initialization (Custodian).
 
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
 
@@ -134,7 +134,7 @@ Default config.json:
 ```json
 {
   "skill_id": "ocas-forge",
-  "skill_version": "2.3.0",
+  "skill_version": "2.3.2",
   "config_version": "1",
   "created_at": "",
   "updated_at": "",
@@ -179,6 +179,7 @@ skill_okrs:
 
 - Mentor — receives VariantProposal and VariantDecision files via intake directory
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
+- Custodian — initializes skills built by Forge during system health passes; Forge-built packages should include conformant Background tasks tables so Custodian can register them automatically
 
 
 ## Journal outputs
