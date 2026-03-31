@@ -36,6 +36,9 @@ Forge does not own: skill evaluation or variant testing (Mentor), behavioral pat
 
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
 
+## Ontology types
+
+Forge does not extract entities and does not emit Signals to Elephas. Forge operates on skill package data only.
 
 ## Commands
 
