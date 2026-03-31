@@ -19,7 +19,7 @@ All Forge journals are Action Journals. Forge builds skill packages — these ar
     "run_id": "r_xxxxxxx",
     "role": "champion",
     "skill_name": "ocas-forge",
-    "skill_version": "2.0.0",
+    "skill_version": "2.3.2",
     "timestamp_start": "2026-03-17T10:00:00-07:00",
     "timestamp_end": "2026-03-17T10:02:00-07:00",
     "normalized_input_hash": "sha256:...",

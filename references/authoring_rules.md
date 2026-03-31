@@ -9,7 +9,7 @@
 6. Add complexity only when justified — start minimal
 
 ## Responsibility Boundaries
-Every new skill must verify it does not conflict with: Scout, Sift, Praxis, Dispatch, Corvus, Mentor, Elephas, Weave, Taste, Voyage, Look, Rally, Relay, Vesper, Forge, Fellow, Thread.
+Every new skill must verify it does not conflict with: Scout, Sift, Praxis, Dispatch, Corvus, Mentor, Elephas, Weave, Taste, Voyage, Look, Rally, Relay, Vesper, Forge, Fellow, Thread, Custodian.
 
 ## Atomic Skill Principle
 Skills perform one clear role. They may cooperate but must never depend on other skills.
