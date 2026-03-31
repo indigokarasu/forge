@@ -11,7 +11,7 @@ Reference: `ocas-skill-authoring-rules.md` v2.4.0
 6. Add complexity only when justified — start minimal
 
 ## Responsibility Boundaries
-Every new skill must verify it does not conflict with: Scout, Sift, Praxis, Dispatch, Corvus, Mentor, Elephas, Weave, Taste, Voyage, Look, Rally, Relay, Vesper, Forge, Fellow, Thread, Custodian.
+Every new skill must verify it does not conflict with: Scout, Sift, Praxis, Dispatch, Corvus, Mentor, Elephas, Weave, Taste, Voyage, Look, Rally, Relay, Vesper, Forge, Fellow, Thread, Custodian, Triage, Haiku, Bower, Spot.
 
 ## Atomic Skill Principle
 Skills perform one clear role. They may cooperate but must never depend on other skills. If a cooperating skill is absent, the skill functions normally.
