@@ -43,6 +43,10 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+### v2.3.2 -- March 30, 2026
+- Added Custodian to responsibility boundary, optional skill cooperation, and authoring rules boundary check list
+- Fixed version consistency across config.json, journal.md, and skill.json
+
 ### v2.3.0 -- March 27, 2026
 - Added `forge.update` command and midnight cron for automatic version-checked self-updates
 
