@@ -1,16 +1,18 @@
-# CHANGELOG
+# Changelog
 
-## 2.4.0 — 2026-03-30
+All notable changes to forge are documented here.
+
+## [2.4.3] - 2026-04-01
 
 ### Changed
-- `references/authoring_rules.md`: updated to reflect ocas-skill-authoring-rules.md v2.4.0
-  - Added Ontology Mapping as required section for system skills
-  - Added Variant Naming Convention (`{skill-id}-variant-{YYYYMMDD}`)
-  - Added Bundled Workflow Plans guidance with expected plans table
-  - Added standardized HEARTBEAT.md registration wording
-  - Added full validation checklist
-- `references/package_patterns.md`: updated System pattern to include `references/plans/` for bundled workflow plans, updated required SKILL.md sections list
+- Synced authoring rules with latest OCAS architecture specification
+- Updated storage conventions reference
+- Added ocas-sands to core skill list
 
-## Prior
+## [2.4.2] - 2026-03-31
 
-See git log for earlier history.
+### Fixed
+- Variant proposal handling improvements
+
+[2.4.3]: https://github.com/indigokarasu/forge/releases/tag/v2.4.3
+[2.4.2]: https://github.com/indigokarasu/forge/releases/tag/v2.4.2
