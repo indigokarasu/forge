@@ -43,6 +43,12 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+### v2.5.0 -- April 2, 2026
+- Added structured entity observations in journal payloads (`entities_observed`, `relationships_observed`, `preferences_observed`)
+- Added `user_relevance` tagging on journal observations (default `agent_only` for system-internal entities)
+- Added Elephas journal cooperation in skill cooperation section
+- Removed "does not emit Signals to Elephas" — Forge now records entity observations in journals
+
 ### v2.3.2 -- March 30, 2026
 - Added Custodian to responsibility boundary, optional skill cooperation, and authoring rules boundary check list
 - Fixed version consistency across config.json, journal.md, and skill.json

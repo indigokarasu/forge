@@ -38,7 +38,7 @@ Forge receives VariantProposal and VariantDecision files from Mentor. It builds 
 
 ## Ontology types
 
-Forge does not extract entities and does not emit Signals to Elephas. Forge operates on skill package data only.
+Forge operates on skill package data. Entities encountered during builds and reviews are recorded as entity observations in journals for downstream consumption.
 
 ## Commands
 
@@ -183,11 +183,20 @@ skill_okrs:
 - Mentor — receives VariantProposal and VariantDecision files via intake directory
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
 - Custodian — initializes skills built by Forge during system health passes; Forge-built packages should include conformant Background tasks tables so Custodian can register them automatically
+- Elephas — journal entity observations consumed during Chronicle ingestion
 
 
 ## Journal outputs
 
 Action Journal — every build, critique, repair, validation, and variant processing run.
+
+When entities are encountered during a run, include the following fields in `decision.payload`:
+
+- `entities_observed` — entities encountered (e.g. Entity/AI for skills being built, Thing/DigitalArtifact for skill packages and code artifacts, Concept/Idea for design patterns and architectures)
+- `relationships_observed` — relationships between observed entities
+- `preferences_observed` — any preferences inferred from observations
+
+Each entity observation must include a `user_relevance` field: `user` if the entity is directly related to the user's world, `agent_only` if encountered incidentally during internal operations, `unknown` if unclear. Most Forge entities are `agent_only` since they are system internals.
 
 
 ## Initialization
