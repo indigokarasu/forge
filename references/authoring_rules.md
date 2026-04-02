@@ -1,6 +1,6 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.4.1
+Version: 2.5.0
 Author: Indigo Karasu
 
 Changes from 2.3.1: added Variant Naming Convention section; standardized HEARTBEAT.md registration language; added ocas-custodian to responsibility boundaries list; added Ontology Mapping to required SKILL.md sections for system skills; added Bundled Workflow Plans section.
