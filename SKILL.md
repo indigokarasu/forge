@@ -263,3 +263,13 @@ public
 | `references/package_patterns.md` | When deciding package shape by skill type |
 | `references/examples.md` | When reviewing descriptions or detecting anti-patterns |
 | `references/journal.md` | Before forge.journal; at end of every run |
+
+## Update command
+
+This skill self-updates every 24 hours via:
+
+```bash
+openclaw forge.update
+```
+
+This pulls the latest version from GitHub and restarts the skill's background tasks if applicable.
