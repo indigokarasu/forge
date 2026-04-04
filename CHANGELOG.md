@@ -1,3 +1,14 @@
+## [2026-04-04] Forge References Synced
+
+### Changes
+- Synced authoring_rules.md from ocas-architecture (v2.6.1)
+- Updated to reflect all 24 active OCAS skills
+- Added ocas-multipass and ocas-vibes to responsibility boundaries
+
+### Validation
+- ✓ References synchronized with architecture specifications
+- ✓ Version: 2.5.1 → 2.5.2
+
 ## [2026-04-04] Spec Compliance Update
 
 ### Changes
