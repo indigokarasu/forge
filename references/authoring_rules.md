@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.1
+Version: 2.6.2
 Author: Indigo Karasu
+
+Changes from 2.6.1: verified all 24 OCAS skills have Ontology types sections per requirements; documented that each skill explicitly declares entity extraction behavior and Signal emission policy; completed comprehensive audit on 2026-04-05.
 
 Changes from 2.6.0: added ocas-multipass and ocas-vibes to Responsibility Boundaries list; updated to reflect all 24 active OCAS skills as of 2026-04-04.
 
