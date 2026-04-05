@@ -1,7 +1,11 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5
+Spec Version: 1.5.2
 Author: Indigo Karasu
+
+Changes from 1.5.1: verified all 24 OCAS skills have complete ontology type definitions and Signal emission declarations; all skills audited for Ontology types section compliance on 2026-04-05.
+
+Changes from 1.5: added ocas-multipass and ocas-vibes to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; updated to reflect all 24 active OCAS skills as of 2026-04-04.
 
 Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership and Signal Emission tables; added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
 
@@ -313,6 +317,8 @@ Skills not in this table do not extract entities and do not emit Signals to Elep
 | ocas-praxis | — | — | — | — | Behavioral refinement; no entity extraction |
 | ocas-forge | — | — | — | — | Skill architect; no entity extraction |
 | ocas-fellow | — | — | — | — | Experimentation engine; no entity extraction |
+| ocas-multipass | — | — | — | — | Tool delegation; no entity extraction |
+| ocas-vibes | — | — | — | — | Voice/style enforcement; no entity extraction |
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -347,6 +353,10 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-elephas | N/A | Reads Signals and writes Chronicle facts; not an emitter |
 | ocas-mentor | No | Orchestration engine; no entity signals |
 | ocas-praxis | No | Behavioral refinement; no entity signals |
+| ocas-forge | No | Skill architect; no entity signals |
+| ocas-fellow | No | Experimentation engine; no entity signals |
+| ocas-multipass | No | Tool delegation; no entity signals |
+| ocas-vibes | No | Voice/style enforcement; no entity signals |
 | ocas-forge | No | Skill architect; no entity signals |
 | ocas-fellow | No | Experimentation engine; no entity signals |
 
