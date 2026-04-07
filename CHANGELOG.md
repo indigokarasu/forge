@@ -1,4 +1,12 @@
+## [2.5.5] - 2026-04-07
+
+- Synced authoring_rules.md and ontology.md from ocas-architecture after coherence audit
+
 ## [2026-04-05] Sync Architecture Specifications
+## [2.5.4] - 2026-04-07
+
+- Patch version update after architecture coherence audit.
+
 
 ### Changes
 - Synced all reference files with updated ocas-architecture specs:
