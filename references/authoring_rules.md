@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.2
+Version: 2.6.3
 Author: Indigo Karasu
+
+Changes from 2.6.2: removed ocas-relay from Responsibility Boundaries list (skill does not exist as OCAS architecture component); confirmed all 24 active OCAS skills in boundaries list; architecture coherence audit 2026-04-07.
 
 Changes from 2.6.1: verified all 24 OCAS skills have Ontology types sections per requirements; documented that each skill explicitly declares entity extraction behavior and Signal emission policy; completed comprehensive audit on 2026-04-05.
 
@@ -292,7 +294,7 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
 
 Each skill build spec includes a Responsibility Boundary section.
 

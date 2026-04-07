@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5.2
+Spec Version: 1.5.3
 Author: Indigo Karasu
+
+Changes from 1.5.2: removed ocas-relay from Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; skill does not exist as OCAS architecture component; verified 24/24 actual OCAS skills listed and current.
 
 Changes from 1.5.1: verified all 24 OCAS skills have complete ontology type definitions and Signal emission declarations; all skills audited for Ontology types section compliance on 2026-04-05.
 
@@ -311,7 +313,6 @@ Skills not in this table do not extract entities and do not emit Signals to Elep
 | ocas-haiku | — | — | — | — | No entity extraction; cooperative Chronicle read only |
 | ocas-bower | — | — | — | DigitalArtifact | Drive files/folders; structural pattern signals (optional) |
 | ocas-triage | — | — | — | — | No entity extraction; queue and scheduling only |
-| ocas-relay | — | — | — | DigitalArtifact | Device attachments only; no Elephas emission |
 | ocas-elephas | — | — | — | — | Chronicle writer only; no entity extraction from user data |
 | ocas-mentor | — | — | — | — | Orchestration engine; no entity extraction |
 | ocas-praxis | — | — | — | — | Behavioral refinement; no entity extraction |
@@ -348,7 +349,6 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-haiku | No | Does not emit entity signals to Chronicle |
 | ocas-bower | Optional | May emit DigitalArtifact signals for structural Drive discoveries |
 | ocas-triage | No | Does not emit entity signals to Chronicle |
-| ocas-relay | No | Device attachments stored locally; downstream skills handle Chronicle ingestion |
 | ocas-custodian | No | System health only; no entity signals |
 | ocas-elephas | N/A | Reads Signals and writes Chronicle facts; not an emitter |
 | ocas-mentor | No | Orchestration engine; no entity signals |
@@ -357,7 +357,6 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-fellow | No | Experimentation engine; no entity signals |
 | ocas-multipass | No | Tool delegation; no entity signals |
 | ocas-vibes | No | Voice/style enforcement; no entity signals |
-| ocas-forge | No | Skill architect; no entity signals |
 | ocas-fellow | No | Experimentation engine; no entity signals |
 
 ---
