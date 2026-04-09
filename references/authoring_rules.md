@@ -1,6 +1,6 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.3
+Version: 2.7.0
 Author: Indigo Karasu
 
 Changes from 2.6.2: removed ocas-relay from Responsibility Boundaries list (skill does not exist as OCAS architecture component); confirmed all 24 active OCAS skills in boundaries list; architecture coherence audit 2026-04-07.
@@ -115,16 +115,16 @@ Sections: title, trigger conditions, purpose and boundaries, decision model, exe
 Every skill with persistent state stores data centrally. No data inside the skill package directory.
 
 ```
-~/openclaw/data/{skill-name}/   — state, config, JSONL logs
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
+$OCAS_DATA_ROOT/data/{skill-name}/   — state, config, JSONL logs
+$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
 ```
 
 LadybugDB skills only:
 ```
-~/openclaw/db/{skill-name}/     — LadybugDB database files
+$OCAS_DATA_ROOT/db/{skill-name}/     — LadybugDB database files
 ```
 
-Config file location: `~/openclaw/data/{skill-name}/config.json`
+Config file location: `$OCAS_DATA_ROOT/data/{skill-name}/config.json`
 Config must include ConfigBase fields from `spec-ocas-shared-schemas.md`.
 
 See `spec-ocas-storage-conventions.md` for the full standard.
@@ -135,7 +135,7 @@ See `spec-ocas-storage-conventions.md` for the full standard.
 
 Every skill run writes a journal. Runs missing journals are invalid.
 
-Journal file location: `~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+Journal file location: `$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
 
 Select journal type based on whether the run executes external side effects:
 - **Observation Journal** — no external side effects (reading, analyzing, discovering)
@@ -190,7 +190,7 @@ Skills with no operational background tasks (self-update only): ocas-weave, ocas
 Background tasks are registered during `{skill}.init` (which runs automatically on first use). Before calling `cron.add`, always check existing jobs first to avoid duplicates:
 
 ```bash
-openclaw cron list   # check before registering
+# Check platform scheduling registry for existing tasks
 ```
 
 In agent tool calls: list existing jobs, check for the target name, add only if absent.
@@ -209,42 +209,44 @@ Skills with no background tasks omit this section entirely.
 
 ### Cron job conventions
 
-All isolated cron jobs use these flags with `openclaw cron add`:
-- `--session isolated` — dedicated fresh agent session
-- `--light-context` — skip workspace bootstrap to minimize token cost
-- `--tz America/Los_Angeles` — timezone for schedule evaluation (update once user's timezone is known)
+Skills declare their scheduling requirements in SKILL.md frontmatter under `metadata.{platform}`. The skill's init command reads its own metadata and calls the platform's scheduling registration API. This keeps skill packages portable across platforms.
 
-For main-session jobs, use `--session main --system-event "text"` with `--wake now` or `--wake next-heartbeat`.
-
-Registration syntax:
-```bash
-openclaw cron add --name "{skill}:{task}" --cron "M H D Mo DoW" \
-  --session isolated --message "{skill}.{command}" --light-context --tz America/Los_Angeles
+Declarative metadata pattern in SKILL.md frontmatter:
+```yaml
+metadata:
+  openclaw:
+    cron:
+      - name: "{skill-short}:{task-short}"
+        schedule: "0 2 * * *"
+        command: "{skill}.{command}"
+    heartbeat:
+      - name: "{skill-short}:{task-short}"
+        command: "{skill}.{command}"
+  hermes:
+    cron:
+      - name: "{skill-short}:{task-short}"
+        schedule: "0 2 * * *"
+        command: "{skill}.{command}"
 ```
 
-One-shot jobs use `--at "ISO8601"` instead of `--cron`. Interval jobs use `--every "duration"`.
-
-Manage existing jobs: `openclaw cron list`, `openclaw cron edit <id>`, `openclaw cron rm <id>`, `openclaw cron run <id>` (manual trigger).
+During `{skill}.init`, the skill reads its own frontmatter metadata and registers tasks using the platform's scheduling API. Check for existing registrations before adding to ensure idempotence.
 
 ### HEARTBEAT.md
 
-The workspace `HEARTBEAT.md` at `~/.openclaw/workspace/HEARTBEAT.md` is the coordination point for all lightweight heartbeat tasks. Skills that contribute heartbeat entries register during `{skill}.init`.
+During `{skill}.init`, register heartbeat tasks declared in `metadata.openclaw.heartbeat` (or `metadata.hermes` equivalent) using the platform's scheduling API. Check for existing registrations before adding to ensure idempotence.
 
-**Standard registration pattern (use this exact wording in every SKILL.md):**
+Skills declare heartbeat tasks in SKILL.md frontmatter under `metadata.{platform}.heartbeat`. The platform reads this metadata and manages the heartbeat coordination file.
 
-> During `{skill}.init`, append to `~/.openclaw/workspace/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
-> ```
-> {skill-short}:{task-short}: {command}
-> ```
-
-Example for Corvus:
+Example heartbeat declaration in frontmatter:
+```yaml
+metadata:
+  openclaw:
+    heartbeat:
+      - name: "corvus:light"
+        command: "corvus.analyze.light"
 ```
-corvus:light: corvus.analyze.light
-```
 
-Every skill that uses heartbeat must include this pattern verbatim in its SKILL.md `## Background tasks` section, substituting `{skill-short}:{task-short}` and `{command}` with the actual values.
-
-If `HEARTBEAT.md` is empty (only blank lines and headers), OpenClaw skips heartbeat runs entirely. Keep it non-empty if any skill needs heartbeat execution.
+If no skills declare heartbeat tasks, the platform skips heartbeat runs entirely.
 
 ---
 
@@ -284,7 +286,7 @@ System skills must include:
 
 **Journal Outputs** — which journal type(s) this skill emits.
 
-**Storage Layout** — the skill's data and journal paths under `~/openclaw/`.
+**Storage Layout** — the skill's data and journal paths under `$OCAS_DATA_ROOT/`.
 
 **Background Tasks** — cron jobs and heartbeat entries required by this skill, with job names, schedules, and registration commands. Omit if the skill has no background tasks.
 
@@ -358,7 +360,7 @@ Examples:
 
 ## Bundled Workflow Plans
 
-Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `~/openclaw/data/ocas-mentor/plans/` during Mentor initialization.
+Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `$OCAS_DATA_ROOT/data/ocas-mentor/plans/` during Mentor initialization.
 
 Skills expected to bundle plans:
 
@@ -373,7 +375,7 @@ Skills expected to bundle plans:
 To add a bundled plan:
 1. Create `references/plans/{plan_id}.plan.md` following `spec-ocas-workflow-plans.md` format.
 2. Add a row to the skill's Support file map in SKILL.md referencing the plan.
-3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `~/openclaw/data/ocas-mentor/plans/`, skipping files already present.
+3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `$OCAS_DATA_ROOT/data/ocas-mentor/plans/`, skipping files already present.
 
 See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
@@ -393,7 +395,7 @@ Verify:
 - Support files exist only when justified
 - SKILL.md points to any support file it depends on
 - Major duplication has been removed
-- Storage paths use `~/openclaw/` root
+- Storage paths use `$OCAS_DATA_ROOT/` root
 - Journal path is specified
 - Background tasks section present if skill has cron or heartbeat requirements; absent if purely reactive
 

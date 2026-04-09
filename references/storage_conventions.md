@@ -1,9 +1,9 @@
 # OCAS Storage Conventions
 
-Spec Version: 1.1
+Spec Version: 1.2
 Author: Indigo Karasu
 
-Changes from 1.0: replaced workspace dot-folder convention with centralized storage under ~/openclaw/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
+Changes from 1.0: replaced workspace dot-folder convention with centralized storage under $OCAS_DATA_ROOT/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
 
 ---
 
@@ -15,18 +15,56 @@ This document defines the standard storage conventions for OCAS skills. All skil
 
 ## Storage Roots
 
-All persistent OCAS data lives under a single central root: `~/openclaw/`.
+All persistent OCAS data lives under a single central root: `$OCAS_DATA_ROOT/`.
 
 Three sub-roots, one per data class:
 
 ```
-~/openclaw/
+$OCAS_DATA_ROOT/
   data/       — skill state, configuration, and JSONL logs
   journals/   — journal files (telemetry, OKR evaluation)
   db/         — LadybugDB graph databases (Elephas and Weave only)
 ```
 
-No skill writes outside `~/openclaw/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
+No skill writes outside `$OCAS_DATA_ROOT/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
+
+---
+
+## Platform Resolution
+
+Skills resolve the data root at init time using this precedence:
+
+1. Platform skill config key `ocas.data_root` (if the platform supports skill-level config settings)
+2. Environment variable `OCAS_DATA_ROOT`
+3. Default fallback: `~/openclaw/`
+
+The workspace root (for HEARTBEAT.md and similar coordination files) resolves via:
+
+1. Platform skill config key `ocas.workspace_root`
+2. Environment variable `OCAS_WORKSPACE_ROOT`
+3. Default fallback: `~/.openclaw/workspace/`
+
+All paths in OCAS specifications are written as `$OCAS_DATA_ROOT/` and resolved at runtime. Skills must never hardcode a platform-specific absolute path.
+
+### Hermes Agent configuration example
+
+In `~/.hermes/config.yaml`:
+```yaml
+skills:
+  config:
+    ocas.data_root: "~/.hermes/ocas-data"
+    ocas.workspace_root: "~/.hermes/ocas-workspace"
+```
+
+Or in `~/.hermes/.env`:
+```
+OCAS_DATA_ROOT=~/.hermes/ocas-data
+OCAS_WORKSPACE_ROOT=~/.hermes/ocas-workspace
+```
+
+### OpenClaw configuration
+
+No configuration needed. OpenClaw uses the default fallback paths.
 
 ---
 
@@ -35,7 +73,7 @@ No skill writes outside `~/openclaw/`. No skill writes inside the skill package 
 ### Location
 
 ```
-~/openclaw/data/{skill-name}/
+$OCAS_DATA_ROOT/data/{skill-name}/
 ```
 
 The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `ocas-elephas`, `ocas-weave`.
@@ -43,14 +81,14 @@ The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-s
 ### Required Structure
 
 ```
-~/openclaw/data/{skill-name}/
+$OCAS_DATA_ROOT/data/{skill-name}/
   config.json
 ```
 
 ### Typical Full Structure
 
 ```
-~/openclaw/data/{skill-name}/
+$OCAS_DATA_ROOT/data/{skill-name}/
   config.json
   {primary_log}.jsonl
   decisions.jsonl
@@ -66,7 +104,7 @@ The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-s
 ### Location
 
 ```
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
+$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
 ```
 
 One file per run. Date directory created automatically. File named by `run_id`.
@@ -74,7 +112,7 @@ One file per run. Date directory created automatically. File named by `run_id`.
 ### Structure
 
 ```
-~/openclaw/journals/ocas-scout/
+$OCAS_DATA_ROOT/journals/ocas-scout/
   2026-03-17/
     r_a7f2c1.json
     r_b3e8d2.json
@@ -85,7 +123,7 @@ One file per run. Date directory created automatically. File named by `run_id`.
 Champion and challenger runs for the same comparison group live in the same date directory:
 
 ```
-~/openclaw/journals/ocas-rally/
+$OCAS_DATA_ROOT/journals/ocas-rally/
   2026-03-17/
     cg_5cfa2c1/
       champion.json
@@ -105,7 +143,7 @@ Champion and challenger runs for the same comparison group live in the same date
 ### Location
 
 ```
-~/openclaw/db/{skill-name}/
+$OCAS_DATA_ROOT/db/{skill-name}/
 ```
 
 Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elephas` and `ocas-weave`.
@@ -113,7 +151,7 @@ Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elepha
 ### Structure
 
 ```
-~/openclaw/db/ocas-elephas/
+$OCAS_DATA_ROOT/db/ocas-elephas/
   chronicle.lbug
   config.json
   staging/
@@ -121,7 +159,7 @@ Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elepha
     {signal_id}.signal.json
     processed/
 
-~/openclaw/db/ocas-weave/
+$OCAS_DATA_ROOT/db/ocas-weave/
   weave.lbug
   config.json
   staging/
@@ -136,7 +174,7 @@ The `.lbug` file is managed exclusively by LadybugDB. Never read or modify `.lbu
 Skills that accept signals from other skills use intake directories under their data root.
 
 ```
-~/openclaw/data/{skill-name}/intake/
+$OCAS_DATA_ROOT/data/{skill-name}/intake/
   {signal_id}.json      — incoming signal files
   processed/            — moved here after consumption
 ```
@@ -227,10 +265,10 @@ Cross-skill data sharing uses only:
 ## Initialization
 
 When a skill's data root does not exist on first run:
-1. Create `~/openclaw/data/{skill-name}/`
+1. Create `$OCAS_DATA_ROOT/data/{skill-name}/`
 2. Write default `config.json` with ConfigBase fields and skill-specific defaults
 3. Create required empty JSONL files
-4. Create `~/openclaw/journals/{skill-name}/` directory
+4. Create `$OCAS_DATA_ROOT/journals/{skill-name}/` directory
 5. Create intake directories if the skill accepts signals
 6. Log initialization as a DecisionRecord
 
@@ -241,8 +279,8 @@ Skills initialize automatically rather than failing on missing storage.
 ## Validation
 
 Skills with validation scripts check:
-- Data root exists at `~/openclaw/data/{skill-name}/`
-- Journal root exists at `~/openclaw/journals/{skill-name}/`
+- Data root exists at `$OCAS_DATA_ROOT/data/{skill-name}/`
+- Journal root exists at `$OCAS_DATA_ROOT/journals/{skill-name}/`
 - `config.json` is valid JSON with required ConfigBase fields
 - JSONL files contain valid JSON on every line
 - No orphaned references

@@ -10,7 +10,7 @@ Changes from 1.2: added Rally → Vesper Portfolio Outcome cooperative read inte
 
 ## Purpose
 
-This document defines the contracts for all inter-skill communication in the OCAS ecosystem. Skills communicate through shared filesystem paths under `~/openclaw/`, not through direct calls or shared memory.
+This document defines the contracts for all inter-skill communication in the OCAS ecosystem. Skills communicate through shared filesystem paths under `$OCAS_DATA_ROOT/`, not through direct calls or shared memory.
 
 All interface paths, file formats, and handoff contracts are defined here. Skills reference this document when they need to send or receive data from another skill.
 
@@ -35,7 +35,7 @@ Skills emit Signal observations to Elephas for Chronicle ingestion.
 
 ### Path
 ```
-~/openclaw/db/ocas-elephas/intake/{signal_id}.signal.json
+$OCAS_DATA_ROOT/db/ocas-elephas/intake/{signal_id}.signal.json
 ```
 
 ### Producers
@@ -59,14 +59,14 @@ Mentor reads journals from all skills during heartbeat evaluation passes.
 
 ### Path
 ```
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
+$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
 ```
 
 ### Producers
 All skills (every run writes a journal).
 
 ### Consumption
-Mentor scans `~/openclaw/journals/` recursively during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. It tracks which `run_id`s have already been ingested via its own ingestion log at `~/openclaw/data/ocas-mentor/ingestion_log.jsonl`.
+Mentor scans `$OCAS_DATA_ROOT/journals/` recursively during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. It tracks which `run_id`s have already been ingested via its own ingestion log at `$OCAS_DATA_ROOT/data/ocas-mentor/ingestion_log.jsonl`.
 
 ### Notes
 Mentor and Elephas are independent consumers of the same journal files. Neither blocks the other. Mentor reads for performance evaluation; Elephas reads to extract Chronicle candidates.
@@ -80,7 +80,7 @@ Corvus notifies Praxis when it detects a behavioral anomaly or opportunity in sk
 
 ### Path
 ```
-~/openclaw/data/ocas-praxis/intake/{signal_id}.json
+$OCAS_DATA_ROOT/data/ocas-praxis/intake/{signal_id}.json
 ```
 
 ### Producer
@@ -115,7 +115,7 @@ Mentor proposes skill improvements to Forge after detecting OKR regressions or p
 
 ### Path
 ```
-~/openclaw/data/ocas-forge/intake/{proposal_id}.json
+$OCAS_DATA_ROOT/data/ocas-forge/intake/{proposal_id}.json
 ```
 
 ### Producer
@@ -153,7 +153,7 @@ Mentor emits a promotion decision after evaluating champion vs. challenger runs 
 
 ### Path
 ```
-~/openclaw/data/ocas-forge/intake/{decision_id}.json
+$OCAS_DATA_ROOT/data/ocas-forge/intake/{decision_id}.json
 ```
 
 ### Producer
@@ -174,7 +174,7 @@ Sands delivers structured schedule briefs to Vesper for inclusion in morning and
 
 ### Path
 ```
-~/openclaw/data/ocas-vesper/intake/{proposal_id}.json
+$OCAS_DATA_ROOT/data/ocas-vesper/intake/{proposal_id}.json
 ```
 
 ### Producer
@@ -204,7 +204,7 @@ Corvus delivers validated insight proposals to Vesper for inclusion in daily bri
 
 ### Path
 ```
-~/openclaw/data/ocas-vesper/intake/{proposal_id}.json
+$OCAS_DATA_ROOT/data/ocas-vesper/intake/{proposal_id}.json
 ```
 
 ### Producer
@@ -240,7 +240,7 @@ Thread delivers reconstructed research threads to Corvus for pattern analysis.
 
 ### Path
 ```
-~/openclaw/data/ocas-corvus/intake/{thread_id}.json
+$OCAS_DATA_ROOT/data/ocas-corvus/intake/{thread_id}.json
 ```
 
 ### Producer
@@ -261,7 +261,7 @@ Thread proposes stable research topics, interests, and source affinities as Chro
 
 ### Path
 ```
-~/openclaw/db/ocas-elephas/intake/{candidate_id}.signal.json
+$OCAS_DATA_ROOT/db/ocas-elephas/intake/{candidate_id}.signal.json
 ```
 
 ### Producer
@@ -281,7 +281,7 @@ Vesper reads Rally's latest daily report during briefing generation to include p
 This is a cooperative read interface — no intake directory is used. Vesper reads directly from Rally's data directory:
 
 ```
-~/openclaw/data/ocas-rally/reports/{YYYY-MM-DD}-daily.json
+$OCAS_DATA_ROOT/data/ocas-rally/reports/{YYYY-MM-DD}-daily.json
 ```
 
 Vesper reads the most recent file matching `*-daily.json` in that directory.
@@ -323,7 +323,7 @@ Mentor invokes Fellow to run a controlled benchmark experiment against a target 
 
 ### Path
 ```
-~/openclaw/data/ocas-fellow/intake/{experiment_id}.json
+$OCAS_DATA_ROOT/data/ocas-fellow/intake/{experiment_id}.json
 ```
 
 ### Producer
@@ -347,7 +347,7 @@ Fellow returns the outcome of a completed experiment cycle to Mentor for promoti
 
 ### Path
 ```
-~/openclaw/data/ocas-mentor/intake/{cycle_id}.json
+$OCAS_DATA_ROOT/data/ocas-mentor/intake/{cycle_id}.json
 ```
 
 ### Producer
@@ -395,7 +395,7 @@ The following cooperative reads are documented here because they are load-bearin
 
 Sift may read Thread's active research context to improve query specificity. Thread's current context is available at:
 ```
-~/openclaw/data/ocas-thread/active_context.json
+$OCAS_DATA_ROOT/data/ocas-thread/active_context.json
 ```
 If absent, Sift proceeds with the unmodified query. Thread never reads from Sift.
 
@@ -403,7 +403,7 @@ If absent, Sift proceeds with the unmodified query. Thread never reads from Sift
 
 Sift may query Weave's social graph database to disambiguate entity references (e.g., resolving "John" to a specific person when multiple matches exist). Weave's LadybugDB is at:
 ```
-~/openclaw/db/ocas-weave/
+$OCAS_DATA_ROOT/db/ocas-weave/
 ```
 Sift opens this database as read-only. If absent, Sift proceeds with unresolved references.
 
