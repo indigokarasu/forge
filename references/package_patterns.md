@@ -51,4 +51,4 @@ SKILL.md: 150-300 lines. Trigger, purpose, decision model, execution loop, suppo
 ## references/plans/ convention
 Plans follow `spec-ocas-workflow-plans.md` format.
 Filename must match plan_id: `{plan_id}.plan.md`.
-Init command must copy plans to ~/openclaw/data/ocas-mentor/plans/ (skip existing).
+Init command must copy plans to $OCAS_DATA_ROOT/data/ocas-mentor/plans/ (skip existing).

@@ -218,7 +218,7 @@ Signals remain permanently attached as evidence after promotion.
 Skills emit Signals by writing a JSON file to the Elephas intake directory:
 
 ```
-~/openclaw/db/ocas-elephas/intake/{signal_id}.signal.json
+$OCAS_DATA_ROOT/db/ocas-elephas/intake/{signal_id}.signal.json
 ```
 
 Elephas watches this directory and processes new files. After processing, files move to `intake/processed/`. Skills must not delete or modify files in either directory.
