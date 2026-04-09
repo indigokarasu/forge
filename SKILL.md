@@ -1,9 +1,44 @@
 ---
 name: ocas-forge
-source: https://github.com/indigokarasu/forge
-install: openclaw skill install https://github.com/indigokarasu/forge
-description: Use when creating, building, reviewing, repairing, or validating Agent Skill packages. Runs a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Trigger phrases: 'create a new skill', 'build a skill', 'design a skill', 'review this skill', 'repair this skill', 'validate skill package', 'update forge'. Do not use for skill evaluation or variant proposals (use Mentor).
-metadata: {"openclaw":{"emoji":"🔨"}}
+description: >
+  Forge: skill architect and builder. Designs, builds, and validates complete
+  Agent Skill packages through a mandatory six-phase pipeline: existence gate,
+  classify, scope, architecture, build, validate. Trigger phrases: 'create a
+  new skill', 'build a skill', 'design a skill', 'review this skill', 'repair
+  this skill', 'validate skill package', 'update forge'. Default output is the
+  finished installable package. Do not use for skill evaluation or variant
+  proposals (use Mentor).
+metadata:
+  author: Indigo Karasu
+  email: mx.indigo.karasu@gmail.com
+  version: "2.6.0"
+  hermes:
+    tags: [skill-building, architecture, validation]
+    category: evolution
+    cron:
+      - name: "forge:update"
+        schedule: "0 0 * * *"
+        command: "forge.update"
+  openclaw:
+    skill_type: system
+    visibility: public
+    filesystem:
+      read:
+        - "$OCAS_DATA_ROOT/data/ocas-forge/"
+        - "$OCAS_DATA_ROOT/journals/ocas-forge/"
+        - "$OCAS_DATA_ROOT/data/ocas-forge/intake/"
+      write:
+        - "$OCAS_DATA_ROOT/data/ocas-forge/"
+        - "$OCAS_DATA_ROOT/journals/ocas-forge/"
+    self_update:
+      source: "https://github.com/indigokarasu/forge"
+      mechanism: "version-checked tarball from GitHub via gh CLI"
+      command: "forge.update"
+      requires_binaries: [gh, tar, python3]
+    cron:
+      - name: "forge:update"
+        schedule: "0 0 * * *"
+        command: "forge.update"
 ---
 
 # Forge
@@ -85,7 +120,7 @@ Read `references/examples.md` for good and bad examples.
 
 After every Forge command (build, critique, repair, validate):
 
-1. Check `~/openclaw/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/`
+1. Check `$OCAS_DATA_ROOT/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/`
 2. Persist build log entries and decisions to local JSONL files
 3. Log material decisions to `decisions.jsonl`
 4. Write journal via `forge.journal`
@@ -104,7 +139,7 @@ After every Forge command (build, critique, repair, validate):
 
 ## Inter-skill interfaces
 
-Forge receives intake files from Mentor at: `~/openclaw/data/ocas-forge/intake/`
+Forge receives intake files from Mentor at: `$OCAS_DATA_ROOT/data/ocas-forge/intake/`
 
 File types received:
 - `{proposal_id}.json` — VariantProposal (spec-ocas-shared-schemas.md)
@@ -118,7 +153,7 @@ See `spec-ocas-interfaces.md` for full handoff contracts.
 ## Storage layout
 
 ```
-~/openclaw/data/ocas-forge/
+$OCAS_DATA_ROOT/data/ocas-forge/
   config.json
   build_log.jsonl
   decisions.jsonl
@@ -127,7 +162,7 @@ See `spec-ocas-interfaces.md` for full handoff contracts.
     {decision_id}.json
     processed/
 
-~/openclaw/journals/ocas-forge/
+$OCAS_DATA_ROOT/journals/ocas-forge/
   YYYY-MM-DD/
     {run_id}.json
 ```
@@ -203,12 +238,12 @@ Each entity observation must include a `user_relevance` field: `user` if the ent
 
 On first invocation of any Forge command, run `forge.init`:
 
-1. Create `~/openclaw/data/ocas-forge/` and subdirectories (`intake/`, `intake/processed/`)
+1. Create `$OCAS_DATA_ROOT/data/ocas-forge/` and subdirectories (`intake/`, `intake/processed/`)
 2. Write default `config.json` with ConfigBase fields if absent
 3. Create empty JSONL files: `build_log.jsonl`, `decisions.jsonl`
-4. Create `~/openclaw/journals/ocas-forge/`
+4. Create `$OCAS_DATA_ROOT/journals/ocas-forge/`
 5. Register heartbeat entry `forge:intake` in `HEARTBEAT.md` if not already present
-6. Register cron job `forge:update` if not already present (check `openclaw cron list` first)
+6. Register cron job `forge:update` if not already present (check the platform scheduling registry first)
 7. Log initialization as a DecisionRecord in `decisions.jsonl`
 
 
@@ -216,16 +251,15 @@ On first invocation of any Forge command, run `forge.init`:
 
 | Job name | Mechanism | Schedule | Command |
 |---|---|---|---|
-| `forge:intake` | heartbeat | every heartbeat pass | Check `~/openclaw/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/` |
+| `forge:intake` | heartbeat | every heartbeat pass | Check `$OCAS_DATA_ROOT/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/` |
 | `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
 
-Heartbeat registration: append `forge:intake` entry to `~/.openclaw/workspace/HEARTBEAT.md` if not already present.
+Heartbeat registration: append `forge:intake` entry to `$OCAS_WORKSPACE_ROOT/HEARTBEAT.md` if not already present.
 
 Registration during `forge.init`:
 ```
-openclaw cron list
-# If forge:update absent:
-openclaw cron add --name forge:update --schedule "0 0 * * *" --command "forge.update" --sessionTarget isolated --lightContext true --timezone America/Los_Angeles
+# Check platform scheduling registry for existing tasks
+# Task declared in SKILL.md frontmatter metadata.{platform}.cron
 ```
 
 
