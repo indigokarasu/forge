@@ -215,13 +215,17 @@ Signals remain permanently attached as evidence after promotion.
 
 ### Signal Delivery
 
-Skills emit Signals by writing a JSON file to the Elephas intake directory:
+Skills emit Signals by including a `signal` payload field in their journal entries:
 
-```
-$OCAS_DATA_ROOT/db/ocas-elephas/intake/{signal_id}.signal.json
+```json
+{
+  "signal": {
+    "entities": [{ "type": "Entity/Person", "data": { ... }, "confidence": "high" }]
+  }
+}
 ```
 
-Elephas watches this directory and processes new files. After processing, files move to `intake/processed/`. Skills must not delete or modify files in either directory.
+Elephas scans all journals for entries with a `signal` field during ingestion passes. See the interfaces specification for the full schema.
 
 Not all skills emit Signals. Skills that maintain standalone domain databases (Weave, Triage) operate independently. They may optionally emit Signals for Chronicle promotion, but this is not required for normal operation.
 

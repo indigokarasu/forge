@@ -112,22 +112,24 @@ Sections: title, trigger conditions, purpose and boundaries, decision model, exe
 
 ## Storage Requirements
 
-Every skill with persistent state stores data centrally. No data inside the skill package directory.
+All skill data lives under `{agent_root}/commons/`. The skill resolves `{agent_root}` at init by asking the agent platform for its home directory, then creates or uses `commons/` one level down. No data inside the skill package directory.
 
+Every skill gets:
 ```
-$OCAS_DATA_ROOT/data/{skill-name}/   — state, config, JSONL logs
-$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
+{agent_root}/commons/data/{skill-name}/       — private state, config, JSONL logs
+{agent_root}/commons/journals/{skill-name}/   — per-run journal files (shared)
+{agent_root}/commons/errors/{skill-name}/     — per-run error records (shared)
 ```
 
 LadybugDB skills only:
 ```
-$OCAS_DATA_ROOT/db/{skill-name}/     — LadybugDB database files
+{agent_root}/commons/db/{skill-name}/         — LadybugDB database files
 ```
 
-Config file location: `$OCAS_DATA_ROOT/data/{skill-name}/config.json`
-Config must include ConfigBase fields from `spec-ocas-shared-schemas.md`.
+Config file location: `{agent_root}/commons/data/{skill-name}/config.json`
+Config must include ConfigBase fields from the shared schemas specification.
 
-See `spec-ocas-storage-conventions.md` for the full standard.
+See the storage conventions specification for the full standard.
 
 ---
 
@@ -135,7 +137,8 @@ See `spec-ocas-storage-conventions.md` for the full standard.
 
 Every skill run writes a journal. Runs missing journals are invalid.
 
-Journal file location: `$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+Journal file location: `{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+Error file location: `{agent_root}/commons/errors/{skill-name}/YYYY-MM-DD/{run_id}.json`
 
 Select journal type based on whether the run executes external side effects:
 - **Observation Journal** — no external side effects (reading, analyzing, discovering)
@@ -150,11 +153,11 @@ See `spec-ocas-journal.md` for the full specification.
 
 ## Inter-Skill Communication Requirements
 
-Skills communicate through defined intake directories, not direct calls.
+Skills communicate through typed payload fields in journal entries, not through direct calls or file drops.
 
-If a skill sends signals to another skill or receives signals from another skill, it must reference `spec-ocas-interfaces.md` for the path and format.
+When a run produces output relevant to another skill, include the appropriate payload field in the journal entry. Consuming skills scan the shared journal tree and filter for entries containing their relevant fields.
 
-Do not create undocumented inter-skill interfaces.
+See the interfaces specification for all defined payload fields, producers, and consumers. Do not create undocumented inter-skill interfaces.
 
 ---
 
@@ -171,7 +174,7 @@ Use **cron** when:
 - Output should be delivered to a channel
 
 Use **heartbeat** (entry in `HEARTBEAT.md`) when:
-- The task is a lightweight poll or check (scan an intake directory, update an aggregate)
+- The task is a lightweight poll or check (scan journals for new entries, update an aggregate)
 - Timing can drift slightly without consequence
 - The task can batch with other monitoring checks
 
@@ -181,7 +184,7 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 
 Skills with operational cron jobs: ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch.
 
-Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (intake poll), ocas-forge (intake poll), ocas-haiku (post-opportunity).
+Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (journal scan), ocas-forge (journal scan), ocas-haiku (post-opportunity).
 
 Skills with no operational background tasks (self-update only): ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow.
 
@@ -286,7 +289,7 @@ System skills must include:
 
 **Journal Outputs** — which journal type(s) this skill emits.
 
-**Storage Layout** — the skill's data and journal paths under `$OCAS_DATA_ROOT/`.
+**Storage Layout** — the skill's data and journal paths under `{agent_root}/commons/`.
 
 **Background Tasks** — cron jobs and heartbeat entries required by this skill, with job names, schedules, and registration commands. Omit if the skill has no background tasks.
 
@@ -360,7 +363,7 @@ Examples:
 
 ## Bundled Workflow Plans
 
-Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `$OCAS_DATA_ROOT/data/ocas-mentor/plans/` during Mentor initialization.
+Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `{agent_root}/commons/data/ocas-mentor/plans/` during Mentor initialization.
 
 Skills expected to bundle plans:
 
@@ -375,7 +378,7 @@ Skills expected to bundle plans:
 To add a bundled plan:
 1. Create `references/plans/{plan_id}.plan.md` following `spec-ocas-workflow-plans.md` format.
 2. Add a row to the skill's Support file map in SKILL.md referencing the plan.
-3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `$OCAS_DATA_ROOT/data/ocas-mentor/plans/`, skipping files already present.
+3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `{agent_root}/commons/data/ocas-mentor/plans/`, skipping files already present.
 
 See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
@@ -395,7 +398,7 @@ Verify:
 - Support files exist only when justified
 - SKILL.md points to any support file it depends on
 - Major duplication has been removed
-- Storage paths use `$OCAS_DATA_ROOT/` root
+- Storage paths use `{agent_root}/commons/` root
 - Journal path is specified
 - Background tasks section present if skill has cron or heartbeat requirements; absent if purely reactive
 

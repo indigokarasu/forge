@@ -3,7 +3,7 @@
 Spec Version: 1.3
 Versioning Policy: Minor version increments only. Major versions avoided to maintain compatibility.
 
-Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Elephas and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.
+Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Elephas and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.
 
 ---
 
@@ -107,12 +107,12 @@ Elephas ingests all journal types into Chronicle. Mentor reads all journal types
 All journals are written to the central journal root. Skills do not store journals inside their data directories or skill packages.
 
 ```
-$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
+{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
 ```
 
 Example standard run:
 ```
-$OCAS_DATA_ROOT/journals/ocas-scout/
+{agent_root}/commons/journals/ocas-scout/
   2026-03-17/
     r_91d28e1.json
     r_a7f2c1.json
@@ -120,7 +120,7 @@ $OCAS_DATA_ROOT/journals/ocas-scout/
 
 Example champion/challenger pair:
 ```
-$OCAS_DATA_ROOT/journals/ocas-rally/
+{agent_root}/commons/journals/ocas-rally/
   2026-03-07/
     cg_5cfa2c1/
       champion.json
@@ -406,7 +406,7 @@ The canonical filename for this spec is `spec-ocas-journal.md`. All skill packag
 
 Every champion run must:
 - generate a `comparison_group_id`
-- write a journal entry to `$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+- write a journal entry to `{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
 - spawn a variant run if one exists
 - ensure variants never execute side effects
 
@@ -416,7 +416,7 @@ Every champion run must:
 
 ```
 skills execute tasks
-journals capture telemetry → $OCAS_DATA_ROOT/journals/
+journals capture telemetry → {agent_root}/commons/journals/
 mentor reads journals for evaluation
 elephas reads journals for knowledge ingestion
 forge builds variants from mentor proposals

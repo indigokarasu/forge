@@ -11,7 +11,7 @@ description: >
 metadata:
   author: Indigo Karasu
   email: mx.indigo.karasu@gmail.com
-  version: "2.6.0"
+  version: "2.6.1"
   hermes:
     tags: [skill-building, architecture, validation]
     category: evolution
@@ -24,12 +24,11 @@ metadata:
     visibility: public
     filesystem:
       read:
-        - "$OCAS_DATA_ROOT/data/ocas-forge/"
-        - "$OCAS_DATA_ROOT/journals/ocas-forge/"
-        - "$OCAS_DATA_ROOT/data/ocas-forge/intake/"
+        - "{agent_root}/commons/data/ocas-forge/"
+        - "{agent_root}/commons/journals/ocas-forge/"
       write:
-        - "$OCAS_DATA_ROOT/data/ocas-forge/"
-        - "$OCAS_DATA_ROOT/journals/ocas-forge/"
+        - "{agent_root}/commons/data/ocas-forge/"
+        - "{agent_root}/commons/journals/ocas-forge/"
     self_update:
       source: "https://github.com/indigokarasu/forge"
       mechanism: "version-checked tarball from GitHub via gh CLI"
@@ -120,7 +119,7 @@ Read `references/examples.md` for good and bad examples.
 
 After every Forge command (build, critique, repair, validate):
 
-1. Check `$OCAS_DATA_ROOT/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/`
+1. Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log
 2. Persist build log entries and decisions to local JSONL files
 3. Log material decisions to `decisions.jsonl`
 4. Write journal via `forge.journal`
@@ -139,13 +138,13 @@ After every Forge command (build, critique, repair, validate):
 
 ## Inter-skill interfaces
 
-Forge receives intake files from Mentor at: `$OCAS_DATA_ROOT/data/ocas-forge/intake/`
+Forge reads variant proposals and decisions from Mentor journals. journal payload fields (see interfaces specification)
 
 File types received:
 - `{proposal_id}.json` — VariantProposal (spec-ocas-shared-schemas.md)
 - `{decision_id}.json` — VariantDecision (spec-ocas-shared-schemas.md)
 
-After processing each file, move to `intake/processed/`.
+After processing each file, move to the consumer's ingestion log.
 
 See `spec-ocas-interfaces.md` for full handoff contracts.
 
@@ -153,16 +152,15 @@ See `spec-ocas-interfaces.md` for full handoff contracts.
 ## Storage layout
 
 ```
-$OCAS_DATA_ROOT/data/ocas-forge/
+{agent_root}/commons/data/ocas-forge/
   config.json
   build_log.jsonl
   decisions.jsonl
-  intake/
     {proposal_id}.json
     {decision_id}.json
     processed/
 
-$OCAS_DATA_ROOT/journals/ocas-forge/
+{agent_root}/commons/journals/ocas-forge/
   YYYY-MM-DD/
     {run_id}.json
 ```
@@ -206,7 +204,7 @@ skill_okrs:
     target: 0.90
     evaluation_window: 30_runs
   - name: variant_build_success
-    metric: fraction of VariantProposal intake files successfully built
+    metric: fraction of VariantProposal journal payloads successfully built
     direction: maximize
     target: 0.90
     evaluation_window: 30_runs
@@ -215,7 +213,7 @@ skill_okrs:
 
 ## Optional skill cooperation
 
-- Mentor — receives VariantProposal and VariantDecision files via intake directory
+- Mentor — receives VariantProposal and VariantDecision files via journal payload
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
 - Custodian — initializes skills built by Forge during system health passes; Forge-built packages should include conformant Background tasks tables so Custodian can register them automatically
 - Elephas — journal entity observations consumed during Chronicle ingestion
@@ -238,11 +236,11 @@ Each entity observation must include a `user_relevance` field: `user` if the ent
 
 On first invocation of any Forge command, run `forge.init`:
 
-1. Create `$OCAS_DATA_ROOT/data/ocas-forge/` and subdirectories (`intake/`, `intake/processed/`)
+1. Create `{agent_root}/commons/data/ocas-forge/` and subdirectories (journal entries, the consumer's ingestion log)
 2. Write default `config.json` with ConfigBase fields if absent
 3. Create empty JSONL files: `build_log.jsonl`, `decisions.jsonl`
-4. Create `$OCAS_DATA_ROOT/journals/ocas-forge/`
-5. Register heartbeat entry `forge:intake` in `HEARTBEAT.md` if not already present
+4. Create `{agent_root}/commons/journals/ocas-forge/`
+5. Register heartbeat entry `forge:journal-scan` in `HEARTBEAT.md` if not already present
 6. Register cron job `forge:update` if not already present (check the platform scheduling registry first)
 7. Log initialization as a DecisionRecord in `decisions.jsonl`
 
@@ -251,10 +249,10 @@ On first invocation of any Forge command, run `forge.init`:
 
 | Job name | Mechanism | Schedule | Command |
 |---|---|---|---|
-| `forge:intake` | heartbeat | every heartbeat pass | Check `$OCAS_DATA_ROOT/data/ocas-forge/intake/` for VariantProposal and VariantDecision files from Mentor; process and move to `intake/processed/` |
+| `forge:journal-scan` | heartbeat | every heartbeat pass | Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log |
 | `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
 
-Heartbeat registration: append `forge:intake` entry to `$OCAS_WORKSPACE_ROOT/HEARTBEAT.md` if not already present.
+Heartbeat registration: append `forge:journal-scan` entry to `{agent_root}/HEARTBEAT.md` if not already present.
 
 Registration during `forge.init`:
 ```
