@@ -1,9 +1,9 @@
 # OCAS Storage Conventions
 
-Spec Version: 1.2
+Spec Version: 2.0
 Author: Indigo Karasu
 
-Changes from 1.0: replaced workspace dot-folder convention with centralized storage under $OCAS_DATA_ROOT/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
+Changes from 1.2: replaced $OCAS_DATA_ROOT variable with platform-native {agent_root}/commons/ convention; eliminated all invented environment variables; added errors/ as a universal storage root alongside journals/; removed intake directory convention (inter-skill communication now uses journal payloads); updated initialization, validation, and cross-skill access sections.
 
 ---
 
@@ -13,58 +13,34 @@ This document defines the standard storage conventions for OCAS skills. All skil
 
 ---
 
-## Storage Roots
+## Storage Root
 
-All persistent OCAS data lives under a single central root: `$OCAS_DATA_ROOT/`.
+All shared OCAS data lives under `{agent_root}/commons/`.
 
-Three sub-roots, one per data class:
+`{agent_root}` is the agent platform's home directory. Every agent platform has one:
+
+- OpenClaw: `~/openclaw/`
+- Hermes Agent: `~/.hermes/`
+- Claude Code: `~/.claude/`
+
+At init time, the skill asks the agent for its root directory, then creates or uses `commons/` one level down — the same level as `skills/`, `memory/`, and other platform directories.
+
+Four sub-roots, one per data class:
 
 ```
-$OCAS_DATA_ROOT/
-  data/       — skill state, configuration, and JSONL logs
-  journals/   — journal files (telemetry, OKR evaluation)
+{agent_root}/commons/
+  data/       — skill-private state, configuration, and JSONL logs
+  journals/   — per-run journal files (shared, read by meta-skills)
+  errors/     — per-run error records (shared, read by meta-skills)
   db/         — LadybugDB graph databases (Elephas and Weave only)
 ```
 
-No skill writes outside `$OCAS_DATA_ROOT/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
+No skill writes outside `{agent_root}/commons/`. No skill writes inside the skill package directory.
 
----
+### What goes where
 
-## Platform Resolution
-
-Skills resolve the data root at init time using this precedence:
-
-1. Platform skill config key `ocas.data_root` (if the platform supports skill-level config settings)
-2. Environment variable `OCAS_DATA_ROOT`
-3. Default fallback: `~/openclaw/`
-
-The workspace root (for HEARTBEAT.md and similar coordination files) resolves via:
-
-1. Platform skill config key `ocas.workspace_root`
-2. Environment variable `OCAS_WORKSPACE_ROOT`
-3. Default fallback: `~/.openclaw/workspace/`
-
-All paths in OCAS specifications are written as `$OCAS_DATA_ROOT/` and resolved at runtime. Skills must never hardcode a platform-specific absolute path.
-
-### Hermes Agent configuration example
-
-In `~/.hermes/config.yaml`:
-```yaml
-skills:
-  config:
-    ocas.data_root: "~/.hermes/ocas-data"
-    ocas.workspace_root: "~/.hermes/ocas-workspace"
-```
-
-Or in `~/.hermes/.env`:
-```
-OCAS_DATA_ROOT=~/.hermes/ocas-data
-OCAS_WORKSPACE_ROOT=~/.hermes/ocas-workspace
-```
-
-### OpenClaw configuration
-
-No configuration needed. OpenClaw uses the default fallback paths.
+- **If only your skill reads it** → `commons/data/{skill-name}/`
+- **If other skills read it** → `commons/journals/`, `commons/errors/`, or `commons/db/`
 
 ---
 
@@ -73,7 +49,7 @@ No configuration needed. OpenClaw uses the default fallback paths.
 ### Location
 
 ```
-$OCAS_DATA_ROOT/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
 ```
 
 The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `ocas-elephas`, `ocas-weave`.
@@ -81,14 +57,14 @@ The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-s
 ### Required Structure
 
 ```
-$OCAS_DATA_ROOT/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
   config.json
 ```
 
 ### Typical Full Structure
 
 ```
-$OCAS_DATA_ROOT/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
   config.json
   {primary_log}.jsonl
   decisions.jsonl
@@ -104,7 +80,7 @@ $OCAS_DATA_ROOT/data/{skill-name}/
 ### Location
 
 ```
-$OCAS_DATA_ROOT/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
+{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
 ```
 
 One file per run. Date directory created automatically. File named by `run_id`.
@@ -112,7 +88,7 @@ One file per run. Date directory created automatically. File named by `run_id`.
 ### Structure
 
 ```
-$OCAS_DATA_ROOT/journals/ocas-scout/
+{agent_root}/commons/journals/ocas-scout/
   2026-03-17/
     r_a7f2c1.json
     r_b3e8d2.json
@@ -123,7 +99,7 @@ $OCAS_DATA_ROOT/journals/ocas-scout/
 Champion and challenger runs for the same comparison group live in the same date directory:
 
 ```
-$OCAS_DATA_ROOT/journals/ocas-rally/
+{agent_root}/commons/journals/ocas-rally/
   2026-03-17/
     cg_5cfa2c1/
       champion.json
@@ -134,7 +110,41 @@ $OCAS_DATA_ROOT/journals/ocas-rally/
 
 - Journal files are written atomically (write to `.tmp`, then rename).
 - Journal files are immutable after write. Never edit.
-- Runs missing journal files are invalid per `spec-ocas-journal.md`.
+- Runs missing journal files are invalid per the journal specification.
+- Journals are shared records. Meta-skills (Mentor, Elephas, Corvus, Custodian) read all skill journals.
+
+### Inter-skill payloads in journals
+
+Journals carry typed payload fields that consuming skills filter on:
+
+| Journal field | Consumer | Meaning |
+|---|---|---|
+| `briefing.surface: true` | Vesper | Include in next briefing |
+| `signal.entities: [...]` | Elephas | Entities to ingest into Chronicle |
+| `variant_proposal: {...}` | Forge | Skill improvement to build |
+| `experiment_request: {...}` | Fellow | Experiment to run |
+| `cycle_result: {...}` | Mentor | Experiment results |
+| `behavioral_signal: {...}` | Praxis | Behavioral pattern to evaluate |
+
+Each consumer owns its filtering logic and tracks which `run_id`s it has consumed via an ingestion log in its own `data/` directory.
+
+---
+
+## Error Directory
+
+### Location
+
+```
+{agent_root}/commons/errors/{skill-name}/YYYY-MM-DD/{run_id}.json
+```
+
+Same structure as journals. One file per failed run. Every skill writes error records universally.
+
+### Conventions
+
+- Error files follow the same atomic write and immutability rules as journals.
+- Custodian reads all skill error directories during health scans.
+- A run may produce both a journal and an error record (partial success).
 
 ---
 
@@ -143,7 +153,7 @@ $OCAS_DATA_ROOT/journals/ocas-rally/
 ### Location
 
 ```
-$OCAS_DATA_ROOT/db/{skill-name}/
+{agent_root}/commons/db/{skill-name}/
 ```
 
 Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elephas` and `ocas-weave`.
@@ -151,15 +161,12 @@ Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elepha
 ### Structure
 
 ```
-$OCAS_DATA_ROOT/db/ocas-elephas/
+{agent_root}/commons/db/ocas-elephas/
   chronicle.lbug
   config.json
   staging/
-  intake/
-    {signal_id}.signal.json
-    processed/
 
-$OCAS_DATA_ROOT/db/ocas-weave/
+{agent_root}/commons/db/ocas-weave/
   weave.lbug
   config.json
   staging/
@@ -169,25 +176,11 @@ The `.lbug` file is managed exclusively by LadybugDB. Never read or modify `.lbu
 
 ---
 
-## Intake Directories
-
-Skills that accept signals from other skills use intake directories under their data root.
-
-```
-$OCAS_DATA_ROOT/data/{skill-name}/intake/
-  {signal_id}.json      — incoming signal files
-  processed/            — moved here after consumption
-```
-
-See `spec-ocas-interfaces.md` for which skills publish to which intake directories and what file formats they use.
-
----
-
 ## File Types and Conventions
 
 ### config.json
 
-Every skill's configuration file. Must include `ConfigBase` fields from `spec-ocas-shared-schemas.md`: `skill_id`, `skill_version`, `config_version`, `created_at`, `updated_at`.
+Every skill's configuration file. Must include `ConfigBase` fields from the shared schemas specification: `skill_id`, `skill_version`, `config_version`, `created_at`, `updated_at`.
 
 Config is the only mutable JSON file in the data directory. All other data files are append-only.
 
@@ -252,25 +245,27 @@ Skills must not silently delete data. Expired data is removed by explicit mainte
 
 ## Cross-Skill Access
 
-Skills must not read or write another skill's data or journal directory.
+Skills must not read or write another skill's private data directory (`commons/data/{other-skill}/`).
 
 Cross-skill data sharing uses only:
-- Chronicle queries (via `elephas.query`)
-- Weave queries (read-only)
-- Defined intake directory drops (see `spec-ocas-interfaces.md`)
-- Journal emission and Elephas ingestion
+- **Journals** — shared records in `commons/journals/`, readable by any skill
+- **Errors** — shared records in `commons/errors/`, readable by any skill
+- **Chronicle queries** — via `elephas.query` against `commons/db/ocas-elephas/`
+- **Weave queries** — read-only against `commons/db/ocas-weave/`
+- **Journal payloads** — typed fields in journal entries consumed by designated skills
 
 ---
 
 ## Initialization
 
-When a skill's data root does not exist on first run:
-1. Create `$OCAS_DATA_ROOT/data/{skill-name}/`
-2. Write default `config.json` with ConfigBase fields and skill-specific defaults
-3. Create required empty JSONL files
-4. Create `$OCAS_DATA_ROOT/journals/{skill-name}/` directory
-5. Create intake directories if the skill accepts signals
-6. Log initialization as a DecisionRecord
+When a skill's storage does not exist on first run:
+1. Resolve `{agent_root}` by asking the agent platform for its home directory
+2. Create `{agent_root}/commons/data/{skill-name}/`
+3. Write default `config.json` with ConfigBase fields and skill-specific defaults
+4. Create required empty JSONL files
+5. Create `{agent_root}/commons/journals/{skill-name}/` directory
+6. Create `{agent_root}/commons/errors/{skill-name}/` directory
+7. Log initialization as a DecisionRecord
 
 Skills initialize automatically rather than failing on missing storage.
 
@@ -279,10 +274,11 @@ Skills initialize automatically rather than failing on missing storage.
 ## Validation
 
 Skills with validation scripts check:
-- Data root exists at `$OCAS_DATA_ROOT/data/{skill-name}/`
-- Journal root exists at `$OCAS_DATA_ROOT/journals/{skill-name}/`
+- Data root exists at `{agent_root}/commons/data/{skill-name}/`
+- Journal root exists at `{agent_root}/commons/journals/{skill-name}/`
+- Error root exists at `{agent_root}/commons/errors/{skill-name}/`
 - `config.json` is valid JSON with required ConfigBase fields
 - JSONL files contain valid JSON on every line
 - No orphaned references
 - Retention policies are being respected
-- No data written outside the skill's own directories
+- No data written outside the skill's own directories (except shared journals/errors)
