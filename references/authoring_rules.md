@@ -77,7 +77,6 @@ High-risk areas: command syntax, file paths, metadata fields, package structure,
 Minimum package:
 ```
 ocas-{skill}/
-  skill.json
   SKILL.md
 ```
 
@@ -258,7 +257,6 @@ If no skills declare heartbeat tasks, the platform skips heartbeat runs entirely
 ### Base package
 ```
 ocas-{skill}/
-  skill.json
   SKILL.md
 ```
 
