@@ -1,6 +1,6 @@
 # OCAS Shared Schemas
 
-Spec Version: 1.3
+Spec Version: 1.1.4
 Author: Indigo Karasu
 
 Changes from 1.2: added PortfolioOutcomeRecord schema (Rally domain extension); added ConsumptionSignal and ItemRecord schemas (Taste domain extensions); added EvaluationResult schema (Mentor domain extension).
@@ -109,9 +109,9 @@ Proposal type `behavioral_signal` is used when Corvus detects an anomaly or patt
 
 ## BehavioralSignal
 
-Used by: Corvus (writes as journal payload), Praxis (reads from Corvus journals).
+Used by: Corvus (writes to Praxis intake), Praxis (reads from intake).
 
-Journal payload field: `behavioral_signal`
+Written to: `~/openclaw/data/ocas-praxis/intake/{signal_id}.json`
 
 ```json
 {
@@ -131,9 +131,9 @@ Journal payload field: `behavioral_signal`
 
 ## VariantProposal
 
-Used by: Mentor (writes as journal payload), Forge (reads from Mentor journals).
+Used by: Mentor (writes to Forge intake), Forge (reads from intake).
 
-Journal payload field: `variant_proposal`
+Written to: `~/openclaw/data/ocas-forge/intake/{proposal_id}.json`
 
 ```json
 {
@@ -158,7 +158,7 @@ Journal payload field: `variant_proposal`
 
 Used by: Mentor (writes), Forge (reads and acts on).
 
-Journal payload field: `variant_decision`
+Written to: `~/openclaw/data/ocas-forge/intake/{decision_id}.json`
 
 ```json
 {
@@ -244,7 +244,7 @@ Minimum required fields:
 
 Used by: all skills that maintain a config file.
 
-Every skill's `config.json` at `{agent_root}/commons/data/{skill-name}/config.json` includes these base fields plus skill-specific configuration:
+Every skill's `config.json` at `~/openclaw/data/{skill-name}/config.json` includes these base fields plus skill-specific configuration:
 
 ```json
 {
@@ -260,9 +260,9 @@ Every skill's `config.json` at `{agent_root}/commons/data/{skill-name}/config.js
 
 ## ExperimentRequest
 
-Used by: Mentor (writes as journal payload), Fellow (reads from Mentor journals).
+Used by: Mentor (writes to Fellow intake), Fellow (reads from intake).
 
-Journal payload field: `experiment_request`
+Written to: `~/openclaw/data/ocas-fellow/intake/{experiment_id}.json`
 
 ```json
 {
@@ -305,9 +305,9 @@ Journal payload field: `experiment_request`
 
 ## CycleResult
 
-Used by: Fellow (writes as journal payload), Mentor (reads from Fellow journals).
+Used by: Fellow (writes to Mentor intake), Mentor (reads from intake).
 
-Journal payload field: `cycle_result`
+Written to: `~/openclaw/data/ocas-mentor/intake/{cycle_id}.json`
 
 ```json
 {
@@ -339,7 +339,7 @@ The schemas below are skill-specific extensions of shared base schemas. They are
 
 **Extends:** JournalEntry (decision field)
 **Used by:** Rally (writes), Vesper (reads via cooperative interface)
-**Written to:** `{agent_root}/commons/data/ocas-rally/reports/YYYY-MM-DD-daily.json`
+**Written to:** `~/openclaw/data/ocas-rally/reports/YYYY-MM-DD-daily.json`
 
 ```json
 {
@@ -378,7 +378,7 @@ Vesper reads `top_movers`, `risk_flags`, `daily_return`, and `allocation_changes
 
 **Extends:** Signal (payload.data)
 **Used by:** Taste (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-taste/signals.jsonl`
+**Written to:** `~/openclaw/data/ocas-taste/signals.jsonl`
 
 This schema is Taste-internal. It is not emitted to Elephas. It represents a single observed consumption event.
 
@@ -405,7 +405,7 @@ This schema is Taste-internal. It is not emitted to Elephas. It represents a sin
 ### ItemRecord
 
 **Used by:** Taste (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-taste/items.jsonl`
+**Written to:** `~/openclaw/data/ocas-taste/items.jsonl`
 
 ```json
 {
@@ -425,7 +425,7 @@ This schema is Taste-internal. It is not emitted to Elephas. It represents a sin
 ### EvaluationResult
 
 **Used by:** Mentor (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-mentor/evaluations/{evaluation_id}.json`
+**Written to:** `~/openclaw/data/ocas-mentor/evaluations/{evaluation_id}.json`
 
 ```json
 {
