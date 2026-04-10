@@ -1,3 +1,13 @@
+## v2.6.5 - 2026-04-10
+
+- **feat:** Sync all reference documentation with ocas-architecture spec updates
+- Updated authoring_rules.md, ontology.md, interfaces.md, journal.md, schemas.md, storage_conventions.md, workflow_plans.md
+- Ensures forge always reflects latest architecture specifications
+
+## v2.6.4 - 2026-04-10
+
+- **feat:** Add skill.json configuration file for OCAS architecture coherence (architecture audit 2026-04-10)
+
 ## [2.6.1] - 2026-04-08
 
 ### Storage Architecture Update

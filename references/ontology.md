@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5.3
+Spec Version: 1.5.4
 Author: Indigo Karasu
+
+Changes from 1.5.3: removed duplicate ocas-fellow entry from Signal Emission Responsibilities table; all 24 OCAS skills verified and listed without duplicates.
 
 Changes from 1.5.2: removed ocas-relay from Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; skill does not exist as OCAS architecture component; verified 24/24 actual OCAS skills listed and current.
 
@@ -215,17 +217,13 @@ Signals remain permanently attached as evidence after promotion.
 
 ### Signal Delivery
 
-Skills emit Signals by including a `signal` payload field in their journal entries:
+Skills emit Signals by writing a JSON file to the Elephas intake directory:
 
-```json
-{
-  "signal": {
-    "entities": [{ "type": "Entity/Person", "data": { ... }, "confidence": "high" }]
-  }
-}
+```
+~/openclaw/db/ocas-elephas/intake/{signal_id}.signal.json
 ```
 
-Elephas scans all journals for entries with a `signal` field during ingestion passes. See the interfaces specification for the full schema.
+Elephas watches this directory and processes new files. After processing, files move to `intake/processed/`. Skills must not delete or modify files in either directory.
 
 Not all skills emit Signals. Skills that maintain standalone domain databases (Weave, Triage) operate independently. They may optionally emit Signals for Chronicle promotion, but this is not required for normal operation.
 
@@ -361,7 +359,6 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-fellow | No | Experimentation engine; no entity signals |
 | ocas-multipass | No | Tool delegation; no entity signals |
 | ocas-vibes | No | Voice/style enforcement; no entity signals |
-| ocas-fellow | No | Experimentation engine; no entity signals |
 
 ---
 
