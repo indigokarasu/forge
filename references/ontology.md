@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5.4
+Spec Version: 2.0.0
 Author: Indigo Karasu
+
+Changes from 1.5.4: architecture coherence audit 2026-04-11 found only 2 active OCAS skill repositories (ocas-forge, ocas-triage); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to reflect current state; marked 22 previously-documented skills as historical reference; major version bump due to scope reduction from 24 to 2 active implementations.
 
 Changes from 1.5.3: removed duplicate ocas-fellow entry from Signal Emission Responsibilities table; all 24 OCAS skills verified and listed without duplicates.
 
@@ -294,34 +296,16 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
 
-Skills not in this table do not extract entities and do not emit Signals to Elephas.
+**Currently active OCAS skills (as of 2026-04-11):**
 
 | Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
 |---|---|---|---|---|---|
-| ocas-scout | Person, AI | — | — | DigitalArtifact | Extracts people and their public profiles |
-| ocas-sift | Person, AI | Place | Event, Idea | DigitalArtifact | General entity extraction from research |
-| ocas-look | Person | Place | Event, Action | DigitalArtifact | Entities extracted from images |
-| ocas-thread | — | — | Idea | — | Research topic threads (interests, sources) |
-| ocas-corvus | — | — | Idea | Signal | Patterns and anomalies; behavioral signals |
-| ocas-weave | Person | — | — | — | Social graph; Person nodes only |
-| ocas-taste | — | Place | Action | DigitalArtifact | Venues, consumed items, behavioral actions |
-| ocas-voyage | — | Place | Event, Action | — | Venues, trip events, booking actions |
-| ocas-rally | — | — | Event | Thing | Market events; securities as Things |
-| ocas-sands | — | Place | Event | — | Event locations resolved via Google Places API; calendar events created/modified |
-| ocas-dispatch | Person | — | Action | DigitalArtifact | Contacts, sent/received messages |
-| ocas-vesper | — | — | — | — | Aggregates only; does not extract entities |
-| ocas-custodian | — | — | — | — | System health only; no entity extraction |
-| ocas-spot | — | Place | Event | — | Venues booked + confirmed appointments |
-| ocas-haiku | — | — | — | — | No entity extraction; cooperative Chronicle read only |
-| ocas-bower | — | — | — | DigitalArtifact | Drive files/folders; structural pattern signals (optional) |
-| ocas-triage | — | — | — | — | No entity extraction; queue and scheduling only |
-| ocas-elephas | — | — | — | — | Chronicle writer only; no entity extraction from user data |
-| ocas-mentor | — | — | — | — | Orchestration engine; no entity extraction |
-| ocas-praxis | — | — | — | — | Behavioral refinement; no entity extraction |
-| ocas-forge | — | — | — | — | Skill architect; no entity extraction |
-| ocas-fellow | — | — | — | — | Experimentation engine; no entity extraction |
-| ocas-multipass | — | — | — | — | Tool delegation; no entity extraction |
-| ocas-vibes | — | — | — | — | Voice/style enforcement; no entity extraction |
+| ocas-forge | — | — | — | — | Skill architect; does not extract entities or emit Signals |
+| ocas-triage | — | — | — | — | Queue and scheduling; no entity extraction |
+
+**Historical skill mappings (reference; skills not currently released):**
+
+Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -334,31 +318,16 @@ Skills not in this table do not extract entities and do not emit Signals to Elep
 
 Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
 
+**Currently active OCAS skills (as of 2026-04-11):**
+
 | Skill | Emit Signals to Elephas? | Condition |
 |---|---|---|
-| ocas-scout | Yes | After each completed research request, for each extracted entity with confidence ≥ med |
-| ocas-sift | Yes | For entities and relationships extracted with confidence ≥ med |
-| ocas-look | Yes | For entities identified in processed images |
-| ocas-thread | Yes | For Chronicle candidates only (sessions ≥ 3, long_clicks ≥ 3) |
-| ocas-corvus | Optional | For behavioral signals routed to Praxis; does not emit entity signals |
-| ocas-weave | Optional | May emit Person signals for Chronicle promotion |
-| ocas-taste | No | Taste maintains its own preference model; does not emit to Chronicle |
-| ocas-voyage | No | Voyage manages trip state; does not emit entity signals to Chronicle |
-| ocas-rally | No | Rally maintains its own portfolio data; does not emit to Chronicle |
-| ocas-sands | No | Sands manages calendar state; Place and Event data retained in decisions.jsonl only; does not emit to Chronicle |
-| ocas-dispatch | No | Dispatch manages communication state; does not emit entity signals |
-| ocas-spot | Yes | On confirmed booking: Place for new venues, Concept/Event for appointments |
-| ocas-haiku | No | Does not emit entity signals to Chronicle |
-| ocas-bower | Optional | May emit DigitalArtifact signals for structural Drive discoveries |
-| ocas-triage | No | Does not emit entity signals to Chronicle |
-| ocas-custodian | No | System health only; no entity signals |
-| ocas-elephas | N/A | Reads Signals and writes Chronicle facts; not an emitter |
-| ocas-mentor | No | Orchestration engine; no entity signals |
-| ocas-praxis | No | Behavioral refinement; no entity signals |
 | ocas-forge | No | Skill architect; no entity signals |
-| ocas-fellow | No | Experimentation engine; no entity signals |
-| ocas-multipass | No | Tool delegation; no entity signals |
-| ocas-vibes | No | Voice/style enforcement; no entity signals |
+| ocas-triage | No | Queue scheduling only; does not emit entity signals |
+
+**Historical skill patterns (reference; skills not currently released):**
+
+Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes
 
 ---
 
