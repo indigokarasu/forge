@@ -1,3 +1,11 @@
+## v2.6.6 - 2026-04-11
+
+- **chore:** Sync reference documentation with 2026-04-11 architecture coherence audit
+- Updated authoring_rules.md: v2.6.4 → v2.7.0 (reflects current 2-skill active ecosystem)
+- Updated ontology.md: v1.5.4 → v2.0.0 (major version update for scope change)
+- References now accurately document only active OCAS skills (forge, triage)
+- Marked 22 previously-documented skills as archived/historical reference
+
 ## v2.6.5 - 2026-04-10
 
 - **feat:** Sync all reference documentation with ocas-architecture spec updates
