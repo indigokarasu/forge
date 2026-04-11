@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.4
+Version: 2.7.0
 Author: Indigo Karasu
+
+Changes from 2.6.4: architecture coherence audit 2026-04-11 discovered only 2 active OCAS skill repositories (ocas-forge, ocas-triage); updated Responsibility Boundaries and Background Tasks sections to reflect current active skills; other 22 previously-documented skills marked as archived/non-existent; major version bump due to scope change from 24 skills to 2 active implementations.
 
 Changes from 2.6.3: added explicit Background tasks sections to ocas-multipass, ocas-triage, and ocas-vibes documenting that they have no operational background tasks; created skill.json files for all 24 OCAS skills; architecture coherence audit 2026-04-09.
 
@@ -181,11 +183,13 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 
 **Note:** All skills have a `{skill}:update` cron job at midnight for self-updates from GitHub. This universal update task is not counted below — the lists below refer to skills with _operational_ background tasks beyond self-update.
 
-Skills with operational cron jobs: ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch.
+**Current active OCAS skills:**
 
-Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (intake poll), ocas-forge (intake poll), ocas-haiku (post-opportunity).
+Skills with heartbeat entries only: ocas-forge (intake poll).
 
-Skills with no operational background tasks (self-update only): ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow.
+Skills with no operational background tasks (self-update only): ocas-triage.
+
+**Note:** This reflects the current OCAS ecosystem as of 2026-04-11. Additional skills (ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
 
 ### Idempotent registration
 
@@ -294,9 +298,11 @@ System skills must include:
 
 ## Responsibility Boundaries
 
-Before creating a new skill, verify it does not conflict with:
+Before creating a new skill, verify it does not conflict with the following active OCAS skills:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
+ocas-forge, ocas-triage
+
+Legacy reference (archived/non-existent): ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-fellow, ocas-thread, ocas-custodian, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
 
 Each skill build spec includes a Responsibility Boundary section.
 
