@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 2.0.0
+Spec Version: 2.0.1
 Author: Indigo Karasu
+
+Changes from 2.0.0: architecture coherence audit 2026-04-12 found only 1 active OCAS skill repository (ocas-forge); ocas-triage has no GitHub repository instantiation; updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to reflect only ocas-forge as active; moved ocas-triage to historical reference section; patch version bump due to scope refinement within existing active skills count.
 
 Changes from 1.5.4: architecture coherence audit 2026-04-11 found only 2 active OCAS skill repositories (ocas-forge, ocas-triage); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to reflect current state; marked 22 previously-documented skills as historical reference; major version bump due to scope reduction from 24 to 2 active implementations.
 
@@ -296,16 +298,15 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
 
-**Currently active OCAS skills (as of 2026-04-11):**
+**Currently active OCAS skills (as of 2026-04-12):**
 
 | Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
 |---|---|---|---|---|---|
 | ocas-forge | — | — | — | — | Skill architect; does not extract entities or emit Signals |
-| ocas-triage | — | — | — | — | Queue and scheduling; no entity extraction |
 
 **Historical skill mappings (reference; skills not currently released):**
 
-Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes
+Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -318,16 +319,15 @@ Skills not in this list do not extract entities and do not emit Signals to Eleph
 
 Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
 
-**Currently active OCAS skills (as of 2026-04-11):**
+**Currently active OCAS skills (as of 2026-04-12):**
 
 | Skill | Emit Signals to Elephas? | Condition |
 |---|---|---|
 | ocas-forge | No | Skill architect; no entity signals |
-| ocas-triage | No | Queue scheduling only; does not emit entity signals |
 
 **Historical skill patterns (reference; skills not currently released):**
 
-Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes
+Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 ---
 
