@@ -1,3 +1,11 @@
+## v2.6.7 - 2026-04-12
+
+- **chore:** Sync reference documentation with 2026-04-12 architecture coherence audit
+- Updated authoring_rules.md: v2.7.0 → v2.7.1 (reflects verified 1-skill active ecosystem)
+- Updated ontology.md: v2.0.0 → v2.0.1 (ocas-triage moved to archived reference)
+- References now accurately document only active OCAS skill (ocas-forge)
+- Clarified that ocas-triage has no GitHub repository instantiation
+
 ## v2.6.6 - 2026-04-11
 
 - **chore:** Sync reference documentation with 2026-04-11 architecture coherence audit
