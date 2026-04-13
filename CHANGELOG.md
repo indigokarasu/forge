@@ -1,3 +1,10 @@
+## [2.6.9] - 2026-04-13
+
+### Changed
+- Synced reference documentation with ocas-architecture updates
+- Updated authoring_rules.md: v2.7.1 → v2.7.2 (clarified README.md and CHANGELOG.md requirements)
+- References now include complete spec requirements for skill package structure
+
 ## [2.6.8] - 2026-04-12
 
 ### Fixed
