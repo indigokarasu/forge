@@ -56,11 +56,9 @@
 
 - Synced authoring_rules.md and ontology.md from ocas-architecture after coherence audit
 
-## [2026-04-05] Sync Architecture Specifications
 ## [2.5.4] - 2026-04-07
 
 - Patch version update after architecture coherence audit.
-
 
 ### Changes
 - Synced all reference files with updated ocas-architecture specs:
@@ -72,9 +70,6 @@
   - schemas.md: latest
 - All changes reflect completion of Ontology Types audit for 24 OCAS skills
 - Forge now references finalized Skill Entity Extraction and Signal Emission tables
-
-### Impact
-Forge skill developers building new skills will reference the most current architecture specifications and authoring rules.
 
 ## [2026-04-05] Sync Architecture Specifications
 
