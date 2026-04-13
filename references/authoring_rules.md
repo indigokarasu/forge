@@ -72,6 +72,8 @@ SKILL.md does not become:
 - A changelog or design diary
 - A knowledge dump
 
+Every skill package requires a `README.md` and `CHANGELOG.md`. Structure and format are defined in `spec-ocas-skill-publishing.md` in the architecture repo. Follow that spec exactly — it is the single source of truth for README sections, CHANGELOG entry format, versioning rules, and GitHub release convention.
+
 ### 5. Match specificity to failure risk
 
 Use general guidance when multiple approaches are acceptable. Use exact instructions, schemas, or scripts where drift is costly.
