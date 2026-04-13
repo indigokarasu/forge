@@ -46,6 +46,9 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+### v2.6.8 — April 12, 2026
+- Added `{agent_root}/skills/` to filesystem write paths (was missing, caused write failures when building skill packages)
+
 ### v2.5.0 -- April 2, 2026
 - Added structured entity observations in journal payloads (`entities_observed`, `relationships_observed`, `preferences_observed`)
 - Added `user_relevance` tagging on journal observations (default `agent_only` for system-internal entities)

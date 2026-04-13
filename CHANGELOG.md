@@ -1,3 +1,8 @@
+## [2.6.8] - 2026-04-12
+
+### Fixed
+- Added `{agent_root}/skills/` to filesystem write paths (was missing, caused write failures when building skill packages)
+
 ## v2.6.7 - 2026-04-12
 
 - **chore:** Sync reference documentation with 2026-04-12 architecture coherence audit
