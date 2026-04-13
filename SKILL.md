@@ -11,7 +11,7 @@ description: >
 metadata:
   author: Indigo Karasu
   email: mx.indigo.karasu@gmail.com
-  version: "2.6.8"
+  version: "2.6.9"
   hermes:
     tags: [skill-building, architecture, validation]
     category: evolution

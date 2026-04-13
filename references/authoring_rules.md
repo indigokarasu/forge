@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.7.1
+Version: 2.7.2
 Author: Indigo Karasu
+
+Changes from 2.7.1: clarified README.md and CHANGELOG.md requirements per spec-ocas-skill-publishing.md; patch version bump for documentation enhancement.
 
 Changes from 2.7.0: architecture coherence audit 2026-04-12 discovered only 1 active OCAS skill repository (ocas-forge); ocas-triage design specs retained but no GitHub repository instantiated; updated Responsibility Boundaries list to remove ocas-triage and move it to legacy reference; clarified Background Tasks section to reflect only ocas-forge as active; patch version bump due to scope refinement within existing active skill count.
 
