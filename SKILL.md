@@ -297,12 +297,138 @@ public
 | `references/examples.md` | When reviewing descriptions or detecting anti-patterns |
 | `references/journal.md` | Before forge.journal; at end of every run |
 
-## Update command
+## Integrated: skill-adaptation
 
-This skill self-updates every 24 hours via:
+Adapt third-party agent skills (OpenClaw, etc.) to work with Hermes by swapping path references, command references, and metadata.
 
+### When to use this skill
+A user shares a GitHub repo containing a `SKILL.md` or `skill.json` designed for a different agent framework (typically OpenClaw/OCAS).
+
+### Steps
+#### 1. Clone the repo
 ```bash
-forge.update
+git clone https://github.com/<user>/<skill-repo>.git ~/.hermes/skills/<skill-name>/
 ```
 
-This pulls the latest version from GitHub and restarts the skill's background tasks if applicable.
+#### 2. Find all framework-specific references
+```python
+import os
+for root, dirs, files in os.walk('~/.hermes/skills/<skill-name>'):
+    dirs[:] = [d for d in dirs if d != '.git']
+    for f in files:
+        fpath = os.path.join(root, f)
+        with open(fpath) as fh:
+            content = fh.read()
+        if 'openclaw' in content.lower() or '~/openclaw' in content:
+            print(fpath)
+```
+
+#### 3. Swap references
+Use this comprehensive replacement list (order matters):
+```python
+replacements = [
+    ('~/openclaw/', '~/.hermes/'),
+    ('~/openclaw', '~/.hermes'),
+    ('openclaw skill install', 'skill_view'),
+    ('openclaw ', 'hermes '),
+    ('OpenClaw', 'Hermes'),
+    ('ocas-', 'hermes-'),
+    ('OCAS ', 'Hermes '),
+    ('OCAS_', 'hermes_'),
+    ('OpenClaw Agent', 'Hermes Agent'),
+    ('openclaw-agent', 'hermes-agent'),
+    ('openclaw/', '.hermes/'),
+    ('openclaw:', 'hermes:'),
+    ('openclaw', 'hermes'),  # catch-all for any remaining lowercase
+]
+```
+**Important**: Use `errors='replace'` when reading to handle binary files like `.DS_Store` that may get caught in `os.walk()`.
+
+#### 4. Verify no references remain
+Run the scan from Step 2 again — should return zero results.
+
+#### 5. Create required directories
+Check for `~/` paths referenced in the skill and create them under `~/.hermes/`:
+- `~/.hermes/data/<skill-dir>/`
+- `~/.hermes/journals/<skill-dir>/`
+- Any other paths referenced in storage layout sections
+
+#### 6. Fix skill name in frontmatter
+**Important**: The bulk `ocas-` → `hermes-` replacement will rename `name: ocas-skillname` to `name: hermes-skillname`. This is wrong — the Hermes skill name should just be the directory name (e.g., `name: bower`, `name: sands`). Always do:
+```python
+# After bulk replacements, fix the name
+content = content.replace(f'name: hermes-{skill_name}', f'name: {skill_name}', 1)
+```
+Also fix the metadata tag: `metadata: {"openclaw":...}` → `metadata: {"hermes":...}`
+
+#### 7. Write default config
+If the skill references a config file, create it with sensible defaults.
+
+#### 8. Register cron jobs
+If the skill defines scheduled tasks, register them with the Hermes `cronjob` tool:
+```
+cronjob(action='create', name=..., prompt=..., schedule=..., skill='<skill-name>', deliver='origin')
+```
+
+### Pitfalls
+- **skill.json vs SKILL.md**: Skills from other frameworks often use `skill.json` which has a different schema. The SKILL.md YAML frontmatter is what Hermes reads — make sure the SKILL.md `name` field is correct.
+- **OpenClaw cron commands**: References to `openclaw cron list` won't work. Replace with instructions to use the Hermes `cronjob` tool (`action='list'`).
+- **Signal emission paths**: Skills that emit to other ecosystem tools (like Elephas, Vesper) write to `~/openclaw/db/` — change to `~/.hermes/db/`. The target tools may not exist in Hermes, but the paths should still be consistent.
+- **Don't touch .git**: When walking directories for replacements, always skip `.git` directories.
+- **Verify with case-insensitive search**: Some references may be `OpenClaw`, `openclaw`, or `OPENCLAW`. Search case-insensitively.
+- **Environment variables in JS/Node scripts**: Skills with `.js` or `.sh` scripts may reference env vars like `OPENCLAW_MODEL`, `OC_VERSION`. Update these to `HERMES_MODEL`, `HERMES_VERSION` etc.
+- **install: frontmatter line becomes invalid**: After bulk replacements, `install: openclaw skill install ...` becomes `install: hermes skill install ...` which isn't a valid Hermes command. Remove these lines entirely:
+```python
+import re
+content = re.sub(r'^install:.*$', '', content, flags=re.MULTILINE)
+content = re.sub(r'\\n{3,}', '\\n\\n', content)  # clean up double blank lines
+```
+- **source: frontmatter line is worth keeping**: The `source: https://github.com/...` field survives replacement and remains useful metadata for self-update commands.
+- **Cron job prompts must be self-contained**: When registering cron jobs, the prompt argument must fully describe what to do — no context from the current session is available. Include the skill name and key steps.
+
+### Batch multi-skill adaptation
+When installing multiple skills from the same author, do them all at once:
+```bash
+cd ~/.hermes/skills
+git clone https://github.com/<user>/<skill1>.git && \
+git clone https://github.com/<user>/<skill2>.git && \
+...
+```
+Then run the replacement script across all skills in a single pass:
+```python
+import os
+skill_names = ['skill1', 'skill2', 'skill3', ...]  # directory names
+for name in skill_names:
+    skill_path = os.path.join('~/.hermes/skills', name)
+    for root, dirs, files in os.walk(skill_path):
+        dirs[:] = [d for d in dirs if d != '.git']
+        for fname in files:
+            fpath = os.path.join(root, fname)
+            # Apply replacements... (see Step 3 replacements list)
+            
+    # Fix skill name after bulk replacement
+    skill_md = f'~/.hermes/skills/{name}/SKILL.md'
+    with open(skill_md) as f:
+        content = f.read()
+    content = content.replace(f'name: hermes-{name}', f'name: {name}', 1)
+    content = content.replace(f'name: ocas-{name}', f'name: {name}', 1)
+    # ... also fix metadata: {"openclaw": -> {"hermes":
+```
+Verify all skills in a single pass:
+```python
+for name in skill_names:
+    # Check each file for remaining openclaw/OCAS references
+    # Confirm name: field is correct in SKILL.md
+```
+
+### Non-standard repo naming
+Some skills use `ocas-` prefix in the repo name (e.g., `ocas-spot` in `https://github.com/indigokarasu/ocas-spot`). Clone to the plain name:
+```bash
+git clone https://github.com/<user>/ocas-<skill>.git ~/.hermes/skills/<skill>/
+```
+This avoids having nested `ocas-` prefixes in paths like `~/.hermes/skills/ocas-spot/`.
+
+### Post-adaptation cleanup checklist for indigokarasu skills
+When adapting skills from github.com/indigokarasu, these `install:` lines appear in 6 of 7 skills and must be removed:
+- sands, rally, scout, taste, voyage, vesper — all have `install: openclaw skill install https://github.com/indigokarasu/<skill>`
+- bower and haiku do NOT have install lines (already clean)
