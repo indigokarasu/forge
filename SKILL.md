@@ -11,7 +11,7 @@ description: >
 metadata:
   author: Indigo Karasu
   email: mx.indigo.karasu@gmail.com
-  version: "2.6.7"
+  version: "2.6.3"
   hermes:
     tags: [skill-building, architecture, validation]
     category: evolution
@@ -29,6 +29,7 @@ metadata:
       write:
         - "{agent_root}/commons/data/ocas-forge/"
         - "{agent_root}/commons/journals/ocas-forge/"
+        - "{agent_root}/skills/"
     self_update:
       source: "https://github.com/indigokarasu/forge"
       mechanism: "version-checked tarball from GitHub via gh CLI"
