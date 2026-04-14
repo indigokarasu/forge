@@ -46,31 +46,23 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+### v2.6.9 — April 13, 2026
+- Synced reference documentation with ocas-architecture updates
+- Updated authoring_rules.md: v2.7.1 → v2.7.2 (clarified README.md and CHANGELOG.md requirements)
+
 ### v2.6.8 — April 12, 2026
 - Added `{agent_root}/skills/` to filesystem write paths (was missing, caused write failures when building skill packages)
 
-### v2.5.0 -- April 2, 2026
-- Added structured entity observations in journal payloads (`entities_observed`, `relationships_observed`, `preferences_observed`)
-- Added `user_relevance` tagging on journal observations (default `agent_only` for system-internal entities)
-- Added Elephas journal cooperation in skill cooperation section
-- Removed "does not emit Signals to Elephas" — Forge now records entity observations in journals
+### v2.6.7 — April 12, 2026
+- Synced reference documentation with 2026-04-12 architecture coherence audit
+- Updated ontology.md: v2.0.0 → v2.0.1 (ocas-triage moved to archived reference)
 
-### v2.3.2 -- March 30, 2026
-- Added Custodian to responsibility boundary, optional skill cooperation, and authoring rules boundary check list
-- Fixed version consistency across config.json and journal.md
+### v2.6.6 — April 11, 2026
+- Synced reference documentation with 2026-04-11 architecture coherence audit
+- References now accurately document only active OCAS skill (ocas-forge)
 
-### v2.3.0 -- March 27, 2026
-- Added `forge.update` command and midnight cron for automatic version-checked self-updates
-
-### v2.2.0 -- March 22, 2026
-- Routing improvements
-
-### v2.1.0 -- March 22, 2026
-- Run completion with Mentor (via journal payload) integration
-- Initialization with heartbeat registration
-
-### v2.0.0 -- March 18, 2026
-- Initial release as part of the unified OCAS skill suite
+### v2.6.5 — April 10, 2026
+- Synced all reference documentation with ocas-architecture spec updates
 ---
 
 *Forge is part of the [OCAS Agent Suite](https://github.com/indigokarasu) -- a collection of interconnected skills for personal intelligence, autonomous research, and continuous self-improvement. Each skill owns a narrow responsibility and communicates with others through structured signal files, shared journals, and Chronicle, a long-term knowledge graph that accumulates verified facts over time.*
