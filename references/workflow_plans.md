@@ -17,13 +17,13 @@ Plans are distinct from ad-hoc Mentor projects. A project is created on-the-fly 
 
 ## General Rules
 
-- Plans are Markdown files with YAML frontmatter, stored at `~/openclaw/data/ocas-mentor/plans/`.
+- Plans are Markdown files with YAML frontmatter, stored at `{agent_root}/commons/data/ocas-mentor/plans/`.
 - Skills that ship bundled plans include them at `references/plans/` in the skill package. Mentor copies bundled plans during initialization -- skipping any plan file already present to preserve user modifications.
-- Plans are discovered by scanning `~/openclaw/data/ocas-mentor/plans/` for `*.plan.md` files.
+- Plans are discovered by scanning `{agent_root}/commons/data/ocas-mentor/plans/` for `*.plan.md` files.
 - Parameters are declared in frontmatter and passed at invocation time via `--arg name=value`.
 - Steps reference prior step outputs via `{{steps.step_id.output_name}}`.
 - Parameters are referenced via `{{params.param_name}}`.
-- Every plan run is tracked in `~/openclaw/data/ocas-mentor/plan-runs/{plan_run_id}/`.
+- Every plan run is tracked in `{agent_root}/commons/data/ocas-mentor/plan-runs/{plan_run_id}/`.
 - Plans must not hardcode user-specific values. Use parameters for anything that varies between invocations.
 - Plan files are authoritative. Editing a plan file changes behavior for all future runs. In-progress runs use the state snapshot in their `state.json` -- they are not affected by edits.
 
@@ -32,7 +32,7 @@ Plans are distinct from ad-hoc Mentor projects. A project is created on-the-fly 
 ## Storage Layout
 
 ```
-~/openclaw/data/ocas-mentor/
+{agent_root}/commons/data/ocas-mentor/
   plans/
     {plan_id}.plan.md          -- plan definitions (bundled or user-created)
   plan-runs/
@@ -223,7 +223,7 @@ If a step's skill is not available, treat it as a step failure and apply `on_fai
 
 Mentor exposes these commands for plan management:
 
-- `mentor.plan.list` -- list all plans in `~/openclaw/data/ocas-mentor/plans/` with plan_id, version, and description
+- `mentor.plan.list` -- list all plans in `{agent_root}/commons/data/ocas-mentor/plans/` with plan_id, version, and description
 - `mentor.plan.run {plan_id} [--arg name=value ...]` -- execute a named plan
 - `mentor.plan.status {plan_run_id}` -- show current state of a running or recent plan run
 - `mentor.plan.resume {plan_run_id}` -- continue a paused or failed run from the first incomplete step
@@ -234,7 +234,7 @@ Mentor exposes these commands for plan management:
 ## Adding New Plans
 
 1. Write a `{plan_id}.plan.md` file following the format above.
-2. Place it in `~/openclaw/data/ocas-mentor/plans/` for user-created plans, or in a skill's `references/plans/` for bundled plans.
+2. Place it in `{agent_root}/commons/data/ocas-mentor/plans/` for user-created plans, or in a skill's `references/plans/` for bundled plans.
 3. If bundled with a skill, add a row to that skill's Support file map referencing the plan.
 4. Mentor discovers new files at next `mentor.plan.list` or `mentor.plan.run` invocation.
 
@@ -244,7 +244,7 @@ Do not hardcode user-specific values in plan files. Use parameters for all varia
 
 ## Expected Bundled Plans
 
-The following skills are expected to ship bundled plans. Plans are copied to `~/openclaw/data/ocas-mentor/plans/` during `mentor.init`. Existing files are never overwritten (user modifications are preserved).
+The following skills are expected to ship bundled plans. Plans are copied to `{agent_root}/commons/data/ocas-mentor/plans/` during `mentor.init`. Existing files are never overwritten (user modifications are preserved).
 
 | Skill | Plan ID | Description |
 |---|---|---|
@@ -259,7 +259,7 @@ The following skills are expected to ship bundled plans. Plans are copied to `~/
 Skills that bundle plans must add a copy step to their `{skill}.init` command:
 
 ```
-Copy all *.plan.md files from {skill}/references/plans/ to ~/openclaw/data/ocas-mentor/plans/
+Copy all *.plan.md files from {skill}/references/plans/ to {agent_root}/commons/data/ocas-mentor/plans/
 Skip any file that already exists at the destination (preserve user modifications)
 Log each copy operation as a DecisionRecord
 ```

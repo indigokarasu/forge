@@ -1,3 +1,11 @@
+## [2.6.10] - 2026-04-15
+
+### Changed
+- Synced reference documentation with ocas-architecture updates (architecture coherence sync 2026-04-15)
+- Updated authoring_rules.md: v2.7.1 → v2.7.2 (clarified README.md and CHANGELOG.md requirements)
+- Updated ontology.md, interfaces.md, schemas.md, workflow_plans.md, storage_conventions.md to latest spec versions
+- All references now synchronized with architecture baseline
+
 ## [2.6.9] - 2026-04-13
 
 ### Changed

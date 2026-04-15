@@ -3,7 +3,7 @@
 Spec Version: 1.0.3
 Author: Indigo Karasu
 
-Changes from 1.0: replaced workspace dot-folder convention with centralized storage under ~/openclaw/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
+Changes from 1.0: replaced workspace dot-folder convention with centralized storage under {agent_root}/commons/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
 
 ---
 
@@ -15,18 +15,18 @@ This document defines the standard storage conventions for OCAS skills. All skil
 
 ## Storage Roots
 
-All persistent OCAS data lives under a single central root: `~/openclaw/`.
+All persistent OCAS data lives under a single central root: `{agent_root}/commons/`.
 
 Three sub-roots, one per data class:
 
 ```
-~/openclaw/
+{agent_root}/commons/
   data/       — skill state, configuration, and JSONL logs
   journals/   — journal files (telemetry, OKR evaluation)
   db/         — LadybugDB graph databases (Elephas and Weave only)
 ```
 
-No skill writes outside `~/openclaw/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
+No skill writes outside `{agent_root}/commons/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
 
 ---
 
@@ -35,7 +35,7 @@ No skill writes outside `~/openclaw/`. No skill writes inside the skill package 
 ### Location
 
 ```
-~/openclaw/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
 ```
 
 The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `ocas-elephas`, `ocas-weave`.
@@ -43,14 +43,14 @@ The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-s
 ### Required Structure
 
 ```
-~/openclaw/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
   config.json
 ```
 
 ### Typical Full Structure
 
 ```
-~/openclaw/data/{skill-name}/
+{agent_root}/commons/data/{skill-name}/
   config.json
   {primary_log}.jsonl
   decisions.jsonl
@@ -66,7 +66,7 @@ The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-s
 ### Location
 
 ```
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
+{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
 ```
 
 One file per run. Date directory created automatically. File named by `run_id`.
@@ -74,7 +74,7 @@ One file per run. Date directory created automatically. File named by `run_id`.
 ### Structure
 
 ```
-~/openclaw/journals/ocas-scout/
+{agent_root}/commons/journals/ocas-scout/
   2026-03-17/
     r_a7f2c1.json
     r_b3e8d2.json
@@ -85,7 +85,7 @@ One file per run. Date directory created automatically. File named by `run_id`.
 Champion and challenger runs for the same comparison group live in the same date directory:
 
 ```
-~/openclaw/journals/ocas-rally/
+{agent_root}/commons/journals/ocas-rally/
   2026-03-17/
     cg_5cfa2c1/
       champion.json
@@ -105,7 +105,7 @@ Champion and challenger runs for the same comparison group live in the same date
 ### Location
 
 ```
-~/openclaw/db/{skill-name}/
+{agent_root}/commons/db/{skill-name}/
 ```
 
 Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elephas` and `ocas-weave`.
@@ -113,7 +113,7 @@ Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elepha
 ### Structure
 
 ```
-~/openclaw/db/ocas-elephas/
+{agent_root}/commons/db/ocas-elephas/
   chronicle.lbug
   config.json
   staging/
@@ -121,7 +121,7 @@ Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elepha
     {signal_id}.signal.json
     processed/
 
-~/openclaw/db/ocas-weave/
+{agent_root}/commons/db/ocas-weave/
   weave.lbug
   config.json
   staging/
@@ -136,7 +136,7 @@ The `.lbug` file is managed exclusively by LadybugDB. Never read or modify `.lbu
 Skills that accept signals from other skills use intake directories under their data root.
 
 ```
-~/openclaw/data/{skill-name}/intake/
+{agent_root}/commons/data/{skill-name}/intake/
   {signal_id}.json      — incoming signal files
   processed/            — moved here after consumption
 ```
@@ -227,10 +227,10 @@ Cross-skill data sharing uses only:
 ## Initialization
 
 When a skill's data root does not exist on first run:
-1. Create `~/openclaw/data/{skill-name}/`
+1. Create `{agent_root}/commons/data/{skill-name}/`
 2. Write default `config.json` with ConfigBase fields and skill-specific defaults
 3. Create required empty JSONL files
-4. Create `~/openclaw/journals/{skill-name}/` directory
+4. Create `{agent_root}/commons/journals/{skill-name}/` directory
 5. Create intake directories if the skill accepts signals
 6. Log initialization as a DecisionRecord
 
@@ -241,8 +241,8 @@ Skills initialize automatically rather than failing on missing storage.
 ## Validation
 
 Skills with validation scripts check:
-- Data root exists at `~/openclaw/data/{skill-name}/`
-- Journal root exists at `~/openclaw/journals/{skill-name}/`
+- Data root exists at `{agent_root}/commons/data/{skill-name}/`
+- Journal root exists at `{agent_root}/commons/journals/{skill-name}/`
 - `config.json` is valid JSON with required ConfigBase fields
 - JSONL files contain valid JSON on every line
 - No orphaned references
