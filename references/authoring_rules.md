@@ -125,16 +125,16 @@ Sections: title, trigger conditions, purpose and boundaries, decision model, exe
 Every skill with persistent state stores data centrally. No data inside the skill package directory.
 
 ```
-~/openclaw/data/{skill-name}/   — state, config, JSONL logs
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
+{agent_root}/commons/data/{skill-name}/   — state, config, JSONL logs
+{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
 ```
 
 LadybugDB skills only:
 ```
-~/openclaw/db/{skill-name}/     — LadybugDB database files
+{agent_root}/commons/db/{skill-name}/     — LadybugDB database files
 ```
 
-Config file location: `~/openclaw/data/{skill-name}/config.json`
+Config file location: `{agent_root}/commons/data/{skill-name}/config.json`
 Config must include ConfigBase fields from `spec-ocas-shared-schemas.md`.
 
 See `spec-ocas-storage-conventions.md` for the full standard.
@@ -145,7 +145,7 @@ See `spec-ocas-storage-conventions.md` for the full standard.
 
 Every skill run writes a journal. Runs missing journals are invalid.
 
-Journal file location: `~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+Journal file location: `{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
 
 Select journal type based on whether the run executes external side effects:
 - **Observation Journal** — no external side effects (reading, analyzing, discovering)
@@ -294,7 +294,7 @@ System skills must include:
 
 **Journal Outputs** — which journal type(s) this skill emits.
 
-**Storage Layout** — the skill's data and journal paths under `~/openclaw/`.
+**Storage Layout** — the skill's data and journal paths under `{agent_root}/commons/`.
 
 **Background Tasks** — cron jobs and heartbeat entries required by this skill, with job names, schedules, and registration commands. Omit if the skill has no background tasks.
 
@@ -370,7 +370,7 @@ Examples:
 
 ## Bundled Workflow Plans
 
-Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `~/openclaw/data/ocas-mentor/plans/` during Mentor initialization.
+Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `{agent_root}/commons/data/ocas-mentor/plans/` during Mentor initialization.
 
 Skills expected to bundle plans:
 
@@ -385,7 +385,7 @@ Skills expected to bundle plans:
 To add a bundled plan:
 1. Create `references/plans/{plan_id}.plan.md` following `spec-ocas-workflow-plans.md` format.
 2. Add a row to the skill's Support file map in SKILL.md referencing the plan.
-3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `~/openclaw/data/ocas-mentor/plans/`, skipping files already present.
+3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `{agent_root}/commons/data/ocas-mentor/plans/`, skipping files already present.
 
 See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
@@ -405,7 +405,7 @@ Verify:
 - Support files exist only when justified
 - SKILL.md points to any support file it depends on
 - Major duplication has been removed
-- Storage paths use `~/openclaw/` root
+- Storage paths use `{agent_root}/commons/` root
 - Journal path is specified
 - Background tasks section present if skill has cron or heartbeat requirements; absent if purely reactive
 
