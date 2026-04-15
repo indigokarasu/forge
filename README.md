@@ -46,6 +46,12 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+### v2.6.10 — April 15, 2026
+- Synced reference documentation with ocas-architecture updates (architecture coherence sync 2026-04-15)
+- Updated authoring_rules.md, ontology.md, interfaces.md, schemas.md, workflow_plans.md, storage_conventions.md
+- Clarified Ontology types section: explicit statement that Forge does not extract entities or emit Signals
+- Updated HEARTBEAT.md registration pattern to match standard documentation
+
 ### v2.6.9 — April 13, 2026
 - Synced reference documentation with ocas-architecture updates
 - Updated authoring_rules.md: v2.7.1 → v2.7.2 (clarified README.md and CHANGELOG.md requirements)

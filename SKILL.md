@@ -73,7 +73,7 @@ Forge receives VariantProposal and VariantDecision files from Mentor. It builds 
 
 ## Ontology types
 
-Forge operates on skill package data. Entities encountered during builds and reviews are recorded as entity observations in journals for downstream consumption.
+Forge does not extract entities and does not emit Signals to Elephas. Forge operates on skill package data and skill metadata only, not on user entities from Chronicle or Weave.
 
 ## Commands
 
@@ -253,7 +253,10 @@ On first invocation of any Forge command, run `forge.init`:
 | `forge:journal-scan` | heartbeat | every heartbeat pass | Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log |
 | `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
 
-Heartbeat registration: append `forge:journal-scan` entry to `{agent_root}/HEARTBEAT.md` if not already present.
+During `forge.init`, append to `{agent_root}/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
+```
+forge:journal-scan: forge.journal-scan
+```
 
 Registration during `forge.init`:
 ```
