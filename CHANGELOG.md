@@ -1,3 +1,11 @@
+## [2.6.11] - 2026-04-16
+
+### Changed
+- Synced reference documentation with ocas-architecture updates (architecture coherence sync 2026-04-16)
+- Updated authoring_rules.md: v2.7.2 → v2.8.0 (added ocas-relay as active skill, updated responsibility boundaries)
+- Updated ontology.md: v2.0.1 → v2.1.0 (added ocas-relay to entity extraction and signal emission tables)
+- All references now reflect 2-skill active ecosystem (ocas-forge, ocas-relay)
+
 ## [2.6.10] - 2026-04-15
 
 ### Changed
