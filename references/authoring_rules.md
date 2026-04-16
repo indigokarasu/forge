@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.7.2
+Version: 2.8.0
 Author: Indigo Karasu
+
+Changes from 2.7.2: architecture coherence audit 2026-04-16 discovered 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Responsibility Boundaries list to add ocas-relay; updated Background Tasks section to reflect both active skills; minor version bump due to expansion of active skill count.
 
 Changes from 2.7.1: clarified README.md and CHANGELOG.md requirements per spec-ocas-skill-publishing.md; patch version bump for documentation enhancement.
 
@@ -191,9 +193,10 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 
 **Current active OCAS skills:**
 
-Skills with heartbeat entries only: ocas-forge (intake poll).
+- Skills with heartbeat entries only: ocas-forge (intake poll)
+- Skills with cron jobs only: ocas-relay (update only)
 
-**Note:** This reflects the current OCAS ecosystem as of 2026-04-12. Additional skills (ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis, ocas-triage) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
+**Note:** This reflects the current OCAS ecosystem as of 2026-04-16. Additional skills (ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis, ocas-triage) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
 
 ### Idempotent registration
 
@@ -304,7 +307,8 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with the following active OCAS skills:
 
-ocas-forge
+- ocas-forge — skill design, construction, and validation
+- ocas-relay — device gateway, telemetry ingestion, permission management
 
 Legacy reference (archived/non-existent): ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-fellow, ocas-thread, ocas-custodian, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes, ocas-triage
 
