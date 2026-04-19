@@ -11,7 +11,7 @@ description: >
 metadata:
   author: Indigo Karasu
   email: mx.indigo.karasu@gmail.com
-  version: "2.6.11"
+  version: "2.7.0"
   hermes:
     tags: [skill-building, architecture, validation]
     category: evolution
@@ -53,21 +53,25 @@ Forge is the system's skill architect — given a capability idea or broken exis
 - Repair broken or defective skill packages
 - Classify whether a proposed capability deserves to be a skill
 - Validate a skill package against OCAS standards
+- Consolidate orphan or duplicate skills into their natural parent
+- Verify whether a skill is up to date against its GitHub source
+- Sync local skill changes back to the canonical repository
 
 
 ## When not to use
 
 - Evaluating skill performance — use Mentor
-- Running or orchestrating skills — use Mentor
+- Running or orchestrating skills — use Mentor (and see `deferred/running-ocas-skills.md`)
+- Authentication and service wiring (OAuth, MCP setup) — use the forthcoming `ocas-auth` skill; reference content lives in `deferred/mcp-oauth-setup.md`
 - Web research — use Sift
 - Building non-skill artifacts
 
 
 ## Responsibility boundary
 
-Forge owns skill design, construction, and validation.
+Forge owns skill design, construction, validation, consolidation, update verification, and repo-sync.
 
-Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow), system health and skill initialization (Custodian).
+Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow), system health and skill initialization (Custodian), runtime orchestration and delegation (the agent harness), authentication and MCP wiring (ocas-auth).
 
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
 
@@ -83,6 +87,9 @@ Forge does not extract entities and does not emit Signals to Elephas. Forge oper
 - `forge.classify` — classify a proposed skill (shortcut, workflow, system)
 - `forge.validate` — run validation checks on a package
 - `forge.scaffold` — generate a minimal package skeleton
+- `forge.consolidate` — merge an orphan or duplicate skill into its natural parent
+- `forge.verify-update` — check whether a skill is at the latest version from its GitHub source
+- `forge.sync` — sync local skill changes to the canonical repository via PR
 - `forge.status` — current build state if multi-step build in progress
 - `forge.journal` — write journal for the current run; called at end of every run
 - `forge.update` — pull latest from GitHub source; preserves journals and data
@@ -285,6 +292,38 @@ Registration during `forge.init`:
 6. On failure → retry once. If second attempt fails, report the error and stop.
 7. Output exactly: `I updated Forge from version {old} to {new}`
 
+This skill self-updates every 24 hours via `forge.update`, which pulls the latest version from GitHub and restarts the skill's background tasks if applicable.
+
+### Update verification (`forge.verify-update`)
+
+When a skill's self-update command fails or you need to confirm a skill is at the latest version without mutating it, verify manually: read `metadata.version` from local `SKILL.md`, fetch the remote tarball or release (`curl https://api.github.com/repos/{owner}/{repo}/releases/latest`), read its `metadata.version`, and compare. If versions match, stop silently; if they differ, copy extracted files over, log a decision, and clean up.
+
+See `references/builder_workflows.md` for the full procedure, file-level diff steps, git-state verification, and pitfalls.
+
+
+## Skill consolidation
+
+`forge.consolidate` merges an orphan or duplicate skill into its natural parent to reduce skill-list sprawl and invocation confusion.
+
+**Use when:** a skill duplicates functionality already in a parent skill; a skill is "glue" or a "patch" that logically belongs inside an existing one; the skill list has grown unwieldy with overlapping concerns.
+
+**Core rule:** fold merged content into the parent's existing section structure. **Do not** wrap it in `## Integrated: <name>` sections — that bloats SKILL.md, duplicates headings, and defeats progressive disclosure. Identify the parent section that matches the orphan's concern and refactor the content in, resolving redundancy as you go.
+
+**Shape of the workflow:** audit → map orphan to parent → pull latest → fold content → commit on a `merge/` branch → PR → delete orphan locally → update memory.
+
+See `references/builder_workflows.md` for the full command sequence, branch-naming convention, and pitfalls (stash conflicts, divergent branches, non-repo skill dirs, for-loop `cd` gotcha).
+
+
+## Skill sync
+
+`forge.sync` identifies local skill changes in `~/.hermes/skills` and syncs them to the canonical `hermes-agent` repository via a fork-and-PR workflow.
+
+**Use when:** pushing local skill changes to GitHub; persisting a round of local iterations into the main codebase.
+
+**Shape of the workflow:** enumerate local SKILL.md files → diff each against its repo counterpart (NEW or CHANGED) → copy changes into the repo tree → branch `skill-updates-YYYYMMDD` → commit, push to fork, open PR against `NousResearch/hermes-agent:main`.
+
+See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls (embedded repos, working-directory confusion, upstream-sync).
+
 
 ## Visibility
 
@@ -299,16 +338,6 @@ public
 | `references/package_patterns.md` | When deciding package shape by skill type |
 | `references/examples.md` | When reviewing descriptions or detecting anti-patterns |
 | `references/journal.md` | Before forge.journal; at end of every run |
-
-## Update command
-
-This skill self-updates every 24 hours via:
-
-```bash
-forge.update
-```
-
-This pulls the latest version from GitHub and restarts the skill's background tasks if applicable.
-
----
-
+| `references/builder_workflows.md` | Before forge.consolidate, forge.sync, or forge.verify-update |
+| `deferred/running-ocas-skills.md` | Only when the question is actually about running skills (delegation, cron, venv) — this is out-of-scope for Forge and awaits a proper runtime-harness skill |
+| `deferred/mcp-oauth-setup.md` | Only when the question is actually about OAuth scopes or MCP wiring — this is out-of-scope for Forge and belongs in the forthcoming `ocas-auth` skill |
