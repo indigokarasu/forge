@@ -1,3 +1,22 @@
+## [2.7.0] - 2026-04-18
+
+### Changed
+- Refactor: folded builder-domain helper skills into Forge's existing section structure instead of appending `## Integrated:` wrappers.
+- SKILL.md shrunk from 833 → 343 lines (well under the 300-line system-skill ceiling + reference-depth allowance).
+
+### Added
+- `forge.consolidate`, `forge.sync`, and `forge.verify-update` commands (folded from helper skills `skill-consolidation`, `sync-local-skills-to-repo`, and `skill-update-verification`).
+- `references/builder_workflows.md` — full command sequences and pitfalls for the three new sub-workflows.
+
+### Removed (moved, not deleted)
+- `running-ocas-skills` content (MCP toolset traps, delegate patterns, cron inheritance) → `deferred/running-ocas-skills.md`. This is runtime-harness guidance, out-of-scope for the skill builder.
+- OAuth/MCP/Google setup content (deduplicated across three helper skills) → `deferred/mcp-oauth-setup.md`. Belongs in the forthcoming `ocas-auth` private repo.
+- `ocas-implementation` and `ocas-skill-initialization` — split between the two `deferred/` files by concern (runtime vs. auth); architecture-compliance bullets dropped as redundant with `references/authoring_rules.md`.
+
+### Notes
+- All `## Integrated: <skill-name>` wrapper headers removed.
+- No content was deleted outright; out-of-scope material is preserved in `deferred/` pending proper homes.
+
 ## [2.6.11] - 2026-04-16
 
 ### Changed
