@@ -306,3 +306,55 @@ forge.update
 ```
 
 This pulls the latest version from GitHub and restarts the skill's background tasks if applicable.
+
+---
+
+## Integrated: claude-code-to-hermes
+
+### Migrating Claude Code Skills to Hermes
+
+When porting a Claude Code skill/tool to Hermes Agent:
+
+#### Phase 1: Audit
+```bash
+# Find all hardcoded Claude paths
+grep -rn '\.claude' src/ --include='*.py' --include='*.sh' --include='*.json'
+# Find hook references
+grep -rn 'PostToolUse\|PreToolUse\|Stop\|hook' src/ --include='*.py' --include='*.sh'
+```
+
+#### Phase 2: Path Translation
+Replace `~/.claude/` → `~/.hermes/`. Prefer dynamic `get_hermes_home()` if available, otherwise `Path.home() / ".hermes"`.
+
+#### Phase 3: Hook Replacement
+Claude Code hooks (PostToolUse, Stop, PreToolUse) have no Hermes equivalent. Replace with cron jobs:
+- PostToolUse → make logic idempotent, run periodically via cron
+- Stop → cron job `0 */6 * * *` or daily
+- PreToolUse → validate at call site instead
+
+#### Phase 4: Config Adaptation
+Claude Code `settings.json` → Hermes `config.yaml`. Keep tool-specific config separate — don't merge into Hermes config.
+
+#### Phase 5: Install Script
+Create parallel install targeting `~/.hermes/`. Skip hook injection and `~/.claude/agents/` deployment.
+
+#### Phase 6: Maintenance Automation
+```python
+cronjob(action='create', name='tool-name:sync', schedule='0 6 * * *',
+        prompt='Run maintenance sync. Report results.', deliver='telegram')
+```
+
+#### Common Pitfalls
+- Use `cronjob` tool (built-in), not `hermes cron` CLI
+- Don't forget to skip hook injection in install scripts
+- Run `pytest` after every path change
+- Cron job prompts must be self-contained (fresh session, no context)
+
+#### Checklist
+- [ ] No `~/.claude` references in code
+- [ ] Tests pass
+- [ ] Core functionality works
+- [ ] Install script runs clean
+- [ ] Cron job created for maintenance
+- [ ] Config files updated
+- [ ] No Claude Code hooks referenced
