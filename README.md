@@ -1,0 +1,76 @@
+# 🔨 Forge
+
+Forge is the system's skill architect -- given a capability idea or broken existing package, it runs a mandatory six-phase internal pipeline covering existence gate, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
+
+
+Skill packages follow the [agentskills.io](https://agentskills.io/specification) open standard and are compatible with OpenClaw, Hermes Agent, and any agentskills.io-compliant client.
+
+---
+
+## Overview
+
+Forge is the only place where new OCAS skills are designed and built. Rather than generating a plan or brief, Forge runs a mandatory six-phase internal pipeline (existence gate, classify, scope, architecture, build, validate) before writing a single file, and the output is always the finished, installable package. Mentor can also route improvement proposals to Forge via journal payloads files, which Forge processes at each heartbeat pass. Skill packages are classified by type -- shortcut (20-120 lines), workflow (80-250 lines), or system (150-300 lines) -- and each type has its own structural expectations.
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `forge.build` | Design, scope, build, and validate a complete skill package |
+| `forge.critique` | Review a package and identify defects |
+| `forge.repair` | Fix broken files in an existing package |
+| `forge.classify` | Classify a proposed skill (shortcut, workflow, system) |
+| `forge.validate` | Run validation checks on a package |
+| `forge.scaffold` | Generate a minimal package skeleton |
+| `forge.status` | Current build state if a multi-step build is in progress |
+| `forge.journal` | Write journal for the current run |
+| `forge.update` | Pull latest from GitHub source (preserves journals and data) |
+
+## Setup
+
+`forge.init` runs automatically on first invocation and creates all required directories, config.json, and JSONL files. It also registers the `forge:journal-scan` heartbeat entry to process incoming VariantProposal and VariantDecision files from Mentor and `forge:update` (midnight daily, self-update). No manual setup is required.
+
+## Dependencies
+
+**OCAS Skills**
+- [Mentor](https://github.com/indigokarasu/mentor) -- receives VariantProposal and VariantDecision files via journal payload
+
+**External**
+- None
+
+## Scheduled Tasks
+
+| Job | Mechanism | Schedule | Command |
+|---|---|---|---|
+| `forge:journal-scan` | heartbeat | Every heartbeat pass | Process VariantProposal and VariantDecision files from Mentor (via journal payload) |
+| `forge:update` | cron | `0 0 * * *` (midnight daily) | Self-update from GitHub source |
+
+## Changelog
+
+### v2.6.8 — April 12, 2026
+- Added `{agent_root}/skills/` to filesystem write paths (was missing, caused write failures when building skill packages)
+
+### v2.5.0 -- April 2, 2026
+- Added structured entity observations in journal payloads (`entities_observed`, `relationships_observed`, `preferences_observed`)
+- Added `user_relevance` tagging on journal observations (default `agent_only` for system-internal entities)
+- Added Elephas journal cooperation in skill cooperation section
+- Removed "does not emit Signals to Elephas" — Forge now records entity observations in journals
+
+### v2.3.2 -- March 30, 2026
+- Added Custodian to responsibility boundary, optional skill cooperation, and authoring rules boundary check list
+- Fixed version consistency across config.json and journal.md
+
+### v2.3.0 -- March 27, 2026
+- Added `forge.update` command and midnight cron for automatic version-checked self-updates
+
+### v2.2.0 -- March 22, 2026
+- Routing improvements
+
+### v2.1.0 -- March 22, 2026
+- Run completion with Mentor (via journal payload) integration
+- Initialization with heartbeat registration
+
+### v2.0.0 -- March 18, 2026
+- Initial release as part of the unified OCAS skill suite
+---
+
+*Forge is part of the [OCAS Agent Suite](https://github.com/indigokarasu) -- a collection of interconnected skills for personal intelligence, autonomous research, and continuous self-improvement. Each skill owns a narrow responsibility and communicates with others through structured signal files, shared journals, and Chronicle, a long-term knowledge graph that accumulates verified facts over time.*
