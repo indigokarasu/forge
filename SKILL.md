@@ -17,7 +17,7 @@ metadata:
     category: evolution
     cron:
       - name: "forge:update"
-        schedule: "0 0 * * *"
+        schedule: "15 7 * * *"
         command: "forge.update"
   openclaw:
     skill_type: system
@@ -37,7 +37,7 @@ metadata:
       requires_binaries: [gh, tar, python3]
     cron:
       - name: "forge:update"
-        schedule: "0 0 * * *"
+        schedule: "15 7 * * *"
         command: "forge.update"
 ---
 
