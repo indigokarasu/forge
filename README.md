@@ -46,6 +46,9 @@ Forge is the only place where new OCAS skills are designed and built. Rather tha
 
 ## Changelog
 
+
+### v2.7.1 — April 26, 2026
+- Version alignment per spec-ocas-skill-publishing.md (no functional change)
 ### v2.6.10 — April 15, 2026
 - Synced reference documentation with ocas-architecture updates (architecture coherence sync 2026-04-15)
 - Updated authoring_rules.md, ontology.md, interfaces.md, schemas.md, workflow_plans.md, storage_conventions.md
