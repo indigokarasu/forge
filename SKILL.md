@@ -316,7 +316,7 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 ## Skill sync
 
-`forge.sync` identifies local skill changes in `~/.hermes/skills` and syncs them to the canonical `hermes-agent` repository via a fork-and-PR workflow.
+`forge.sync` identifies local skill changes in `{agent_root}/skills` and syncs them to the canonical `hermes-agent` repository via a fork-and-PR workflow.
 
 **Use when:** pushing local skill changes to GitHub; persisting a round of local iterations into the main codebase.
 
@@ -357,7 +357,7 @@ grep -rn 'PostToolUse\|PreToolUse\|Stop\|hook' src/ --include='*.py' --include='
 ```
 
 ### Phase 2: Path Translation
-Replace `~/.claude/` → `~/.hermes/`. Prefer dynamic `get_hermes_home()` if available, otherwise `Path.home() / ".hermes"`.
+Replace `~/.claude/` → `{agent_root}/`. Prefer dynamic `get_hermes_home()` if available, otherwise `Path.home() / ".hermes"`.
 
 ### Phase 3: Hook Replacement
 Claude Code hooks (PostToolUse, Stop, PreToolUse) have no Hermes equivalent. Replace with cron jobs:
@@ -369,7 +369,7 @@ Claude Code hooks (PostToolUse, Stop, PreToolUse) have no Hermes equivalent. Rep
 Claude Code `settings.json` → Hermes `config.yaml`. Keep tool-specific config separate — don't merge into Hermes config.
 
 ### Phase 5: Install Script
-Create parallel install targeting `~/.hermes/`. Skip hook injection and `~/.claude/agents/` deployment.
+Create parallel install targeting `{agent_root}/`. Skip hook injection and `~/.claude/agents/` deployment.
 
 ### Phase 6: Maintenance Automation
 ```python
