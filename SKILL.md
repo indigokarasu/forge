@@ -45,7 +45,6 @@ metadata:
 
 Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory six-phase internal pipeline covering existence gate, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
 
-
 ## When to use
 
 - Create a new Agent Skill from a goal or capability description
@@ -57,7 +56,6 @@ Forge is the system's skill architect — given a capability idea or broken exis
 - Verify whether a skill is up to date against its GitHub source
 - Sync local skill changes back to the canonical repository
 
-
 ## When not to use
 
 - Evaluating skill performance — use Mentor
@@ -65,7 +63,6 @@ Forge is the system's skill architect — given a capability idea or broken exis
 - Authentication and service wiring (OAuth, MCP setup) — use the forthcoming `ocas-auth` skill; reference content lives in `deferred/mcp-oauth-setup.md`
 - Web research — use Sift
 - Building non-skill artifacts
-
 
 ## Responsibility boundary
 
@@ -94,7 +91,6 @@ Forge does not extract entities and does not emit Signals to Elephas. Forge oper
 - `forge.journal` — write journal for the current run; called at end of every run
 - `forge.update` — pull latest from GitHub source; preserves journals and data
 
-
 ## Mandatory design pipeline
 
 Run all phases before writing files:
@@ -106,13 +102,11 @@ Run all phases before writing files:
 5. **Build** — Write all files
 6. **Validate** — Routing, structural, usefulness checks
 
-
 ## Skill type classification
 
 - **Shortcut** — narrow tool wrapper. 20-120 line SKILL.md.
 - **Workflow** — multi-step process. 80-250 line SKILL.md.
 - **System** — durable behavior system. 150-300 line SKILL.md, deeper material in references.
-
 
 ## Package rules
 
@@ -121,7 +115,6 @@ Minimum package: SKILL.md with agentskills.io frontmatter. Add references/, scri
 Read `references/authoring_rules.md` for full authoring standards.
 Read `references/package_patterns.md` for package shape guidance by type.
 Read `references/examples.md` for good and bad examples.
-
 
 ## Run completion
 
@@ -143,7 +136,6 @@ After every Forge command (build, critique, repair, validate):
 - Storage inside skill package directories
 - Undocumented inter-skill interfaces
 
-
 ## Inter-skill interfaces
 
 Forge reads variant proposals and decisions from Mentor journals. journal payload fields (see interfaces specification)
@@ -155,7 +147,6 @@ File types received:
 After processing each file, move to the consumer's ingestion log.
 
 See `spec-ocas-interfaces.md` for full handoff contracts.
-
 
 ## Storage layout
 
@@ -172,7 +163,6 @@ See `spec-ocas-interfaces.md` for full handoff contracts.
   YYYY-MM-DD/
     {run_id}.json
 ```
-
 
 Default config.json:
 ```json
@@ -193,7 +183,6 @@ Default config.json:
   }
 }
 ```
-
 
 ## OKRs
 
@@ -218,14 +207,12 @@ skill_okrs:
     evaluation_window: 30_runs
 ```
 
-
 ## Optional skill cooperation
 
 - Mentor — receives VariantProposal and VariantDecision files via journal payload
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
 - Custodian — initializes skills built by Forge during system health passes; Forge-built packages should include conformant Background tasks tables so Custodian can register them automatically
 - Elephas — journal entity observations consumed during Chronicle ingestion
-
 
 ## Journal outputs
 
@@ -239,7 +226,6 @@ When entities are encountered during a run, include the following fields in `dec
 
 Each entity observation must include a `user_relevance` field: `user` if the entity is directly related to the user's world, `agent_only` if encountered incidentally during internal operations, `unknown` if unclear. Most Forge entities are `agent_only` since they are system internals.
 
-
 ## Initialization
 
 On first invocation of any Forge command, run `forge.init`:
@@ -251,7 +237,6 @@ On first invocation of any Forge command, run `forge.init`:
 5. Register heartbeat entry `forge:journal-scan` in `HEARTBEAT.md` if not already present
 6. Register cron job `forge:update` if not already present (check the platform scheduling registry first)
 7. Log initialization as a DecisionRecord in `decisions.jsonl`
-
 
 ## Background tasks
 
@@ -270,7 +255,6 @@ Registration during `forge.init`:
 # Check platform scheduling registry for existing tasks
 # Task declared in SKILL.md frontmatter metadata.{platform}.cron
 ```
-
 
 ## Self-update
 
@@ -300,7 +284,6 @@ When a skill's self-update command fails or you need to confirm a skill is at th
 
 See `references/builder_workflows.md` for the full procedure, file-level diff steps, git-state verification, and pitfalls.
 
-
 ## Skill consolidation
 
 `forge.consolidate` merges an orphan or duplicate skill into its natural parent to reduce skill-list sprawl and invocation confusion.
@@ -313,7 +296,6 @@ See `references/builder_workflows.md` for the full procedure, file-level diff st
 
 See `references/builder_workflows.md` for the full command sequence, branch-naming convention, and pitfalls (stash conflicts, divergent branches, non-repo skill dirs, for-loop `cd` gotcha).
 
-
 ## Skill sync
 
 `forge.sync` identifies local skill changes in `{agent_root}/skills` and syncs them to the canonical `hermes-agent` repository via a fork-and-PR workflow.
@@ -324,11 +306,9 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls (embedded repos, working-directory confusion, upstream-sync).
 
-
 ## Visibility
 
 public
-
 
 ## Support file map
 
