@@ -1,27 +1,34 @@
-# Enforcement Durability Patterns
+# Enforcement Durability
 
 ## Problem
-When fixing behavioral issues (e.g., "use Forge instead of built-in skill writer"), it's tempting to write the fix as a note in MEMORY.md. This is **advisory only** — it doesn't structurally enforce the behavior and can be skipped or forgotten.
+Advisory-only enforcement (e.g., writing "use Forge instead of skill_manage" in MEMORY.md) is easily skipped. The agent may read the note but still default to the path of least resistance.
 
-## Rule
-**Never rely on MEMORY.md as the sole enforcement mechanism for behavioral rules.**
+## Solution
+**Hard gates must live in the SKILL.md itself** — the artifact that gets loaded and followed. For example:
 
-Enforcement must live in the skill's SKILL.md itself — specifically in the mandatory pipeline phases, anti-patterns, or pitfalls sections. That's the artifact that gets loaded and followed during execution.
+- Forge's phase 1 existence gate (parent search, standalone test, absorption test) is in the Forge SKILL.md. When the agent loads Forge, those checks are right there in the instructions.
+- The naming guard (NEVER create new `ocas-*` skills without explicit user authorization) is in the Forge SKILL.md.
 
-## What survives what
+## Why this works
+- **Loaded context**: When the agent loads a skill, it follows the instructions in that skill's SKILL.md. If the instructions say "check for parents first," it will.
+- **Durability**: Skills in `~/hermes/skills/` persist across updates. MEMORY.md and hermes core do not.
+- **Visibility**: The rule is visible at the moment of decision (when the agent is reading the skill's instructions).
 
-| Artifact | Survives hermes core update? | Survives skill update? | Enforces behavior? |
-|---|---|---|---|
-| MEMORY.md | Yes (in <hermes-root>/) | Yes | No — advisory only |
-| Forge SKILL.md | Yes (in <hermes-root>/skills/) | Only if not overwritten by forge.update | Yes — loaded before skill creation |
-| skill_manage tool | No — part of hermes core | No | N/A (it's the tool being governed) |
-
-## Pattern
-1. Identify the behavioral rule.
-2. Encode it as a hard gate or anti-pattern in the relevant skill's SKILL.md.
-3. Optionally note it in MEMORY.md for cross-session awareness.
-4. The SKILL.md is the enforcement; MEMORY.md is the reminder.
+## Anti-patterns
+- Relying on memory notes as the sole enforcement mechanism.
+- Writing rules in hermes core or config files that get wiped on update.
+- Creating standalone skills for rules that should be embedded in the relevant class-level skill.
 
 ## Example
-- **Bad**: MEMORY.md says "always use Forge before creating skills" → easily skipped.
-- **Good**: Forge SKILL.md phase 1 has hard gates (checks A/B/C) that must pass before any skill creation proceeds → structurally enforced.
+Instead of:
+```markdown
+# MEMORY.md
+- Always use Forge for skill creation
+```
+
+Do:
+```markdown
+# Forge SKILL.md
+## Phase 1: Existence Gate (HARD GATE)
+Before creating a new skill, check for parents. If a parent exists, absorb into it.
+```
