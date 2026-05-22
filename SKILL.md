@@ -148,6 +148,7 @@ After every Forge command (build, critique, repair, validate):
 - Storage inside skill package directories
 - Undocumented inter-skill interfaces
 - **`## Integrated:` wrapper sections:** when folding content into a parent skill, do NOT wrap it in `## Integrated: <name>` sections. Refactor the content into the parent's existing section structure instead. If the parent has no matching section, create one with a proper name — not a wrapper header referencing the old skill name.
+- **Advisory-only enforcement doesn't work:** writing "use Forge instead of skill_manage" in MEMORY.md is advisory and easily skipped. The hard gates must be in the Forge SKILL.md itself (phase 1 checks A/B/C), because that's the artifact that gets loaded and followed. Never rely on memory notes as the sole enforcement mechanism for behavioral rules. See `references/enforcement_durability.md`.
 
 ## Inter-skill interfaces
 
@@ -257,6 +258,7 @@ On first invocation of any Forge command, run `forge.init`:
 |---|---|---|---|
 | `forge:journal-scan` | heartbeat | every heartbeat pass | Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log |
 | `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
+| `forge:skill-audit` | cron | `0 6 * * 1` (Monday 6am) | Run `scripts/forge_audit_skills.py --dry-run` to scan for orphan skills. If orphans found, review and consolidate into parent skills. Report results. |
 
 During `forge.init`, append to `{agent_root}/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
 ```
