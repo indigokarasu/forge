@@ -114,6 +114,11 @@ Run all phases before writing files:
 5. **Build** — Write all files
 6. **Validate** — Routing, structural, usefulness checks
 
+## Naming Rules
+- Lowercase, hyphens, max 64 chars.
+- **NEVER create new `ocas-*` skills without explicit user authorization.** The `ocas-` prefix is reserved. If a proposed skill name starts with `ocas-`, the user must have explicitly requested it. This prevents accidental proliferation (e.g., `ocas-vpn` created without being asked).
+- Domain prefixes: `prism-`, `reflexion-`, `cek-` are unreserved and follow normal existence-gate rules.
+
 ## Skill type classification
 
 - **Shortcut** — narrow tool wrapper. 20-120 line SKILL.md.
