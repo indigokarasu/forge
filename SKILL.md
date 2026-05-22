@@ -129,9 +129,7 @@ Run all phases before writing files:
 
 Minimum package: SKILL.md with agentskills.io frontmatter. Add references/, scripts/, assets/ only when justified.
 
-Read `references/authoring_rules.md` for full authoring standards.
-Read `references/package_patterns.md` for package shape guidance by type.
-Read `references/examples.md` for good and bad examples.
+Read `references/enforcement_durability.md` for full guidance on how to make rules durable across updates. See also `references/package_patterns.md` for package shape guidance and `references/authoring_rules.md` for full authoring standards.
 
 ## Run completion
 
@@ -154,6 +152,14 @@ After every Forge command (build, critique, repair, validate):
 - Undocumented inter-skill interfaces
 - **`## Integrated:` wrapper sections:** when folding content into a parent skill, do NOT wrap it in `## Integrated: <name>` sections. Refactor the content into the parent's existing section structure instead. If the parent has no matching section, create one with a proper name — not a wrapper header referencing the old skill name.
 - **Advisory-only enforcement doesn't work:** writing "use Forge instead of skill_manage" in MEMORY.md is advisory and easily skipped. The hard gates must be in the Forge SKILL.md itself (phase 1 checks A/B/C), because that's the artifact that gets loaded and followed. Never rely on memory notes as the sole enforcement mechanism for behavioral rules. See `references/enforcement_durability.md`.
+
+## Pitfalls
+
+- **Orphan Skills**: Skills that duplicate parent functionality.
+- **Overlap**: Multiple skills handling the same task.
+- **Bloat**: Skills that grow too large and should be split.
+- **Incorrect Naming**: NEVER create new `ocas-*` skills without explicit user authorization. The `ocas-` prefix is reserved. If a proposed skill name starts with `ocas-`, the user must have explicitly requested it. This prevents accidental proliferation (e.g., `ocas-vpn`).
+- **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
 
 ## Inter-skill interfaces
 
