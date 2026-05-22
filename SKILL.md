@@ -11,7 +11,7 @@ description: >
 metadata:
   author: Indigo Karasu
   email: mx.indigo.karasu@gmail.com
-  version: "2.7.1"
+  version: "3.0.0"
   hermes:
     tags: [skill-building, architecture, validation]
     category: evolution
@@ -48,6 +48,7 @@ Forge is the system's skill architect — given a capability idea or broken exis
 ## When to use
 
 - Create a new Agent Skill from a goal or capability description
+- **Before creating:** always check whether the capability belongs inside an existing skill (see phase 1 parent check). Default to absorption unless there's a specific reason it needs independence.
 - Review or critique an existing skill package
 - Repair broken or defective skill packages
 - Classify whether a proposed capability deserves to be a skill
@@ -95,7 +96,18 @@ Forge does not extract entities and does not emit Signals to Elephas. Forge oper
 
 Run all phases before writing files:
 
-1. **Existence gate** — Is this better as a skill than a one-off prompt?
+1. **Existence gate (HARD GATE — must pass all 3 checks before proceeding)**
+
+   **Check A — Parent search (mandatory first step):**
+   Call `skills_list` to enumerate all existing skills. For each skill whose domain overlaps the proposed capability, call `skill_view` to read its full content. Ask: "Does this existing skill already own this domain?" If yes → **STOP. Do not create a new skill.** Add the content to the parent as a `references/` doc, `scripts/` file, or new SKILL.md section. Record the decision in `decisions.jsonl`.
+
+   **Check B — Standalone test (all 3 must be true):**
+   A new skill is only justified if it has: (a) its own independent invocation path (user or cron triggers it directly by name), (b) its own cron jobs or background tasks, AND (c) its own journal output. If any of these is missing → it's a support file, not a skill. Absorb into parent.
+
+   **Check C — Absorption test:**
+   Can this content fit as a `references/<topic>.md` or `scripts/<name>.py` inside an existing skill? If yes → **absorb, don't spawn.** Creating a standalone skill for content that fits in a reference file is the #1 cause of skill proliferation. Default to absorption.
+
+   **Only proceed to phase 2 if all 3 checks pass.** If the answer is "absorb," execute the absorption immediately: add the content to the parent skill's appropriate subdirectory, update the parent's reference table, and record the decision.
 2. **Classify** — Shortcut, workflow, or system?
 3. **Scope** — Exact job, explicit non-goals, smallest useful promise
 4. **Architecture** — What goes in SKILL.md vs references vs scripts vs assets?
@@ -135,6 +147,7 @@ After every Forge command (build, critique, repair, validate):
 - Template residue and placeholders
 - Storage inside skill package directories
 - Undocumented inter-skill interfaces
+- **`## Integrated:` wrapper sections:** when folding content into a parent skill, do NOT wrap it in `## Integrated: <name>` sections. Refactor the content into the parent's existing section structure instead. If the parent has no matching section, create one with a proper name — not a wrapper header referencing the old skill name.
 
 ## Inter-skill interfaces
 
@@ -288,9 +301,11 @@ See `references/builder_workflows.md` for the full procedure, file-level diff st
 
 `forge.consolidate` merges an orphan or duplicate skill into its natural parent to reduce skill-list sprawl and invocation confusion.
 
-**Use when:** a skill duplicates functionality already in a parent skill; a skill is "glue" or a "patch" that logically belongs inside an existing one; the skill list has grown unwieldy with overlapping concerns.
+**Use when:** a skill duplicates functionality already in a parent skill; a skill is "glue" or a "patch" that logically belongs inside an existing one; the skill list has grown unwieldy with overlapping concerns; a `## Integrated:` wrapper section exists that should be refactored into the parent's proper structure.
 
 **Core rule:** fold merged content into the parent's existing section structure. **Do not** wrap it in `## Integrated: <name>` sections — that bloats SKILL.md, duplicates headings, and defeats progressive disclosure. Identify the parent section that matches the orphan's concern and refactor the content in, resolving redundancy as you go.
+
+**Pre-build default:** before `forge.build` creates any new skill, phase 1 (existence check) requires a parent search. If a parent exists, absorb into it as `references/` or `scripts/` — do not create a standalone. Creation is the exception, absorption is the default.
 
 **Shape of the workflow:** audit → map orphan to parent → pull latest → fold content → commit on a `merge/` branch → PR → delete orphan locally → update memory.
 
@@ -304,70 +319,4 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 **Shape of the workflow:** enumerate local SKILL.md files → diff each against its repo counterpart (NEW or CHANGED) → copy changes into the repo tree → branch `skill-updates-YYYYMMDD` → commit, push to fork, open PR against `NousResearch/hermes-agent:main`.
 
-See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls (embedded repos, working-directory confusion, upstream-sync).
-
-## Visibility
-
-public
-
-## Support file map
-
-| File | When to read |
-|---|---|
-| `references/authoring_rules.md` | Before any build, critique, or validation |
-| `references/package_patterns.md` | When deciding package shape by skill type |
-| `references/examples.md` | When reviewing descriptions or detecting anti-patterns |
-| `references/journal.md` | Before forge.journal; at end of every run |
-| `references/builder_workflows.md` | Before forge.consolidate, forge.sync, or forge.verify-update |
-| `deferred/running-ocas-skills.md` | Only when the question is actually about running skills (delegation, cron, venv) — this is out-of-scope for Forge and awaits a proper runtime-harness skill |
-| `deferred/mcp-oauth-setup.md` | Only when the question is actually about OAuth scopes or MCP wiring — this is out-of-scope for Forge and belongs in the forthcoming `ocas-auth` skill |
-
----
-
-## Migrating Claude Code Skills to Hermes
-
-When porting a Claude Code skill/tool to Hermes Agent:
-
-### Phase 1: Audit
-```bash
-# Find all hardcoded Claude paths
-grep -rn '\.claude' src/ --include='*.py' --include='*.sh' --include='*.json'
-# Find hook references
-grep -rn 'PostToolUse\|PreToolUse\|Stop\|hook' src/ --include='*.py' --include='*.sh'
-```
-
-### Phase 2: Path Translation
-Replace `~/.claude/` → `{agent_root}/`. Prefer dynamic `get_hermes_home()` if available, otherwise `Path.home() / ".hermes"`.
-
-### Phase 3: Hook Replacement
-Claude Code hooks (PostToolUse, Stop, PreToolUse) have no Hermes equivalent. Replace with cron jobs:
-- PostToolUse → make logic idempotent, run periodically via cron
-- Stop → cron job `0 */6 * * *` or daily
-- PreToolUse → validate at call site instead
-
-### Phase 4: Config Adaptation
-Claude Code `settings.json` → Hermes `config.yaml`. Keep tool-specific config separate — don't merge into Hermes config.
-
-### Phase 5: Install Script
-Create parallel install targeting `{agent_root}/`. Skip hook injection and `~/.claude/agents/` deployment.
-
-### Phase 6: Maintenance Automation
-```python
-cronjob(action='create', name='tool-name:sync', schedule='0 6 * * *',
-        prompt='Run maintenance sync. Report results.', deliver='telegram')
-```
-
-### Common Pitfalls
-- Use `cronjob` tool (built-in), not `hermes cron` CLI
-- Don't forget to skip hook injection in install scripts
-- Run `pytest` after every path change
-- Cron job prompts must be self-contained (fresh session, no context)
-
-### Checklist
-- [ ] No `~/.claude` references in code
-- [ ] Tests pass
-- [ ] Core functionality works
-- [ ] Install script runs clean
-- [ ] Cron job created for maintenance
-- [ ] Config files updated
-- [ ] No Claude Code hooks referenced
+See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocati

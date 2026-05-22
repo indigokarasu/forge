@@ -1,7 +1,11 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.8.0
+Version: 3.0.0
 Author: Indigo Karasu
+
+Changes from 2.9.0: Rule 7 strengthened from guideline to hard gate. Phase 1 existence check (parent search, standalone test, absorption test) is now pass/fail — build does not proceed unless all 3 pass. `## Integrated:` wrapper sections explicitly prohibited (they are duplication, not integration). Must fold absorbed content into parent's existing section structure. Updated Responsibility Boundaries to reflect current active skill set.
+
+Changes from 2.8.0: added Rule 7 "Prefer absorption over orphan creation" — when a capability naturally belongs inside an existing umbrella skill, add it as a reference/script rather than creating a standalone skill. Key indicators: process-heavy tasks → scripts/; session-specific detail → references/; subordinate commands → new SKILL.md section. Major version bump because this changes the fundamental decision of when to create vs. absorb.
 
 Changes from 2.7.2: architecture coherence audit 2026-04-16 discovered 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Responsibility Boundaries list to add ocas-relay; updated Background Tasks section to reflect both active skills; minor version bump due to expansion of active skill count.
 
@@ -95,7 +99,53 @@ ocas-{skill}/
 
 Add `references/`, `scripts/`, or `assets/` only when they materially improve correctness, maintainability, or output quality.
 
----
+### 7. Prefer absorption over orphan creation
+
+When a capability naturally belongs inside an existing umbrella skill, **do not create a new standalone skill**. Instead:
+
+- **Process-heavy tasks** (maintenance procedures, sync pipelines, enrichment workflows) → add as `scripts/<name>.py` in the parent skill
+- **Session-specific reference detail** (provider quirks, auth patterns, debugging notes) → add as `references/<topic>.md` in the parent skill
+- **Subordinate commands** that are only meaningful in the context of the parent → add as a new section in the parent's SKILL.md
+
+**Rule of thumb:** If the new "skill" would have its own cron jobs, its own journal output, and its own independent reason to exist → standalone is fine. If it's a procedure the parent skill's agent would run → it belongs inside the parent.
+
+**Before creating a new skill, ask:**
+1. Does an existing skill already own this domain? → Add a reference/script to it instead.
+2. Is this a sub-process of something that already exists? → Nest it, don't spawn it.
+3. Would this skill never be invoked independently? → It's not a skill, it's a support file.
+
+**Example consolidations from May 2026:**
+- Bank sync pipeline (financial-sync) → `references/financial-sync.md` in `ocas-styx`
+- Storage cleanup procedures (system-maintenance) → `references/system-maintenance.md` in `ocas-custodian`
+- Weave DB maintenance queries (weave-db-maintenance) → `references/database_maintenance.md` in `ocas-weave`
+- Dispatch status diagnostics (dispatch-status-from-files) → `references/status_from_files.md` in `ocas-dispatch`
+- Expansion pipeline (ocas-expansion) → already integrated in `ocas-weave/SKILL.md`
+- Bower mempalace ingest (bower-mempalace-ingest) → already in `ocas-bower/scripts/`
+
+## Skill Types `references/`, `scripts/`, or `assets/` only when they materially improve correctness, maintainability, or output quality.
+
+### 7. Prefer absorption over orphan creation
+
+When a capability naturally belongs inside an existing umbrella skill, **do not create a new standalone skill**. Instead:
+
+- **Process-heavy tasks** (maintenance procedures, sync pipelines, enrichment workflows) → add as `scripts/<name>.py` in the parent skill
+- **Session-specific reference detail** (provider quirks, auth patterns, debugging notes) → add as `references/<topic>.md` in the parent skill
+- **Subordinate commands** that are only meaningful in the context of the parent → add as a new section in the parent's SKILL.md
+
+**Rule of thumb:** If the new "skill" would have its own cron jobs, its own journal output, and its own independent reason to exist → standalone is fine. If it's a procedure the parent skill's agent would run → it belongs inside the parent.
+
+**Before creating a new skill, ask:**
+1. Does an existing skill already own this domain? → Add a reference/script to it instead.
+2. Is this a sub-process of something that already exists? → Nest it, don't spawn it.
+3. Would this skill never be invoked independently? → It's not a skill, it's a support file.
+
+**Example consolidations from May 2026:**
+- Bank sync pipeline (financial-sync) → `references/financial-sync.md` in `ocas-styx`
+- Storage cleanup procedures (system-maintenance) → `references/system-maintenance.md` in `ocas-custodian`
+- Weave DB maintenance queries (weave-db-maintenance) → `references/database_maintenance.md` in `ocas-weave`
+- Dispatch status diagnostics (dispatch-status-from-files) → `references/status_from_files.md` in `ocas-dispatch`
+- Expansion pipeline (ocas-expansion) → already integrated in `ocas-weave/SKILL.md`
+- Bower mempalace ingest (bower-mempalace-ingest) → already in `ocas-bower/scripts/`
 
 ## Skill Types
 

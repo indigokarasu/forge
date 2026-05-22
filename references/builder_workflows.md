@@ -46,10 +46,11 @@ Reference detail for three Forge sub-workflows. SKILL.md carries the short spec;
 - **Divergent branches**: some repos may have diverged. Use `git config pull.rebase false` or `git rebase origin/main`.
 - **For-loop `cd` breaks**: running `cd` inside a bash `for` loop breaks after the first iteration because subsequent `cd` calls become relative. Run each pull as a separate command with full paths.
 - **Non-repo skill dirs**: some skill directories may not be git repos (local-only orphans). These can be deleted directly with `rm -rf`.
+- **`replace_all` table collision**: when a SKILL.md has duplicate table structures (e.g., two identical reference file maps), `replace_all=true` will match ALL instances and can corrupt formatting at each insertion point. **Fix:** use more surrounding context to make the match unique, or patch each table individually with a unique anchor line. Prefer unique anchors like section headers immediately above the target table.
 
 ---
 
-## `forge.sync` — sync local skill changes to the canonical repo
+## Patch editing patterns for large SKILL.md files
 
 ### Trigger conditions
 
