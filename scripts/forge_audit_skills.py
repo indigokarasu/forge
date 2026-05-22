@@ -30,6 +30,7 @@ AUDIT_LOG_FILE = FORGE_DATA_DIR / "audit_log.jsonl"
 
 # Skills that are known parents — never flag these as orphans
 KNOWN_SYSTEMS = {
+    # All ocas-* skills are known parents — never auto-consolidate these
     "ocas-forge", "ocas-mentor", "ocas-custodian", "ocas-elephas",
     "ocas-weave", "ocas-dispatch", "ocas-sift", "ocas-scout",
     "ocas-bower", "ocas-sands", "ocas-styx", "ocas-taste",
@@ -37,10 +38,12 @@ KNOWN_SYSTEMS = {
     "ocas-inception", "ocas-fellow", "ocas-corvus", "ocas-praxis",
     "ocas-finch", "ocas-lucid", "ocas-multipass", "ocas-reach",
     "ocas-spot", "ocas-voyage", "ocas-haiku", "ocas-bones",
-    "ocas-rally", "prism-scan", "prism-reflect", "prism-discover",
-    "prism-full", "prism-3way", "reflexion-reflect", "reflexion-critique",
-    "reflexion-memorize", "cek-judge", "cek-subagent-driven-dev",
+    "ocas-rally",
 }
+
+# Naming guard: NEVER create new ocas-* skills without explicit user authorization
+# If a proposed skill name starts with "ocas-", it must be explicitly requested by the user
+RESERVED_PREFIXES = ("ocas-",)
 
 # Keywords that suggest a skill is a helper/patch for a known system
 PARENT_KEYWORDS = {
