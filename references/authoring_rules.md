@@ -122,9 +122,29 @@ When a capability naturally belongs inside an existing umbrella skill, **do not 
 - Expansion pipeline (ocas-expansion) → already integrated in `ocas-weave/SKILL.md`
 - Bower mempalace ingest (bower-mempalace-ingest) → already in `ocas-bower/scripts/`
 
-## Skill Types `references/`, `scripts/`, or `assets/` only when they materially improve correctness, maintainability, or output quality.
+### 8. Keep SKILL.md under 500 lines
 
-### 7. Prefer absorption over orphan creation
+Automated quality auditors (e.g., agentskill.sh) flag SKILL.md files over 500 lines as structural issues. Target:
+
+- Shortcut skills: 20–120 lines
+- Workflow skills: 80–250 lines
+- System skills: 150–300 lines (move secondary detail into references/)
+
+When a skill grows beyond 500 lines, extract operational detail into `references/<topic>.md` files and replace inline content with one-line pointers. The SKILL.md should contain the operational surface; reference files contain the deep detail.
+
+### 9. Never inline credential-handling code in SKILL.md
+
+Automated security auditors (e.g., agentskill.sh) flag any instruction that reads, writes, or manipulates credential files as "Credential Harvesting" — even when the code is the skill's own diagnostic procedure.
+
+**Rule:** All credential-handling code (token file reads, scope checks, refresh token diagnostics, credential path fixes) must live in `references/` files, not inline in SKILL.md. Replace inline credential code with a one-line reference:
+
+```
+See `references/<token-diagnostics>.md` for the diagnostic procedure.
+```
+
+This applies to: OAuth token files, API keys, client secrets, refresh tokens, and any file under `credentials/` or similar paths. The reference file can contain the full code; the SKILL.md should not.
+
+**Example (May 2026):** Weave's SKILL.md had inline Python code that read the Google OAuth token file to diagnose scope issues. The security auditor flagged this as "Credential Harvesting" (2 CRITICAL). Moving the code to `references/google-token-diagnostics.md` and replacing the inline block with a reference link resolved both findings.
 
 When a capability naturally belongs inside an existing umbrella skill, **do not create a new standalone skill**. Instead:
 
