@@ -1,44 +1,17 @@
 ---
 name: ocas-forge
-description: >
-  Forge: skill architect and builder. Designs, builds, and validates complete
-  Agent Skill packages through a mandatory six-phase pipeline: existence gate,
-  classify, scope, architecture, build, validate. Trigger phrases: 'create a
-  new skill', 'build a skill', 'design a skill', 'review this skill', 'repair
-  this skill', 'validate skill package', 'update forge'. Default output is the
-  finished installable package. Do not use for skill evaluation or variant
-  proposals (use Mentor).
+description: 'Forge: skill architect and builder. Designs, builds, and validates complete
+  Agent Skill packages through a mandatory six-phase pipeline: existence gate, classify,
+  scope, architecture, build, validate. Trigger phrases: ''create a new skill'', ''build
+  a skill'', ''design a skill'', ''review this skill'', ''repair this skill'', ''validate
+  skill package'', ''update forge''. Default output is the finished installable package.
+  Do not use for skill evaluation or variant proposals (use Mentor).
+
+  '
+license: MIT
 metadata:
   author: Indigo Karasu
-  email: mx.indigo.karasu@gmail.com
-  version: "3.0.0"
-  hermes:
-    tags: [skill-building, architecture, validation]
-    category: evolution
-    cron:
-      - name: "forge:update"
-        schedule: "15 7 * * *"
-        command: "forge.update"
-  openclaw:
-    skill_type: system
-    visibility: public
-    filesystem:
-      read:
-        - "{agent_root}/commons/data/ocas-forge/"
-        - "{agent_root}/commons/journals/ocas-forge/"
-      write:
-        - "{agent_root}/commons/data/ocas-forge/"
-        - "{agent_root}/commons/journals/ocas-forge/"
-        - "{agent_root}/skills/"
-    self_update:
-      source: "https://github.com/indigokarasu/forge"
-      mechanism: "version-checked tarball from GitHub via gh CLI"
-      command: "forge.update"
-      requires_binaries: [gh, tar, python3]
-    cron:
-      - name: "forge:update"
-        schedule: "15 7 * * *"
-        command: "forge.update"
+  version: 3.0.0
 ---
 
 # Forge
