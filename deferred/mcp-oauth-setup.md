@@ -9,10 +9,10 @@ This content describes OAuth token management, Google API scope handling, and MC
 ### Check existing token scopes
 
 ```bash
-cat {agent_root}/google-workspace-user.json
+cat /root/.google_workspace_mcp/credentials/google-workspace-user.json
 ```
 
-The token file lives at `~/.hermes/google-workspace-user.json` on Hermes installs, or at `{agent_root}/google-workspace-user.json` generally.
+The token file lives at `/root/.google_workspace_mcp/credentials/google-workspace-user.json`.
 
 ### Scope handling
 
@@ -34,7 +34,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from pathlib import Path
 
-token_path = Path.home() / ".hermes" / "google-workspace-user.json"
+token_path = Path('/root/.google_workspace_mcp/credentials/google-workspace-user.json')
 
 creds = Credentials.from_authorized_user_file(
     str(token_path),
@@ -48,6 +48,8 @@ def get_gmail_service():
         creds.refresh(Request())
     return build('gmail', 'v1', credentials=creds)
 ```
+
+**Note:** Credentials are stored in `/root/.google_workspace_mcp/credentials/`, NOT in `~/.hermes/`.
 
 ---
 
