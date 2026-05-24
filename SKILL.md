@@ -11,7 +11,7 @@ description: 'Forge: skill architect and builder. Designs, builds, and validates
 license: MIT
 metadata:
   author: Indigo Karasu
-  version: 3.3.0
+  version: 3.2.2
 ---
 
 # Forge
@@ -158,15 +158,20 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 ## Pitfalls
 
 - **Scope boundary for sync**: `forge.sync` and `forge.audit` must ONLY operate on `ocas-*` skills. Never upload, sync, or publish non-OCAS skills (e.g. hermes-agent built-in skills like `api-integration`, `google-workspace`, `review-skill`) to the indigokarasu GitHub account or agentskill.sh. Before any sync operation, verify each skill name starts with `ocas-`. If a non-OCAS skill is encountered, skip it and report it to the user.
+- **Doing more than asked**: When the user says "review these skills," review them — don't also rewrite, restructure, or push to GitHub unless explicitly asked. When the user says "fix this one thing," fix that one thing — don't also refactor unrelated sections. Match your work to the scope of the request.
+- **Over-structuring responses**: Don't present a table of findings, severity ratings, and recommendations when the user asked you to just do something. Execute first, report concisely after. Match complexity to the question.
 - **Orphan Skills**: Skills that duplicate parent functionality.
 - **Overlap**: Multiple skills handling the same task.
 - **Bloat**: Skills that grow too large and should be split.
 - **Incorrect Naming**: NEVER create new `ocas-*` skills without explicit user authorization. The `ocas-` prefix is reserved. If a proposed skill name starts with `ocas-`, the user must have explicitly requested it. This prevents accidental proliferation (e.g., `ocas-vpn`).
 - **Public repos by default**: NEVER create a GitHub repo as public. All repos default to private. Only make public if owner explicitly asks.
 - **Pushing non-OCAS skills to GitHub**: Built-in skills (shipped with Hermes) and 3rd-party installed skills (via `hermes skills install`) must NEVER be pushed to GitHub. Only skills written from scratch with owner are repo candidates.
+- **Duplicate repos**: Before creating a new repo, always check if one already exists with `gh repo list`. If a repo with the same or similar name exists (e.g. `vpn` vs `ocas-vpn`), use the existing one. Ask the user which to keep if there's ambiguity.
 - **Re-applying fixes that are already done**: Before patching a skill to address a scanner finding or audit issue, CHECK THE CURRENT STATE. Read the skill file first. If the fix is already applied (e.g., curl already replaced with gh api, hardcoded paths already removed), don't re-apply. Duplicate patches clutter git history and can regress previous fixes.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
+- **Don't change repo visibility.** When updating or syncing a skill that already has a GitHub repo, never change its visibility (public/private) unless the user explicitly tells you to. The `gh repo create` command should use `--private` by default for new repos. Existing repos keep whatever visibility they already have.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
+- **Don't change repo visibility.** When updating or syncing a skill that already has a GitHub repo, never change its visibility (public/private) unless the user explicitly tells you to. The `gh repo create` command should use `--private` by default for new repos. Existing repos keep whatever visibility they already have.
 - **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills, each with a rich SKILL.md and a `references/` directory for session-specific detail. NOT a long flat list of narrow one-session-one-skill entries. When auditing or restructuring, always prefer absorption into an existing class-level umbrella over creating a new narrow skill.
 - **Hardcoded Hermes paths**: Using `~/.hermes/skills/` instead of `{agent_root}/skills/` or `get_hermes_home() / "skills"` breaks the skill on non-Hermes harnesses (OpenClaw, Claude Code, etc.). Always use dynamic path resolution in storage layouts and operational descriptions.
 
