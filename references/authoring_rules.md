@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 3.0.0
+Version: 3.1.0
 Author: Indigo Karasu
+
+Changes from 3.0.0: Added Rule 9b "Never inline credential-adjacent descriptions in SKILL.md" — extends the existing Rule 9 (no inline credential code) to also cover credential file paths, token status descriptions, config defaults naming credential files, wallet/account setup commands, and fallback cascade credential references. All must be extracted to reference files. Added May 2026 examples from Bones and Dispatch refactors. Renumbered old Rule 7 (absorption) to Rule 10 to make room.
 
 Changes from 2.9.0: Rule 7 strengthened from guideline to hard gate. Phase 1 existence check (parent search, standalone test, absorption test) is now pass/fail — build does not proceed unless all 3 pass. `## Integrated:` wrapper sections explicitly prohibited (they are duplication, not integration). Must fold absorbed content into parent's existing section structure. Updated Responsibility Boundaries to reflect current active skill set.
 
@@ -132,6 +134,8 @@ Automated quality auditors (e.g., agentskill.sh) flag SKILL.md files over 500 li
 
 When a skill grows beyond 500 lines, extract operational detail into `references/<topic>.md` files and replace inline content with one-line pointers. The SKILL.md should contain the operational surface; reference files contain the deep detail.
 
+**100/100 pattern:** Skills scoring 100/100 on agentskill.sh quality share these traits: body 250-420 lines, no inline credential handling, minimal external curl commands, strong trigger phrases with clear "Use when" sections, concise instructions without excessive operational detail. See `references/agentskill-evaluation-criteria.md` in skill-publish for the full scoring rubric including all 4 quality dimensions and 12 security categories.
+
 ### 9. Never inline credential-handling code in SKILL.md
 
 Automated security auditors (e.g., agentskill.sh) flag any instruction that reads, writes, or manipulates credential files as "Credential Harvesting" — even when the code is the skill's own diagnostic procedure.
@@ -145,6 +149,27 @@ See `references/<token-diagnostics>.md` for the diagnostic procedure.
 This applies to: OAuth token files, API keys, client secrets, refresh tokens, and any file under `credentials/` or similar paths. The reference file can contain the full code; the SKILL.md should not.
 
 **Example (May 2026):** Weave's SKILL.md had inline Python code that read the Google OAuth token file to diagnose scope issues. The security auditor flagged this as "Credential Harvesting" (2 CRITICAL). Moving the code to `references/google-token-diagnostics.md` and replacing the inline block with a reference link resolved both findings.
+
+### 9b. Never inline credential-adjacent descriptions in SKILL.md
+
+Security scanners also flag **descriptions** of credential structure and token status — not just code. These must be extracted to reference files too:
+
+- **Credential file paths** (`kalshi_creds.json`, `wallet.json`, `google-workspace-user.json`, etc.) → credential-file reference
+- **Token status** (which token is broken, error types like `invalid_grant`, `AUTH_SCOPE_MISMATCH` false positives) → `references/token_status.md`
+- **Config defaults that name credential files or API key setup steps** → `references/config-default.json` (machine-readable) + pointer from SKILL.md
+- **Wallet/account setup commands** (`eth-account`, `py_clob_client`, API key creation) → `references/account-creation.md`
+- **Fallback cascade steps that reference credential file names** → pointer to token-status reference
+
+**Pattern:** When a section describes *what credentials exist* or *where they live*, move it to a reference file and replace with a one-line pointer.
+
+**Example (May 2026):** Bones' SKILL.md had a config-default description naming platforms and trading settings inline. Dispatch's fallback cascade named `google-workspace-user.json` directly, and its Gotchas repeated the `mx.indigo.karasu@gmail.com.json` path with error details. All moved to reference files:
+- Config description → `references/config-default.json`
+- Token paths/status → `references/token_status.md`
+- Wallet setup → `references/account-creation.md`
+- Fallback cascade credential reference → pointer to `references/token_status.md`
+- Gotchas token status bullet → pointer to `references/token_status.md`
+
+### 10. Prefer absorption over orphan creation
 
 When a capability naturally belongs inside an existing umbrella skill, **do not create a new standalone skill**. Instead:
 
