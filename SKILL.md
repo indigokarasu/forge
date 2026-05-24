@@ -11,7 +11,7 @@ description: 'Forge: skill architect and builder. Designs, builds, and validates
 license: MIT
 metadata:
   author: Indigo Karasu
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # Forge
@@ -305,4 +305,13 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 **Shape of the workflow:** enumerate local SKILL.md files → diff each against its repo counterpart (NEW or CHANGED) → copy changes into the repo tree → branch `skill-updates-YYYYMMDD` → commit, push to fork, open PR against `NousResearch/hermes-agent:main`.
 
-See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocati
+See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls.
+
+## Support file map
+
+| File | When to read |
+|------|-------------|
+| `references/enforcement_durability.md` | Before writing rules that must survive skill updates; when designing enforcement mechanisms |
+| `references/package_patterns.md` | Before structuring a new skill package; when deciding what goes in SKILL.md vs references vs scripts |
+| `references/authoring_rules.md` | Before writing or editing any skill SKILL.md; authoring standards reference |
+| `references/builder_workflows.md` | Before forge.verify-update, forge.consolidate, or forge.sync; contains command sequences and pitfalls |
