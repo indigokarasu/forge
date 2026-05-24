@@ -1,6 +1,51 @@
-# Builder workflows: consolidation, sync, update verification
+# Builder workflows: consolidation, sync, update verification, compliance audit
 
-Reference detail for three Forge sub-workflows. SKILL.md carries the short spec; this file carries the procedures, commands, and pitfalls.
+Reference detail for Forge sub-workflows. SKILL.md carries the short spec; this file carries the procedures, commands, and pitfalls.
+
+---
+
+## Skill Compliance Audit Workflow
+
+When the user asks to audit one or more OCAS skills for architecture compliance (e.g., "check ocas-genie against forge standards"):
+
+### Phase 1: Inventory
+For each skill, list all files in the package directory (excluding `.git/`). Check against the required file inventory:
+- `SKILL.md`, `README.md`, `CHANGELOG.md`, `skill.json`, `.gitignore`, `evals.json`
+
+### Phase 2: Frontmatter Check
+Read SKILL.md. Verify frontmatter has: `name`, `description`, `license`, `metadata.author`, `metadata.email`, `metadata.version`, `metadata.tags`, `metadata.category`.
+
+### Phase 3: Required Sections Check
+Verify SKILL.md body contains all required sections:
+1. When to use / When NOT to use
+2. Responsibility Boundary
+3. Ontology Types
+4. Journal Outputs
+5. Storage Layout
+6. OKRs
+7. Background Tasks (or explicit "purely reactive" statement)
+8. Support File Map
+
+For system skills, also verify: Commands, Initialization, Self-update, Optional Skill Cooperation.
+
+### Phase 4: Check References
+Every file in `references/` must be listed in the Support File Map. Every reference mentioned in the map must exist on disk.
+
+### Phase 5: Check skill.json
+Valid JSON with: `name`, `version`, `description`, `author`, `email`, `skill_type`, `filesystem`, `self_update`.
+
+### Phase 6: Apply Fixes
+For each gap found, write the missing file or add the missing section. Use consistent OCAS patterns (see `compliance-audit-checklist.md` for the full template).
+
+### Phase 7: GitHub Sync
+For each skill:
+1. `gh repo create indigokarasu/{repo} --private` (if no remote exists)
+2. `git init` + `git remote add origin` (if no .git)
+3. `git add -A && git commit` with conventional commit message
+4. `git push -u origin main`
+5. Verify `gh repo view` → `PRIVATE`
+
+See `compliance-audit-checklist.md` for the complete checklist.
 
 ---
 

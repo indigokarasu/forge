@@ -11,7 +11,7 @@ description: 'Forge: skill architect and builder. Designs, builds, and validates
 license: MIT
 metadata:
   author: Indigo Karasu
-  version: 3.1.0
+  version: 3.2.0
 ---
 
 # Forge
@@ -26,6 +26,7 @@ Forge is the system's skill architect — given a capability idea or broken exis
 - Repair broken or defective skill packages
 - Classify whether a proposed capability deserves to be a skill
 - Validate a skill package against OCAS standards
+- Audit existing skills for OCAS compliance and sync to GitHub
 - Consolidate orphan or duplicate skills into their natural parent
 - Verify whether a skill is up to date against its GitHub source
 - Sync local skill changes back to the canonical repository
@@ -40,7 +41,7 @@ Forge is the system's skill architect — given a capability idea or broken exis
 
 ## Responsibility boundary
 
-Forge owns skill design, construction, validation, consolidation, update verification, and repo-sync.
+Forge owns skill design, construction, validation, consolidation, update verification, compliance auditing, and repo-sync.
 
 Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow), system health and skill initialization (Custodian), runtime orchestration and delegation (the agent harness), authentication and MCP wiring (ocas-auth).
 
@@ -61,6 +62,7 @@ Forge does not extract entities and does not emit Signals to Elephas. Forge oper
 - `forge.consolidate` — merge an orphan or duplicate skill into its natural parent
 - `forge.verify-update` — check whether a skill is at the latest version from its GitHub source
 - `forge.sync` — sync local skill changes to the canonical repository via PR
+- `forge.audit` — audit one or more skills for OCAS compliance, apply fixes, and sync to GitHub
 - `forge.status` — current build state if multi-step build in progress
 - `forge.journal` — write journal for the current run; called at end of every run
 - `forge.update` — pull latest from GitHub source; preserves journals and data
@@ -106,7 +108,7 @@ Read `references/enforcement_durability.md` for full guidance on how to make rul
 
 ## Run completion
 
-After every Forge command (build, critique, repair, validate):
+After every Forge command (build, critique, repair, validate, audit):
 
 1. Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log
 2. Persist build log entries and decisions to local JSONL files
@@ -133,6 +135,7 @@ After every Forge command (build, critique, repair, validate):
 - **Bloat**: Skills that grow too large and should be split.
 - **Incorrect Naming**: NEVER create new `ocas-*` skills without explicit user authorization. The `ocas-` prefix is reserved. If a proposed skill name starts with `ocas-`, the user must have explicitly requested it. This prevents accidental proliferation (e.g., `ocas-vpn`).
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
+- **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills, each with a rich SKILL.md and a `references/` directory for session-specific detail. NOT a long flat list of narrow one-session-one-skill entries. When auditing or restructuring, always prefer absorption into an existing class-level umbrella over creating a new narrow skill.
 
 ## Inter-skill interfaces
 
@@ -214,7 +217,7 @@ skill_okrs:
 
 ## Journal outputs
 
-Action Journal — every build, critique, repair, validation, and variant processing run.
+Action Journal — every build, critique, repair, validation, audit, and variant processing run.
 
 When entities are encountered during a run, include the following fields in `decision.payload`:
 
@@ -232,7 +235,7 @@ On first invocation of any Forge command, run `forge.init`:
 2. Write default `config.json` with ConfigBase fields if absent
 3. Create empty JSONL files: `build_log.jsonl`, `decisions.jsonl`
 4. Create `{agent_root}/commons/journals/ocas-forge/`
-5. Register heartbeat entry `forge:journal-scan` in `HEARTBEAT.md` if not already present
+5. ~~Register heartbeat entry~~ — Hermes has no heartbeat mechanism. forge:journal-scan runs via cron only.
 6. Register cron job `forge:update` if not already present (check the platform scheduling registry first)
 7. Log initialization as a DecisionRecord in `decisions.jsonl`
 
@@ -240,16 +243,11 @@ On first invocation of any Forge command, run `forge.init`:
 
 | Job name | Mechanism | Schedule | Command |
 |---|---|---|---|
-| `forge:journal-scan` | heartbeat | every heartbeat pass | Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log |
+| `forge:journal-scan` | cron | `*/5 * * * *` (every 5 min) | Check journal payload fields (see interfaces specification) for VariantProposal and VariantDecision files from Mentor; process and move to the consumer's ingestion log |
 | `forge:update` | cron | `0 0 * * *` (midnight daily) | `forge.update` |
 | `forge:skill-audit` | cron | `0 6 * * 1` (Monday 6am) | Run `scripts/forge_audit_skills.py --dry-run` to scan for orphan skills. If orphans found, review and consolidate into parent skills. Report results. |
 
-During `forge.init`, append to `{agent_root}/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
-```
-forge:journal-scan: forge.journal-scan
-```
 
-Registration during `forge.init`:
 ```
 # Check platform scheduling registry for existing tasks
 # Task declared in SKILL.md frontmatter metadata.{platform}.cron
@@ -307,6 +305,14 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls.
 
+## Skill audit
+
+`forge.audit` audits one or more existing OCAS skills for architecture compliance, applies fixes, and syncs to GitHub.
+
+**Use when:** user asks to "check X against forge standards", "audit X skill", "make sure X meets OCAS standards", or "review and fix X".
+
+**Shape of the workflow:** see `references/compliance-audit-checklist.md` for the full 7-phase procedure (inventory → frontmatter → sections → references → skill.json → fixes → GitHub sync).
+
 ## Support file map
 
 | File | When to read |
@@ -314,4 +320,5 @@ See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh
 | `references/enforcement_durability.md` | Before writing rules that must survive skill updates; when designing enforcement mechanisms |
 | `references/package_patterns.md` | Before structuring a new skill package; when deciding what goes in SKILL.md vs references vs scripts |
 | `references/authoring_rules.md` | Before writing or editing any skill SKILL.md; authoring standards reference |
-| `references/builder_workflows.md` | Before forge.verify-update, forge.consolidate, or forge.sync; contains command sequences and pitfalls |
+| `references/compliance-audit-checklist.md` | Before auditing an existing skill for OCAS compliance; file inventory, section checklist, GitHub sync steps |
+| `references/builder_workflows.md` | Before forge.verify-update, forge.consolidate, forge.sync, or forge.audit; contains command sequences and pitfalls |
