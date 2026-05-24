@@ -189,13 +189,9 @@ openclaw cron add --name {job-name} \
   --timezone America/Los_Angeles
 ```
 
-### Heartbeat
+### Cron
 
-Append to `~/.openclaw/workspace/HEARTBEAT.md`:
-
-```
-{job-name}: mentor.plan.run {plan_id} --arg param_name=value
-```
+All background tasks use cron. Hermes has no heartbeat mechanism.
 
 ### Resuming a Failed or Paused Run
 

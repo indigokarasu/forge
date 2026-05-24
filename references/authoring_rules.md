@@ -134,6 +134,31 @@ Automated quality auditors (e.g., agentskill.sh) flag SKILL.md files over 500 li
 
 When a skill grows beyond 500 lines, extract operational detail into `references/<topic>.md` files and replace inline content with one-line pointers. The SKILL.md should contain the operational surface; reference files contain the deep detail.
 
+**Code ratio target:** SKILL.md body should be under **15% code** (fenced-block lines ÷ total lines). Measure with the script in `references/code-ratio-reduction.md` (in review-skill). Anything over 30% is a definite problem requiring extraction.
+
+Common targets for extraction:
+
+| Block type | Move to |
+|---|---|
+| SQL DDL / schemas | `references/schema.md` |
+| Python query examples | `references/query-api.md` |
+| JSON/YAML schemas | `references/data_model.md` |
+| Storage directory trees | `references/data_model.md` |
+| Default config files | `references/data_model.md` |
+| OKR / scoring YAML | `references/data_model.md` |
+| Cron setup commands (bash) | `references/data_model.md` |
+| Self-update bash scripts | `references/data_model.md` |
+| Pipeline stage diagrams | `references/pipeline.md` or `references/enrichment-pipeline.md` |
+| Large markdown tables (10+ rows) with code-like content | `references/<topic>.md` |
+| One-off code examples | `references/<topic>.md` |
+
+**Replacement pattern:** For each removed block, replace with a one-line prose summary + pointer link + 2-3 critical items as bullets. Keep the summary short — the reference file has the detail.
+
+**Example (May 2026, ocas-styx):**
+- Removed: 47-line SQL DDL block, 42-line Python query examples (3 blocks), 26-line pipeline stage diagram
+- Added: `references/schema.md`, `references/query-api.md`, `references/enrichment-pipeline.md`
+- Result: code ratio 32.6% → 7.1%
+
 **100/100 pattern:** Skills scoring 100/100 on agentskill.sh quality share these traits: body 250-420 lines, no inline credential handling, minimal external curl commands, strong trigger phrases with clear "Use when" sections, concise instructions without excessive operational detail. See `references/agentskill-evaluation-criteria.md` in skill-publish for the full scoring rubric including all 4 quality dimensions and 12 security categories.
 
 ### 9. Never inline credential-handling code in SKILL.md
@@ -277,10 +302,7 @@ Use **cron** when:
 - The task should run in isolation with no main session history
 - Output should be delivered to a channel
 
-Use **heartbeat** (entry in `HEARTBEAT.md`) when:
-- The task is a lightweight poll or check (scan an intake directory, update an aggregate)
-- Timing can drift slightly without consequence
-- The task can batch with other monitoring checks
+Use **cron** for all background tasks. Hermes has no heartbeat mechanism.
 
 ### Which skills need background tasks
 
@@ -334,25 +356,9 @@ One-shot jobs use `--at "ISO8601"` instead of `--cron`. Interval jobs use `--eve
 
 Manage existing jobs: `openclaw cron list`, `openclaw cron edit <id>`, `openclaw cron rm <id>`, `openclaw cron run <id>` (manual trigger).
 
-### HEARTBEAT.md
+### Cron registration (all tasks)
 
-The workspace `HEARTBEAT.md` at `~/.openclaw/workspace/HEARTBEAT.md` is the coordination point for all lightweight heartbeat tasks. Skills that contribute heartbeat entries register during `{skill}.init`.
-
-**Standard registration pattern (use this exact wording in every SKILL.md):**
-
-> During `{skill}.init`, append to `~/.openclaw/workspace/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
-> ```
-> {skill-short}:{task-short}: {command}
-> ```
-
-Example for Corvus:
-```
-corvus:light: corvus.analyze.light
-```
-
-Every skill that uses heartbeat must include this pattern verbatim in its SKILL.md `## Background tasks` section, substituting `{skill-short}:{task-short}` and `{command}` with the actual values.
-
-If `HEARTBEAT.md` is empty (only blank lines and headers), OpenClaw skips heartbeat runs entirely. Keep it non-empty if any skill needs heartbeat execution.
+All background tasks use cron. Hermes has no heartbeat mechanism.
 
 ---
 
