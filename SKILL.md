@@ -11,7 +11,7 @@ description: 'Forge: skill architect and builder. Designs, builds, and validates
 license: MIT
 metadata:
   author: Indigo Karasu
-  version: 3.2.1
+  version: 3.3.0
 ---
 
 # Forge
@@ -164,6 +164,7 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 - **Incorrect Naming**: NEVER create new `ocas-*` skills without explicit user authorization. The `ocas-` prefix is reserved. If a proposed skill name starts with `ocas-`, the user must have explicitly requested it. This prevents accidental proliferation (e.g., `ocas-vpn`).
 - **Public repos by default**: NEVER create a GitHub repo as public. All repos default to private. Only make public if owner explicitly asks.
 - **Pushing non-OCAS skills to GitHub**: Built-in skills (shipped with Hermes) and 3rd-party installed skills (via `hermes skills install`) must NEVER be pushed to GitHub. Only skills written from scratch with owner are repo candidates.
+- **Re-applying fixes that are already done**: Before patching a skill to address a scanner finding or audit issue, CHECK THE CURRENT STATE. Read the skill file first. If the fix is already applied (e.g., curl already replaced with gh api, hardcoded paths already removed), don't re-apply. Duplicate patches clutter git history and can regress previous fixes.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
 - **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills, each with a rich SKILL.md and a `references/` directory for session-specific detail. NOT a long flat list of narrow one-session-one-skill entries. When auditing or restructuring, always prefer absorption into an existing class-level umbrella over creating a new narrow skill.
@@ -357,6 +358,7 @@ If any check stops you, log the decision in `decisions.jsonl` with `decision_typ
 ## GitHub repo conventions
 
 - **Default to private.** All new repos are created private unless the user explicitly asks for public.
+- **Never change the privacy of existing repos** when updating skill content. Only change a repo's privacy setting if owner explicitly tells you to. Routine skill updates (content, fixes, version bumps) must never touch repo visibility.
 - **Only create repos for skills written from scratch with owner.** Built-in skills (shipped with Hermes) and 3rd-party skills (via `hermes skills install`) must NEVER be pushed to GitHub. Only OCAS skills owner built with Indigo are repo candidates.
 - **Always confirm with owner before creating a new repo** for a skill, even if it appears to be OCAS-authored.
 
