@@ -277,7 +277,7 @@ This skill self-updates every 24 hours via `forge.update`, which pulls the lates
 
 ### Update verification (`forge.verify-update`)
 
-When a skill's self-update command fails or you need to confirm a skill is at the latest version without mutating it, verify manually: read `metadata.version` from local `SKILL.md`, fetch the remote tarball or release (`curl https://api.github.com/repos/{owner}/{repo}/releases/latest`), read its `metadata.version`, and compare. If versions match, stop silently; if they differ, copy extracted files over, log a decision, and clean up.
+When a skill's self-update command fails or you need to confirm a skill is at the latest version without mutating it, verify manually: read `metadata.version` from local `SKILL.md`, fetch the remote version via `gh api "repos/{owner}/{repo}/releases/latest"`, and compare. If versions match, stop silently; if they differ, copy extracted files over, log a decision, and clean up.
 
 See `references/builder_workflows.md` for the full procedure, file-level diff steps, git-state verification, and pitfalls.
 
