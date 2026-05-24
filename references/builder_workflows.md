@@ -37,8 +37,20 @@ Valid JSON with: `name`, `version`, `description`, `author`, `email`, `skill_typ
 ### Phase 6: Apply Fixes
 For each gap found, write the missing file or add the missing section. Use consistent OCAS patterns (see `compliance-audit-checklist.md` for the full template).
 
-### Phase 7: GitHub Sync
-For each skill:
+### Phase 7: GitHub Sync — OCAS-ONLY guardrail
+
+**CRITICAL**: Only sync skills that are OCAS-authored. Before creating any repo or pushing any skill:
+
+1. **Verify the skill name starts with `ocas-`**. If it doesn't, STOP. Do not create a repo, do not push, do not sync. This is the single most important guardrail.
+2. **Verify the author is Indigo Karasu or the operator**. Read `metadata.author` from SKILL.md frontmatter. If the author is anyone else (e.g. `agentskill-sh`, `NousResearch`, `anthropics`), STOP.
+3. **Check against known 3rd-party skills**. Never push these to GitHub under indigokarasu:
+   - `api-integration`, `google-workspace`, `review-skill`, `deployment`, `docker-management`, `email-sending`, `git-operations`, `json-formatting`, `csv-parsing`, `database-operations`, `execute-code`, `unit-testing`, `web-extract`, `learn`, `terminal-run`, `title-sessions`, `voice-call`
+   - Any `prism-*`, `reflexion-*`, `cek-*` skill (these are from the hermes-agent repo, not OCAS)
+   - Any skill with `metadata.author` that isn't `Indigo Karasu` or `the operator`
+4. **Check for duplicates**. Before creating a new repo, list existing repos with `gh repo list indigokarasu`. If a repo with the same name (or a close variant like `vpn` vs `ocas-vpn`) already exists, use the existing one. Don't create a duplicate.
+5. **Default to private**. All new repos must be created with `--private`. Never use `--public` unless owner explicitly asks.
+
+For each verified OCAS skill:
 1. `gh repo create indigokarasu/{repo} --private` (if no remote exists)
 2. `git init` + `git remote add origin` (if no .git)
 3. `git add -A && git commit` with conventional commit message
