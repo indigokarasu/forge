@@ -11,7 +11,7 @@ description: 'Forge: skill architect and builder. Designs, builds, and validates
 license: MIT
 metadata:
   author: Indigo Karasu
-  version: 3.2.0
+  version: 3.2.1
 ---
 
 # Forge
@@ -22,7 +22,9 @@ Forge is the system's skill architect — given a capability idea or broken exis
 
 - Create a new Agent Skill from a goal or capability description
 - **Before creating:** always check whether the capability belongs inside an existing skill (see phase 1 parent check). Default to absorption unless there's a specific reason it needs independence.
-- Review or critique an existing skill package
+- Review or critique an existing skill package — for deep quality evaluation
+  with scoring and iteration, use `ocas-critique`; for quick structural checks,
+  use `forge.validate` directly
 - Repair broken or defective skill packages
 - Classify whether a proposed capability deserves to be a skill
 - Validate a skill package against OCAS standards
@@ -41,9 +43,16 @@ Forge is the system's skill architect — given a capability idea or broken exis
 
 ## Responsibility boundary
 
-Forge owns skill design, construction, validation, consolidation, update verification, compliance auditing, and repo-sync.
+Forge owns skill design, construction, consolidation, update verification,
+compliance auditing, and repo-sync. Forge's `forge.validate` handles quick
+structural checks; deep quality scoring and iterative improvement is owned by
+`ocas-critique`.
 
-Forge does not own: skill evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus), behavioral refinement (Praxis), experimentation (Fellow), system health and skill initialization (Custodian), runtime orchestration and delegation (the agent harness), authentication and MCP wiring (ocas-auth).
+Forge does not own: skill quality scoring and iteration (ocas-critique), skill
+evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus),
+behavioral refinement (Praxis), experimentation (Fellow), system health and
+skill initialization (Custodian), runtime orchestration and delegation (the
+agent harness), authentication and MCP wiring (ocas-auth).
 
 Forge receives VariantProposal and VariantDecision files from Mentor. It builds variant packages and applies promotion decisions.
 
@@ -115,6 +124,15 @@ After every Forge command (build, critique, repair, validate, audit):
 3. Log material decisions to `decisions.jsonl`
 4. Write journal via `forge.journal`
 
+## Cross-platform portability
+
+Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (OpenClaw, Claude Code, Cursor, etc.). When building a new skill:
+
+- **Use `{agent_root}`** as the base for all paths in storage layouts and operational descriptions. This variable resolves to whatever harness the skill runs on.
+- **NEVER hardcode `~/.hermes/`** in file paths, even for Hermes-native skills.
+- **Add `requires: hermes`** to frontmatter if the skill uses Hermes-specific tools (`memory`, `skill_manage`, `session_search`, `cronjob`). This tells other harnesses to skip the skill.
+- **Document tool dependencies** in a "Required tools" section so future porters know what to adapt.
+
 ## Anti-patterns to reject
 
 - Vague or overly broad scope
@@ -128,8 +146,18 @@ After every Forge command (build, critique, repair, validate, audit):
 - **`## Integrated:` wrapper sections:** when folding content into a parent skill, do NOT wrap it in `## Integrated: <name>` sections. Refactor the content into the parent's existing section structure instead. If the parent has no matching section, create one with a proper name — not a wrapper header referencing the old skill name.
 - **Advisory-only enforcement doesn't work:** writing "use Forge instead of skill_manage" in MEMORY.md is advisory and easily skipped. The hard gates must be in the Forge SKILL.md itself (phase 1 checks A/B/C), because that's the artifact that gets loaded and followed. Never rely on memory notes as the sole enforcement mechanism for behavioral rules. See `references/enforcement_durability.md`.
 
+## Cross-platform portability
+
+Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (OpenClaw, Claude Code, Cursor, etc.). When building a new skill:
+
+- **Use `{agent_root}`** as the base for all paths inside the skill's storage layout diagrams. This variable resolves to whatever harness the skill runs on.
+- **NEVER hardcode `~/.hermes/`** in file paths, storage diagrams, or operational descriptions. Even for Hermes-native skills, use `{agent_root}/sessions/`, `{agent_root}/skills/`, `{agent_root}/references/` instead.
+- **Mention the target harness** in the frontmatter with a `requires:` field if the skill depends on Hermes-specific tools (`memory`, `skill_manage`, `session_search`, `cronjob`). Example: `requires: hermes`. This tells other harnesses to skip the skill.
+- **Document Hermes-specific tool dependencies** in a "Required tools" section so future porters know what to adapt.
+
 ## Pitfalls
 
+- **Scope boundary for sync**: `forge.sync` and `forge.audit` must ONLY operate on `ocas-*` skills. Never upload, sync, or publish non-OCAS skills (e.g. hermes-agent built-in skills like `api-integration`, `google-workspace`, `review-skill`) to the indigokarasu GitHub account or agentskill.sh. Before any sync operation, verify each skill name starts with `ocas-`. If a non-OCAS skill is encountered, skip it and report it to the user.
 - **Orphan Skills**: Skills that duplicate parent functionality.
 - **Overlap**: Multiple skills handling the same task.
 - **Bloat**: Skills that grow too large and should be split.
@@ -139,6 +167,7 @@ After every Forge command (build, critique, repair, validate, audit):
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo (e.g., `~/hermes/skills/ocas-forge/`) or in MEMORY.md — not in hermes core, which gets wiped on updates.
 - **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills, each with a rich SKILL.md and a `references/` directory for session-specific detail. NOT a long flat list of narrow one-session-one-skill entries. When auditing or restructuring, always prefer absorption into an existing class-level umbrella over creating a new narrow skill.
+- **Hardcoded Hermes paths**: Using `~/.hermes/skills/` instead of `{agent_root}/skills/` or `get_hermes_home() / "skills"` breaks the skill on non-Hermes harnesses (OpenClaw, Claude Code, etc.). Always use dynamic path resolution in storage layouts and operational descriptions.
 
 ## Inter-skill interfaces
 
@@ -213,6 +242,12 @@ skill_okrs:
 
 ## Optional skill cooperation
 
+- Critique (`ocas-critique`) — the evaluation complement to Forge's build
+  pipeline. Forge builds and validates structure; Critique scores quality on 10
+  dimensions and drives iterative improvement. When `forge.build` completes a
+  package, `ocas-critique` can be invoked to score it and generate improvement
+  plans. When `ocas-critique` finds structural issues requiring restructuring,
+  it triggers `forge.repair`.
 - Mentor — receives VariantProposal and VariantDecision files via journal payload
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
 - Custodian — initializes skills built by Forge during system health passes; Forge-built packages should include conformant Background tasks tables so Custodian can register them automatically
@@ -308,6 +343,17 @@ See `references/builder_workflows.md` for the full command sequence, branch-nami
 
 See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh pr create` invocation, and pitfalls.
 
+## GitHub repo creation guardrail
+
+Before creating any GitHub repo, verify the skill is **yours**:
+
+1. **Check the author.** Read `metadata.author` from the skill's frontmatter. If the author is not `Indigo Karasu`, `the operator`, or `indigokarasu`, **STOP. Do not create a repo.**
+2. **Check the origin.** If the skill directory name matches a known hermes-agent bundled skill (`api-integration`, `google-workspace`, `deployment`, `docker-management`, `email-sending`, `git-operations`, `json-formatting`, `csv-parsing`, `database-operations`, `execute-code`, `unit-testing`, `web-extract`, `learn`, `terminal-run`, `title-sessions`, `voice-call`, `prism-*`, `reflexion-*`, `cek-*`), **STOP. This is a bundled skill — do not push it.**
+3. **Check for fork markers.** If `metadata.fork` is true or the repo description mentions "fork" or "adapted from", **STOP.**
+4. **Default to private.** All new repos must be created with `--private`. Never use `--public` unless explicitly requested.
+
+If any check stops you, log the decision in `decisions.jsonl` with `decision_type: "repo_creation_blocked"` and tell the user why.
+
 ## GitHub repo conventions
 
 - **Default to private.** All new repos are created private unless the user explicitly asks for public.
@@ -321,6 +367,10 @@ See `references/builder_workflows.md` for the exact `find | diff` loops, the `gh
 **Use when:** user asks to "check X against forge standards", "audit X skill", "make sure X meets OCAS standards", or "review and fix X".
 
 **Shape of the workflow:** see `references/compliance-audit-checklist.md` for the full 7-phase procedure (inventory → frontmatter → sections → references → skill.json → fixes → GitHub sync).
+
+## Platform notes
+
+Forge uses the `memory` tool (2 references) lightly — only for build state during multi-step builds. On platforms without `memory`, use `references/build-state.md` as a file-based fallback. Core build/validate/critique pipeline works on any platform with `write_file`, `read_file`, and `terminal`.
 
 ## Support file map
 
