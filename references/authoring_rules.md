@@ -436,6 +436,8 @@ If a cooperating skill is absent, the skill must still function normally.
 
 ---
 
+| Frontmatter block scalars (`description: >` or `description: |`) | NEVER use `execute_code` with `content.split('---')` to edit frontmatter — embedded newlines in block scalars cause truncation. Use `read_file` for exact line ranges, then `patch`. Always verify YAML parses after editing. |
+
 ## Anti-Patterns
 
 - Vague names: `helper`, `utils`, `tools`
