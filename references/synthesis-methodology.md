@@ -23,8 +23,10 @@ and external references, use this workflow:
    to check: frontmatter completeness, support file map, progressive disclosure,
    code ratio.
 
-5. **Self-assess with ocas-critique** — Run `critique.iterate` on the new skill
-   until it reaches the target score (50/50 for OCAS-authored skills).
+5. **Self-assess with skilllab's Critique** — Run the Critique procedure on the new
+   skill until it reaches the target score (50/50 for OCAS-authored skills).
+   skilllab's Critique section (merged from ocas-critique) contains the full
+   6-phase rubric pipeline.
 
 ## Anti-patterns
 
