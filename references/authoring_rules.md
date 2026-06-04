@@ -543,7 +543,15 @@ Verify:
 ## Metadata Requirements
 
 Every skill includes consistent author metadata:
-- Author: Indigo Karasu
-- Email: mx.indigo.karasu@gmail.com
+
+```yaml
+metadata:
+  author: Indigo Karasu (indigokarasu)
+  version: "X.Y.Z"
+```
+
+The `author` field lives under `metadata:` in the YAML frontmatter (not at the top level). When editing authors, always search for both `metadata:` → `author:` and top-level `author:` — some older skills may have it in the wrong location.
+
+**Author normalization:** All skills authored by Indigo Karasu should use the canonical form `Indigo Karasu (indigokarasu)`. When normalizing, be careful with skills that already have the full form — a naive find/replace of `Indigo Karasu` will double the suffix (e.g., `Indigo Karasu (indigokarasu) (indigokarasu)`). Always check for the full form first.
 
 Descriptions are optimized for discovery, not brand voice.
