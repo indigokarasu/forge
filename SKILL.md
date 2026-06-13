@@ -1,20 +1,19 @@
 ---
 name: ocas-forge
-description: >
-  Forge: skill architect and builder. Designs, builds, and validates complete
-  Agent Skill packages through a mandatory six-phase pipeline: existence gate, classify,
-  scope, architecture, build, validate. Trigger phrases: "create a new skill", "build
-  a skill", "design a skill", "review this skill", "repair this skill", "validate
-  skill package", "update forge". Default output is the finished installable package.
-  Do NOT use for skill evaluation (use skilllab's Critique procedure) or variant proposals (use ocas-mentor).
+description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
 license: MIT
+source: https://github.com/indigokarasu/forge
 includes:
 - references/**
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
   version: 3.4.0
-source: https://github.com/indigokarasu/forge
+tags:
+- skill-builder
+- architecture
+- design
+- OCAS-core
 triggers:
 - build a skill
 - create skill
@@ -24,39 +23,7 @@ triggers:
 ---
 ## Interactive Menu
 
-When invoked interactively (via `/` command), present a two-level menu using the `clarify` tool so the user can pick which function to run.
-
-**Level 1 — Category selection** (max 4 choices):
-
-```python
-result = clarify(
-    question="What would you like to do?",
-    choices=[
-        "Build & Validate — build, validate, scaffold, repair packages",
-        "Review & Sync — critique, audit, sync to GitHub",
-        "Consolidate — merge orphan skills into parent",
-        "Status — show system status",
-    ]
-)
-```
-
-**Level 2 — Action selection** based on Level 1 choice:
-
-- **Build & Validate** → clarify with choices: "build — Build a new skill package", "scaffold — Generate a minimal package skeleton", "validate — Run validation checks", "repair — Fix broken files in a package"
-- **Review & Sync** → clarify with choices: "critique — Review a package for defects", "audit — Audit skills for OCAS compliance", "sync — Sync local changes to GitHub"
-- **Consolidate** → run "consolidate — Merge orphan skills into parent" directly (single action — no sub-menu needed)
-- **Status** → run "status — Show system status" directly (single action — no sub-menu needed)
-
-After the user selects an action, execute it following the relevant procedure in this skill. Loop back to the menu after each action completes, until the user chooses to exit or sends `/stop`.
-
-### Response parsing
-
-Match the user's response against the full choice string. Extract the action key by splitting on `" — "` and taking the first segment. If the response doesn't match any known choice (user typed free-form via "Other"), match key prefixes case-insensitively. Re-present the current menu level on no match.
-
-### Platform adaptation
-
-On CLI, choices are navigable with arrow keys. On messaging platforms, choices render as a numbered list. The two-level hierarchy ensures no more than 4 options appear at any level on any platform.
-
+When invoked interactively, present a two-level menu. See `references/interactive-menu.md` for the full menu structure.
 
 
 
@@ -205,6 +172,7 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 - **Incorrect Naming**: NEVER create new `ocas-*` or rename to `ocas-*`/`util-*` without explicit user authorization. See `references/naming-and-authorship.md`.
 - **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo or in MEMORY.md — not in hermes core, which gets wiped on updates.
 - **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills. Session-specific artifacts should be absorbed into existing umbrellas, not created as standalone skills.
+- **Frontend anti-slop reference**: When building any skill that produces or evaluates frontend UI, load the anti-slop rules from the taste-skill reference at `~/.hermes/references/design/taste-skill/anti-slop-rules.md` and the pre-flight checklist at `~/.hermes/references/design/taste-skill/anti-slop-preflight.md`. These are the canonical AI-frontend anti-pattern references. See `~/.hermes/references/design/INDEX.md` §6 for the full taste-skill integration.
 - **Runaway repo creation (`forge.sync`)**: The `forge.sync` and `forge.consolidate` workflows call `gh repo create` for any skill they process, and default to `--public`. Before creating any GitHub repo, check whether the skill is a known 3rd-party skill (hermes-agent bundled skills, agentskill.sh skills, hub-installed skills, etc.). If it is, **do NOT create a repo for it**. Creating repos for 3rd-party skills pollutes the user's GitHub and can accidentally publish code that isn't theirs. Keep 3rd-party skills local-only unless the user explicitly asks to publish.
 - **Panic reporting**: When checking for the existence of skills or repos, verify the actual state (local directory, git remote, GitHub API) before reporting catastrophic findings like "lost and deleted with no copy." Incorrect panic reports erode trust and waste investigation time.
 - **Duplicate repos**: Before creating a new repo, always check if one already exists with `gh repo list`. If a repo with the same or similar name exists, use the existing one.
@@ -213,6 +181,7 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 - **Don't change repo visibility**: When updating or syncing a skill that already has a GitHub repo, never change its visibility unless the user explicitly tells you to.
 - **Appending to JSONL files**: When appending to `.jsonl` files (e.g., `decisions.jsonl`), ALWAYS use `echo '{"key": "val"}' >> file.jsonl`. NEVER use heredoc redirection (`cat > file << 'EOF'`) — the `>` operator truncates the file first, destroying all existing entries.
 - **Stale proposal duplicates in data root**: After Mentor drops VariantProposal files, copies can remain in `{agent_root}/commons/data/ocas-forge/` (data root) even after processing. During `forge:journal-scan`: (1) Check if `intake/processed/` exists — if so, cross-reference each data-root `.json` `proposal_id` against filenames there; skip any already present. (2) If `intake/processed/` does NOT exist, check for a `processed/` subdirectory within the data root itself. (3) If neither processed directory exists, all `.json` files in the data root are unprocessed. After processing, move files to `processed/` (create it if needed).
+- **Path mismatch in `comm` cross-reference**: When using `comm` to compare file lists between `proposals/` and `processed/` directories, strip directory prefixes first — `comm` compares lines literally, so `proposals/vp_0625cecd.json` never matches `vp_0625cecd.json`, making every file appear unprocessed. Use `sed 's|proposals/||'` or `basename` on both sides. After running the comparison, spot-check: pick one filename from the "unprocessed" list and verify it's actually missing from the processed dir before taking action.
 
 ## Inter-skill interfaces
 
@@ -323,3 +292,5 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 | `references/okrs.md` | When reviewing skill performance against targets |
 | `references/naming-and-authorship.md` | Before naming, renaming, or setting author on any skill; before deleting auto-generated skills |
 | `references/dojo-skill-cleanup.md` | Before deleting auto-generated skills; when identifying auto-generated skill candidates |
+| `references/journal-scan-cron-guide.md` | Before running forge:journal-scan — cron mode procedures and pitfalls |
+| `references/interactive-menu.md` | When invoked interactively via `/` command — two-level menu layout, response parsing, platform adaptation |
