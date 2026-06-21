@@ -8,7 +8,7 @@ includes:
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
-  version: 3.4.0
+  version: 3.4.1
 tags:
 - skill-builder
 - architecture
@@ -161,7 +161,9 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 ## Gotchas
 
 - **Duplicate file entries cause patch failures**: Before patching a skill file, always check for duplicate entries (especially in Gotchas sections). The `patch` tool's `old_string` must be unique — if a Gotcha appears twice, expand the surrounding context to make the match unique, or use `replace_all=true` intentionally. When patching skill files you haven't read in full this session, scan for duplicates first.
-- **Stale files in `processed/` vs `intake/processed/`**: The Forge journal-scan cross-references proposals against `intake/`processed/ first. Files can accumulate in `processed/` without being mirrored to `intake/processed/`. During `forge:journal-scan`, always check both locations. Newly found files in `processed/` should be copied to `intake/processed/` after processing to keep the two directories in sync.
+- **Stale files in `processed/` vs `intake/processed/`**: The Forge journal-scan cross-references proposals against `intake/processed/` first. Files can accumulate in `processed/` without being mirrored to `intake/processed/`. During `forge:journal-scan`, always check both locations. Newly found files in `processed/` should be copied to `intake/processed/` after processing to keep the two directories in sync.
+
+- **Non-proposal/decision files in data root are not work items**: Files like `config.json`, `decisions.jsonl`, and other non-`.json` or non-proposal/decision-named files in the Forge data root are not unprocessed work. The journal scan should only flag files matching the VariantProposal (`vp_*.json`) or VariantDecision (`vd_*.json`) naming patterns, or files in `proposals/` / `intake/` subdirectories. Skip everything else.
 - **Missing `includes:` in frontmatter**: When a skill has a `references/` or `scripts/` directory, the frontmatter must include `includes: [references/**]`. Without it, the agent won't auto-discover support files.
 - **Scope boundary for sync**: `forge.sync` and `forge.audit` must ONLY operate on `ocas-*` skills. Never upload, sync, or publish non-OCAS skills to the indigokarasu GitHub account or agentskill.sh. Before any sync operation, verify each skill name starts with `ocas-`. If a non-OCAS skill is encountered, skip it and report to the user.
 - **Doing more than asked**: When the user says "review these skills," review them — don't also rewrite, restructure, or push to GitHub unless explicitly asked. When the user says "fix this one thing," fix that one thing — don't also refactor unrelated sections. Match your work to the scope of the request.
@@ -178,10 +180,13 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 - **Duplicate repos**: Before creating a new repo, always check if one already exists with `gh repo list`. If a repo with the same or similar name exists, use the existing one.
 - **Re-applying fixes that are already done**: Before patching a skill to address a scanner finding or audit issue, CHECK THE CURRENT STATE. Read the skill file first. If the fix is already applied, don't re-apply.
 - **YAML block scalar truncation**: `description: >` and `description: |` block scalars contain embedded newlines. `execute_code` with `content.split('---')` WILL truncate the file at the first `---` inside the block scalar, destroying body content. Always use `read_file` for exact line ranges, then `patch` with precise old_string. After any frontmatter edit, verify line count, YAML parse, and body start heading.
+
+- **`action` field is polymorphic in forge journals — guard with `isinstance` before every access** — Forge scan journals store `action` as one of three types: (1) **dict** with `result` + `findings` keys; (2) **string** containing a human-readable result message; (3) **empty list** `[]` with no `result` key. Inline ingest scripts must branch: `isinstance(action, dict)` → `action.get("result")`; `isinstance(action, str)` → `startswith` against `FORGE_NO_OP_RESULTS`; `isinstance(action, list)` → check `findings.unprocessed_proposals == 0`. A bare `action.get("result")` crashes on string/list. Confirmed 2026-06-21.
 - **Don't change repo visibility**: When updating or syncing a skill that already has a GitHub repo, never change its visibility unless the user explicitly tells you to.
 - **Appending to JSONL files**: When appending to `.jsonl` files (e.g., `decisions.jsonl`), ALWAYS use `echo '{"key": "val"}' >> file.jsonl`. NEVER use heredoc redirection (`cat > file << 'EOF'`) — the `>` operator truncates the file first, destroying all existing entries.
 - **Stale proposal duplicates in data root**: After Mentor drops VariantProposal files, copies can remain in `{agent_root}/commons/data/ocas-forge/` (data root) even after processing. During `forge:journal-scan`: (1) Check if `intake/processed/` exists — if so, cross-reference each data-root `.json` `proposal_id` against filenames there; skip any already present. (2) If `intake/processed/` does NOT exist, check for a `processed/` subdirectory within the data root itself. (3) If neither processed directory exists, all `.json` files in the data root are unprocessed. After processing, move files to `processed/` (create it if needed).
 - **Path mismatch in `comm` cross-reference**: When using `comm` to compare file lists between `proposals/` and `processed/` directories, strip directory prefixes first — `comm` compares lines literally, so `proposals/vp_0625cecd.json` never matches `vp_0625cecd.json`, making every file appear unprocessed. Use `sed 's|proposals/||'` or `basename` on both sides. After running the comparison, spot-check: pick one filename from the "unprocessed" list and verify it's actually missing from the processed dir before taking action.
+- **`write_file` escapes quotes in Python files**: When writing `.py` files via `write_file`, inner double quotes in Python string/dict literals get backslash-escaped, producing `SyntaxError: unterminated string literal` pointing to the wrong line. This is especially insidious with dict literals. **Workaround**: For Python scripts, use `terminal()` with a single-quoted heredoc: `cat > /tmp/script.py << 'SCRIPTEOF'` ... `SCRIPTEOF`, then run with `python3 /tmp/script.py`. Always verify with `python3 -c "compile(open(f).read(), f, 'exec')"` first. For non-Python files (markdown, JSON, YAML), `write_file` is safe.
 
 ## Inter-skill interfaces
 
@@ -222,13 +227,21 @@ directories, writes default config, registers the `forge.update` cron job, and
 logs the initialization decision. See `references/init_procedure.md` for the
 exact sequence.
 
-## Background tasks
+## Dispatch / Cron Integration
 
-| Job name | Mechanism | Schedule | Command |
-|---|---|---|---|
-| `forge:journal-scan` | cron | `*/5 * * * *` | Scan for unprocessed VariantProposal and VariantDecision JSON files |
-| `forge:update` | cron | `0 0 * * *` | `forge.update` |
-| `forge:skill-audit` | cron | `0 6 * * 1` | Run `scripts/forge_audit_skills.py --dry-run` |
+When triggered by the dispatcher (`dispatcher.py`) or the `forge:journal-scan` cron:
+
+1. Check `{agent_root}/commons/data/ocas-forge/` for unprocessed `vp_*.json` (VariantProposal) or `vd_*.json` (VariantDecision) files in the data root, `proposals/`, and `intake/` directories
+2. Cross-reference against `intake/processed/` and `processed/` to skip already-processed files
+3. Process any new files: build variant packages, apply fixes, or queue for Mentor evaluation
+4. After processing, move files to `processed/`
+5. If no unprocessed files: scan is clean, write journal entry and exit
+
+The most recent forge scan journal should show `result: "no_op"` with `findings.unprocessed_proposals: 0` when the queue is empty.
+
+**Multi-skill dispatch pattern:** When the dispatcher triggers multiple skills in one dispatch (e.g., Forge + Mentor + Praxis), each pipeline runs independently. Forge's job is to scan for unprocessed variants and write its journal. If nothing found, write a no-op journal and exit. Don't block on sibling skills.
+
+**Multi-skill dispatch pattern:** When the dispatcher triggers multiple skills in one dispatch (e.g., Forge + Mentor + Praxis), each pipeline runs independently. Forge's job is to scan for unprocessed variants and write its journal. If nothing found, write a no-op journal and exit. Don't block on sibling skills.
 
 ## Self-update
 
@@ -293,4 +306,5 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 | `references/naming-and-authorship.md` | Before naming, renaming, or setting author on any skill; before deleting auto-generated skills |
 | `references/dojo-skill-cleanup.md` | Before deleting auto-generated skills; when identifying auto-generated skill candidates |
 | `references/journal-scan-cron-guide.md` | Before running forge:journal-scan — cron mode procedures and pitfalls |
+| `references/session-20260621-dispatch.md` | Session-specific: dispatch-triggered clean scan, multi-skill dispatch pattern (Forge+Mentor+Praxis) |
 | `references/interactive-menu.md` | When invoked interactively via `/` command — two-level menu layout, response parsing, platform adaptation |

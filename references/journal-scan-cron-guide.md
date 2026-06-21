@@ -101,6 +101,24 @@ The `2>/dev/null` guards against the case where one of the processed dirs
 doesn't exist yet (e.g., fresh Forge install). The `sort -u` on each side
 ensures clean comparison even if a file exists in both processed dirs.
 
+## Common pitfall: `config.json` false positive in data root scan
+
+When scanning `{agent_root}/commons/data/ocas-forge/*.json` for unprocessed
+proposal/decision files, the `config.json` file (Forge's own config) will appear
+as a "new" file if you only check against processed directories. It is NOT a
+proposal or decision — skip it.
+
+**Fix:** When scanning the data root, exclude `config.json`:
+
+```bash
+find {agent_root}/commons/data/ocas-forge/ -maxdepth 1 -name "*.json" \
+  ! -name "config.json" -type f
+```
+
+Or filter it out in the cross-reference step: after building the list of
+candidate files, remove any filename that is exactly `config.json` before
+comparing against processed.
+
 ## Common pitfall: `write_file` does not resolve template placeholders in paths
 
 When writing the journal entry with `write_file()`, the `path` parameter is taken

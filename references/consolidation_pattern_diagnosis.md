@@ -26,3 +26,23 @@ Forge kept creating standalone skills for content that belonged inside existing 
 - Added standalone test (own invocation path + cron + journal = standalone justified)
 - ## Integrated: wrappers added as explicit anti-pattern
 - Pre-build default: absorption is default, creation is the exception
+
+---
+
+## June 2026 Consolidation (June 15, 2026)
+
+**Trigger:** Forge skill audit (`forge_audit_skills.py`) run as scheduled cron job. Manual review of audit output identified orphan.
+
+| Standalone (deleted) | Absorbed into | As |
+|---|---|---|
+| ocas-actualization (v1.1.0) | ocas-autobio (v3.5.0) | 3 new references: panel-rubric.md, dream-interpretation.md, dream-journal-email.md; updated architecture.md, evolution-loop.md |
+
+**Root cause (recurrence):** An intermediate rename (autobio → actualization, v1.0-v1.1) created a fork. The parent (autobio) was rewritten as v3.0+ with the same pipeline, leaving both skills active with identical cron jobs, journal outputs, shift tracking, and SOUL.md distillation purpose. The Phase 1 parent check did not catch this because the skills had different names at the time of creation.
+
+**Fix applied:**
+
+- Consolidation followed `forge.consolidate` workflow: read orphan content, identify unique value, fold into parent's existing section structure (no `## Integrated:` wrappers), update Support File Map, bump version, delete orphan directory.
+- Unique content from orphan: Writer's Panel rubric (5 named authors, iterative procedure), dream interpretation framework (symbols, archetype, emotional register, core tension), Gmail MCP workaround (chat fallback).
+- Parent skill (autobio) already owned the domain — same cron schedule, same storage paths, same ontology types, same distillation targets.
+
+**Lesson:** Phase 1 parent search must check **functional equivalence**, not just name overlap. Two skills with identical cron jobs, journal types, storage layouts, and distillation targets are duplicates even if their names differ.
