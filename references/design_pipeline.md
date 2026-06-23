@@ -19,9 +19,28 @@ Can this content fit as a `references/<topic>.md` or `scripts/<name>.py` inside 
 
 **Trigger:** Phase 1 passed — no local parent owns the domain. Before classifying and scoping a new skill, research whether the capability already exists externally.
 
-**Goal:** Avoid building what already exists. A skill that duplicates an existing GitHub repo or published skill package is waste.
+**Goal:** Avoid building what already exists. Understand existing approaches, synthesize the best patterns, build something better. A skill that duplicates an existing GitHub repo or published skill package without adding value is waste.
 
-### Step A — GitHub Search (via `gh` CLI, NEVER browser search)
+### Step A — Skill Library Search (FIRST — skills often backed by GitHub repos)
+
+Search the OCAS skill library and other skill registries for packages that cover the proposed domain. These repos often have associated GitHub repos you can deep-read in Step B.
+
+**Sources (in priority order):**
+
+1. **Local OCAS skills** — `skills_list` + `skill_view` for any `ocas-*` skill with domain overlap
+2. **GitHub OCAS repos** — `gh search repos "ocas-* user:indigokarasu" --json fullName,description,url`
+3. **AgentSkill.sh** — `agentskill search <keywords>` (already installed)
+4. **SkillsMP** — API: https://skillsmp.com/docs/api (key below)
+5. **LobeHub** — `lobehub search <keywords>` (see https://lobehub.com/cli)
+6. **Skills.sh** — API: https://www.skills.sh/docs/api
+7. **OpenClaw ClawHub** — `clawhub search <keywords>` (see https://docs.openclaw.ai/clawhub/cli)
+
+**API keys (load on demand, do not hardcode in scripts):**
+- SkillsMP: load from config or prompt user if needed
+
+For each skill found, note: name, description, how it works (architecture), what patterns it uses, and what the new skill can learn from it.
+
+### Step B — GitHub Search (via `gh` CLI, NEVER browser search)
 
 Search GitHub for repos that solve the proposed capability. Use `gh search repos` with multiple query variants for broad coverage:
 
@@ -37,8 +56,9 @@ gh search repos "<alternative keywords>" --sort stars --limit 5 --json fullName,
 - Updated within last 6 months (active maintenance)
 - ≥10 stars (community validation)
 - Direct domain overlap (not tangential)
+- **Also include GitHub repos discovered in Step A** (skill library entries often link to their source repos)
 
-### Step B — Deep-read repos (via `gh` API, NEVER browser)
+### Step C — Deep-read repos and skills (via `gh` API + skill_view, NEVER browser)
 
 For each selected repo, fetch structure and key files using `gh api`:
 
@@ -54,15 +74,17 @@ gh api repos/{owner}/{repo}/git/trees/master?recursive=1 --jq '.tree[].path'
 gh api repos/{owner}/{repo}/contents/{path} --jq '.content' | base64 -d
 ```
 
+For skills found in Step A, use `skill_view` to read full content including references and scripts.
+
 **What to read:** README, main entry point, core logic files, package.json/pyproject.toml/setup.py for dependencies. Do NOT browser-scrape. Do NOT clone to disk. Use `gh api` exclusively.
 
-### Step C — Compare and Decide
+### Step D — Compare and Decide
 
-For each repo, assess on three axes:
+For each repo/skill, assess on three axes:
 
 | Axis | Question |
 |------|----------|
-| **Coverage** | Does this repo solve ≥80% of the proposed capability? |
+| **Coverage** | Does this repo/skill solve ≥80% of the proposed capability? |
 | **Quality** | Is it actively maintained, well-documented, production-ready? |
 | **Compatibility** | Can it be wrapped/integrated into an OCAS skill cleanly? (license, language, dependencies) |
 
@@ -72,19 +94,9 @@ For each repo, assess on three axes:
 - **50-80% coverage** → **Fork/adapt.** Use the repo as a foundation, extend it for the remaining gap. Credit the source.
 - **<50% coverage OR incompatible license OR unmaintained** → **Build fresh.** Proceed to Phase 2. Record why existing repos were insufficient.
 
-**Record all findings** in `decisions.jsonl`: which repos were reviewed, their scores, and the final decision (wrap/fork/build). This prevents re-researching the same repos on future builds.
+**Record all findings** in `decisions.jsonl`: which repos/skills were reviewed, their scores, and the final decision (wrap/fork/build). This prevents re-researching the same items on future builds.
 
-### Step D — Skill Library Search
-
-In addition to GitHub, search the OCAS skill library and other skill registries:
-
-- Check `https://github.com/indigokarasu` for OCAS skills that may already cover the domain
-- Search AgentSkill hub (https://agentskill.sh) for published packages
-- Check Hermes bundled skills via `skills_list`
-
-If a published skill package covers the domain → evaluate whether to install it directly instead of building new. Record the decision.
-
-**Research is complete when:** At least 10 GitHub repos have been reviewed OR the search conclusively shows no adequate existing solution. Proceed to Phase 2.
+**Research is complete when:** At least 10 repos/skills have been reviewed OR the search conclusively shows no adequate existing solution. Proceed to Phase 2.
 
 ## Phase 2: Classify
 Shortcut, workflow, or system?
@@ -95,10 +107,13 @@ Exact job, explicit non-goals, smallest useful promise.
 ## Phase 4: Architecture
 What goes in SKILL.md vs references vs scripts vs assets?
 
-## Phase 5: Build
+## Phase 5: Plan
+Map the implementation: file structure, dependencies, inter-skill interfaces, cron jobs, journal outputs. Plan before writing.
+
+## Phase 6: Build
 Write all files.
 
-## Phase 6: Validate
+## Phase 7: Validate
 Routing, structural, usefulness checks.
 
 See `references/package_patterns.md` for package shape guidance and `references/authoring_rules.md` for full authoring standards.
