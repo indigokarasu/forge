@@ -78,7 +78,7 @@ For skills found in Step A, use `skill_view` to read full content including refe
 
 **What to read:** README, main entry point, core logic files, package.json/pyproject.toml/setup.py for dependencies. Do NOT browser-scrape. Do NOT clone to disk. Use `gh api` exclusively.
 
-### Step D — Compare and Decide
+### Step D — Compare, Synthesize, and Decide
 
 For each repo/skill, assess on three axes:
 
@@ -93,8 +93,22 @@ For each repo/skill, assess on three axes:
 - **≥80% coverage + high quality + compatible** → **WRAP, don't build.** Create the new skill as a thin wrapper/adapter around the existing repo. Credit the source in the skill's `references/` and frontmatter.
 - **50-80% coverage** → **Fork/adapt.** Use the repo as a foundation, extend it for the remaining gap. Credit the source.
 - **<50% coverage OR incompatible license OR unmaintained** → **Build fresh.** Proceed to Phase 2. Record why existing repos were insufficient.
+- **Multiple partial solutions** → **SYNTHESIZE.** This is the most common and most valuable path. Take the best patterns from multiple sources:
+  - Architecture from repo A (e.g., the plugin system)
+  - Error handling from repo B (e.g., retry + circuit breaker pattern)
+  - CLI interface from repo C (e.g., argument parsing + help text conventions)
+  - Testing patterns from repo D (e.g., fixture structure, mock strategies)
+  - Configuration handling from a skill in the library
+  - Combine, restructure, and improve. The result should be greater than the sum of its parts. Credit ALL sources in `references/attribution.md` and frontmatter.
 
-**Record all findings** in `decisions.jsonl`: which repos/skills were reviewed, their scores, and the final decision (wrap/fork/build). This prevents re-researching the same items on future builds.
+**Synthesis rules:**
+1. Every borrowed pattern must be adapted to OCAS conventions — don't copy verbatim, make it native
+2. If a pattern is better than what you'd build from scratch, use it — don't reinvent for pride
+3. If a pattern is worse than what you'd do, skip it — don't inherit bad design
+4. The NEW skill must be a coherent whole, not a Frankenstein — internal consistency matters more than source diversity
+5. If you synthesize from ≥3 sources, the result must be meaningfully different from any single source
+
+**Record all findings** in `decisions.jsonl`: which repos/skills were reviewed, their scores, what was borrowed from each, and the final decision (wrap/fork/build/synthesize). This prevents re-researching the same items on future builds.
 
 **Research is complete when:** At least 10 repos/skills have been reviewed OR the search conclusively shows no adequate existing solution. Proceed to Phase 2.
 
