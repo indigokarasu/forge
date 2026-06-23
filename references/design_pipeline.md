@@ -124,8 +124,26 @@ What goes in SKILL.md vs references vs scripts vs assets?
 ## Phase 5: Plan
 Map the implementation: file structure, dependencies, inter-skill interfaces, cron jobs, journal outputs. Plan before writing.
 
+**Skilllab compliance pre-check (run during Plan, before Build):**
+Before writing any files, verify the planned output against skilllab's 10-dimension rubric. Address ALL of the following in the plan:
+
+| Dim | Requirement | Verify |
+|-----|-------------|--------|
+| D1 | Frontmatter: `name` (lowercase-hyphens, 1-64 chars, matches dir), `description` (1-1024 chars), `license` top-level, `includes:` if refs/scripts exist, `metadata.hermes.tags` + `category`, `triggers:` present | Frontmatter will parse and pass agentskills.io spec |
+| D2 | Description follows `[What] [When] [Keywords]. NOT for [Exclusions]` formula. Third-person imperative. Under 1024 chars. | Description triggers correctly, no false activation |
+| D3 | SKILL.md body under 500 lines / 5000 tokens. Code ratio <20% (code lines / total lines). No unnecessary background explanations. | Plan splits content: SKILL.md = overview, details in `references/` |
+| D4 | Three-layer architecture: metadata → SKILL.md → references. Support file map with "When to read" column. File refs one level deep. Descriptive file names. | Plan includes support file map with conditional triggers |
+| D5 | Steps clear, sequential, unambiguous. Checklists (`- [ ]`) for multi-step workflows. Consistent terminology. Concrete examples. | Plan has checklists for any 3+ step procedure |
+| D6 | Fragile operations: exact commands. Flexible tasks: direction + defaults. "Why" explained for rigid rules. | Plan marks which instructions are rigid vs flexible, includes "why" |
+| D7 | Error handling section or table. Scripts: `--help`, structured output, meaningful exit codes, no interactive prompts. | Plan includes error handling guidance |
+| D8 | Progressive disclosure: SKILL.md = navigation, references = detail. Support file map uses conditional language ("Before X", "When Y"). | Every reference file has a conditional trigger in the map |
+| D9 | Scripts: self-contained, `--help` with usage/flags/examples, JSON/CSV stdout, exit codes, idempotent where possible, `--dry-run` for destructive ops. | Plan includes script design meeting D9 |
+| D10 | All description capabilities covered. Gotchas/Pitfalls section present. Scope is coherent. Procedures generalize. | Plan includes gotchas section |
+
+**If any dimension cannot be met**, adjust the plan before building. Do NOT skip and plan to fix later.
+
 ## Phase 6: Build
-Write all files.
+Write all files according to the plan. Re-check D1 frontmatter and D4 support file map as you write — drift between plan and execution is the #1 cause of post-build skilllab fixes.
 
 ## Phase 7: Validate
 Routing, structural, usefulness checks.
