@@ -1,6 +1,6 @@
 ---
 name: ocas-forge
-description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory six-phase pipeline: existence gate, classify, scope, architecture, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
+description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory seven-phase pipeline: existence gate, research, classify, scope, architecture, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
 license: MIT
 source: https://github.com/indigokarasu/forge
 includes:
@@ -8,7 +8,7 @@ includes:
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
-  version: 3.4.1
+  version: 3.5.0
 tags:
 - skill-builder
 - architecture
@@ -27,7 +27,7 @@ When invoked interactively, present a two-level menu. See `references/interactiv
 
 
 
-Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory six-phase internal pipeline covering existence gate, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
+Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory seven-phase internal pipeline covering existence gate, research, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
 
 ## When to Use
 
@@ -59,7 +59,7 @@ structural checks; deep quality scoring and iterative improvement is now
 owned by `skilllab` (Critique procedure, merged from ocas-critique).
 
 Forge does not own: skill quality scoring and iteration (skilllab), skill
-evaluation or variant testing (Mentor), behavioral pattern analysis (Corvus),
+evaluation or variant testing (Mentor), behavioral pattern analysis,
 behavioral refinement (Praxis), experimentation (Fellow), system health and
 skill initialization (Custodian), runtime orchestration and delegation (the
 agent harness), authentication and MCP wiring (ocas-auth).
@@ -76,7 +76,7 @@ Forge receives VariantProposal and VariantDecision files from Mentor. It builds 
 
 ## Ontology types
 
-Forge does not extract entities and does not emit Signals to Elephas. Forge operates on skill package data and skill metadata only, not on user entities from Chronicle or Weave.
+Forge does not extract user entities and does not emit Chronicle signals. Forge operates on skill package data and skill metadata only, not on user entities from Chronicle or Weave.
 
 ## Commands
 
@@ -97,14 +97,21 @@ Forge does not extract entities and does not emit Signals to Elephas. Forge oper
 ## Mandatory design pipeline
 
 Run all phases before writing files. Full phase detail including existence gates
-(parent search, standalone test, absorption test), classification, scoping,
-architecture, build, and validation procedures: see
+(parent search, standalone test, absorption test), **research (GitHub repos + skill library)**,
+classification, scoping, architecture, build, and validation procedures: see
 `references/design_pipeline.md`.
 
 Key rule: **absorption first.** If an existing skill already owns the domain,
 add content to it as a `references/` doc or `scripts/` file — do not create a
 new skill. See `references/enforcement_durability.md` for the absorption
 decision framework.
+
+**Research rule:** After the existence gate passes, you MUST research before
+classifying. Search GitHub repos (via `gh search repos`) AND search the skill
+library (via the APIs below) to understand what already exists. The goal is
+NOT to copy existing skills but to **understand how they work** and **synthesize**
+that knowledge into a new, better skill. Review at least 10 repos or skills
+before deciding to build.
 
 ## Naming and Authorship Rules
 
@@ -214,7 +221,7 @@ See `references/okrs.md`.
 - Mentor — receives VariantProposal and VariantDecision files via journal payload
 - Fellow — Forge may build experiment harnesses for Fellow benchmarks
 - Custodian — initializes skills built by Forge during system health passes
-- **Elephas** — journal entity observations consumed during Chronicle ingestion
+- **Chronicle** — skill metadata and journal entries ingested for knowledge persistence
 
 ## Journal outputs
 
@@ -241,7 +248,7 @@ The most recent forge scan journal should show `result: "no_op"` with `findings.
 
 **Multi-skill dispatch pattern:** When the dispatcher triggers multiple skills in one dispatch (e.g., Forge + Mentor + Praxis), each pipeline runs independently. Forge's job is to scan for unprocessed variants and write its journal. If nothing found, write a no-op journal and exit. Don't block on sibling skills.
 
-**Multi-skill dispatch pattern:** When the dispatcher triggers multiple skills in one dispatch (e.g., Forge + Mentor + Praxis), each pipeline runs independently. Forge's job is to scan for unprocessed variants and write its journal. If nothing found, write a no-op journal and exit. Don't block on sibling skills.
+**Third-wave self-referential pattern (confirmed 2026-06-22):** After a multi-skill dispatch, the dispatcher re-scans and detects journals written by the dispatch's own run (forge-scan, praxis-dispatch, mentor-light). This is the **second wave** — expected and harmless if journals are already in Praxis's eval file. But a **third wave** can occur when the forge-scan or praxis-dispatch journal is written AFTER the Praxis ingest updates `last_ingest_run`. These journals have mtimes after the state timestamp, so the dispatcher detects them as "new" again. **Mitigation:** After the Praxis ingest completes, the caller must also add all dispatch-output journals (especially forge-scan) to `journals_evaluated.jsonl` and advance `last_ingest_run` past their mtimes. See `references/session-20260622-dispatch.md`.
 
 ## Self-update
 
@@ -261,7 +268,37 @@ Do NOT wrap in `## Integrated:` sections.
 Before creating any GitHub repo, verify the skill is OCAS-authored. See
 `references/github_repo_guardrails.md` for the full guardrail checklist.
 
-## Skill library sync audit
+## Skill library search APIs
+
+When Phase 1.5 triggers skill library research, use these APIs to find and review existing skill packages. The goal is to **understand approaches, patterns, and architectures** — not to copy verbatim.
+
+### SkillsMP
+API key: `<STRIPE_LIVE_KEY>`
+- Base URL: https://skillsmp.com/docs/api
+- Use: Search existing skill marketplace for patterns and approaches
+
+### AgentSkill.sh
+- CLI: `agentskill` (already installed)
+- Hub: https://agentskill.sh
+- Use: Search for published skill packages, review their structure and approach
+
+### LobeHub
+- CLI: `lobehub` (see https://lobehub.com/cli)
+- Use: Search skill packages, understand community patterns
+
+### Skills.sh
+- API: https://www.skills.sh/docs/api
+- Use: Search skill library for relevant packages
+
+### OpenClaw
+- CLI: `clawhub` (see https://docs.openclaw.ai/clawhub/cli)
+- Use: Search ClawHub for skill packages
+
+### GitHub OCAS repos
+- `gh search repos "ocas-* user:indigokarasu" --json fullName,description,url`
+- Search known OCAS skill repos directly
+
+**Output of library search:** For each relevant skill found, note: name, description, how it works (architecture), what patterns it uses, and what the new skill can learn from it. Synthesize — don't clone.
 
 When asked to audit sync state of all OCAS skills, or when running a scheduled
 sync check, use the workflow in `references/sync_audit_procedure.md`.
@@ -279,7 +316,7 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 
 | File | When to read |
 |------|-------------|
-| `references/design_pipeline.md` | Before running forge.build — the mandatory 6-phase pipeline |
+| `references/design_pipeline.md` | Before running forge.build — the mandatory 7-phase pipeline (existence gate → research → classify → scope → architecture → build → validate) |
 | `references/init_procedure.md` | On first invocation of any Forge command |
 | `references/sync_audit_procedure.md` | Before forge.sync-audit |
 | `references/enforcement_durability.md` | Before writing rules that must survive skill updates |
@@ -306,5 +343,9 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 | `references/naming-and-authorship.md` | Before naming, renaming, or setting author on any skill; before deleting auto-generated skills |
 | `references/dojo-skill-cleanup.md` | Before deleting auto-generated skills; when identifying auto-generated skill candidates |
 | `references/journal-scan-cron-guide.md` | Before running forge:journal-scan — cron mode procedures and pitfalls |
+| `references/session-20260622-dispatch.md` | Session-specific: dispatch-triggered clean scan, third-wave self-referential pattern (forge-scan written after Praxis ingest) |
+| `references/session-20260622-dispatch-21.md` | Session-specific: dispatch #21, clean scan, second-wave self-referential pattern confirmed |
+| `references/session-20260621-dispatch-7.md` | Session-specific: dispatch #7 — clean scan, 0 unprocessed, cross-ref technique |
+| `references/session-20260621-dispatch-6.md` | Session-specific: dispatch #6 — heredoc single-quote expansion bug, all pipelines clean |
 | `references/session-20260621-dispatch.md` | Session-specific: dispatch-triggered clean scan, multi-skill dispatch pattern (Forge+Mentor+Praxis) |
 | `references/interactive-menu.md` | When invoked interactively via `/` command — two-level menu layout, response parsing, platform adaptation |

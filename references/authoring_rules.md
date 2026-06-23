@@ -548,10 +548,27 @@ Every skill includes consistent author metadata:
 metadata:
   author: Indigo Karasu (indigokarasu)
   version: "X.Y.Z"
+  hermes:
+    tags: [tag1, tag2]
+    category: <category>
 ```
 
 The `author` field lives under `metadata:` in the YAML frontmatter (not at the top level). When editing authors, always search for both `metadata:` → `author:` and top-level `author:` — some older skills may have it in the wrong location.
 
 **Author normalization:** All skills authored by Indigo Karasu should use the canonical form `Indigo Karasu (indigokarasu)`. When normalizing, be careful with skills that already have the full form — a naive find/replace of `Indigo Karasu` will double the suffix (e.g., `Indigo Karasu (indigokarasu) (indigokarasu)`). Always check for the full form first.
+
+**Hermes-specific metadata (from [Nous Research docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)):**
+- `metadata.hermes.tags` — array of tag strings for `skills_list` grouping
+- `metadata.hermes.category` — controls `skills_list` category grouping. Use existing categories; don't invent ad-hoc values
+- `metadata.hermes.config` — if the skill uses env vars, declare them here with `key`, `description`, `default`. This enables `hermes config migrate` and `hermes config show`
+- `metadata.hermes.fallback_for_toolsets` / `requires_toolsets` — conditional activation
+- `metadata.hermes.fallback_for_tools` / `requires_tools` — same, for individual tools
+
+**Anti-patterns:**
+- `category:` at top level (ignored — must be `metadata.hermes.category`)
+- `tags:` only at top level without `metadata.hermes.tags` (misses Hermes grouping)
+- Env vars only in body table, not in `metadata.hermes.config`
+
+See `references/frontmatter-editing-pitfalls.md` for YAML editing safety rules.
 
 Descriptions are optimized for discovery, not brand voice.

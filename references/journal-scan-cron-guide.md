@@ -150,3 +150,45 @@ write_file(path=".../journal-scan-{{unix}}.json", ...)
 # Step 1: terminal("date +%s") -> e.g. 1780707441
 # Step 2: write_file(path=".../journal-scan-1780707441.json", ...)
 ```
+
+## Common pitfall: single-quoted heredoc prevents variable expansion
+
+When writing JSON journal entries via `cat > file << 'EOF'`, the single quotes
+around `EOF` prevent ALL shell variable expansion. `$VAR`, `$(date ...)`, and
+`${TS}` are written as literal strings — not their expanded values.
+
+**Wrong (single-quoted heredoc — variables NOT expanded):**
+```bash
+cat > "$JOURNAL_DIR/forge-scan-${TS}.json" << 'EOF'
+{
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000000+00:00)",
+  "run_id": "forge-scan-${TS}"
+}
+EOF
+```
+Result: `timestamp` field contains literal `$(date -u +%Y-%m-%dT%H:%M:%S.000000+00:00)`.
+
+**Right (use write_file for JSON, or double-quoted heredoc with care):**
+
+Option A — use `write_file()` (preferred for JSON):
+```python
+# Resolve timestamp in Python, write via write_file
+now = datetime.now(timezone.utc)
+ts = now.strftime('%Y%m%dT%H%M%SZ')
+path = f"{journal_dir}/forge-scan-{ts}.json"
+content = json.dumps({"timestamp": now.isoformat(), "run_id": f"forge-scan-{ts}"}, indent=2)
+write_file(path=path, content=content)
+```
+
+Option B — if you must use heredoc, use double quotes (but escape inner `"` and `$`):
+```bash
+cat > "$JOURNAL_DIR/forge-scan-${TS}.json" << EOF
+{
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000000+00:00)",
+  "run_id": "forge-scan-${TS}"
+}
+EOF
+```
+Note: Double-quoted heredoc expands variables but requires escaping `\"` inside JSON strings.
+
+**Best practice: Use `write_file()` for all JSON journal writes.** It avoids heredoc quoting issues entirely and produces valid JSON without manual escaping.
