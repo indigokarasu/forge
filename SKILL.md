@@ -1,6 +1,6 @@
 ---
 name: ocas-forge
-description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory seven-phase pipeline: existence gate, research, classify, scope, architecture, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
+description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory eight-phase pipeline: existence gate, research, classify, scope, architecture, plan, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
 license: MIT
 source: https://github.com/indigokarasu/forge
 includes:
@@ -8,7 +8,7 @@ includes:
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
-  version: 3.5.0
+  version: 3.6.0
 tags:
 - skill-builder
 - architecture
@@ -27,7 +27,7 @@ When invoked interactively, present a two-level menu. See `references/interactiv
 
 
 
-Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory seven-phase internal pipeline covering existence gate, research, classification, scoping, architecture, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
+Forge is the system's skill architect — given a capability idea or broken existing package, it runs a mandatory eight-phase internal pipeline covering existence gate, research, classification, scoping, architecture, planning, construction, and validation before writing a single file. The default output is the finished, installable package with all file contents written; Forge never returns design briefs or plans in place of the real artifact.
 
 ## When to Use
 
@@ -97,8 +97,8 @@ Forge does not extract user entities and does not emit Chronicle signals. Forge 
 ## Mandatory design pipeline
 
 Run all phases before writing files. Full phase detail including existence gates
-(parent search, standalone test, absorption test), **research (GitHub repos + skill library)**,
-classification, scoping, architecture, build, and validation procedures: see
+(parent search, standalone test, absorption test), **research (skill library → GitHub search → deep-read → compare)**,
+classification, scoping, architecture, plan, build, and validation procedures: see
 `references/design_pipeline.md`.
 
 Key rule: **absorption first.** If an existing skill already owns the domain,
@@ -316,7 +316,7 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 
 | File | When to read |
 |------|-------------|
-| `references/design_pipeline.md` | Before running forge.build — the mandatory 7-phase pipeline (existence gate → research → classify → scope → architecture → build → validate) |
+| `references/design_pipeline.md` | Before running forge.build — the mandatory 8-phase pipeline (existence gate → research → classify → scope → architecture → plan → build → validate) |
 | `references/init_procedure.md` | On first invocation of any Forge command |
 | `references/sync_audit_procedure.md` | Before forge.sync-audit |
 | `references/enforcement_durability.md` | Before writing rules that must survive skill updates |
