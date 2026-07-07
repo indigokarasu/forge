@@ -15,9 +15,11 @@ Can this content fit as a `references/<topic>.md` or `scripts/<name>.py` inside 
 
 **Only proceed to phase 2 if all 3 checks pass.** If the answer is "absorb," execute the absorption immediately: add the content to the parent skill's appropriate subdirectory, update the parent's reference table, and record the decision.
 
-## Phase 1.5: Research (MANDATORY before Classify)
+## Phase 1.5: Research (MANDATORY before Classify — applies to ALL forge operations including improvements)
 
 **Trigger:** Phase 1 passed — no local parent owns the domain. Before classifying and scoping a new skill, research whether the capability already exists externally.
+
+**For improvements/updates:** Research is NOT optional just because the skill already exists. When asked to "improve" a skill, you MUST still search external sources (GitHub, arxiv, skill registries, community patterns) to find new taxonomies, patterns, and techniques the skill doesn't yet cover. The user will call it out if you skip.
 
 **Goal:** Avoid building what already exists. Understand existing approaches, synthesize the best patterns, build something better. A skill that duplicates an existing GitHub repo or published skill package without adding value is waste.
 

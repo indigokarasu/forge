@@ -1,6 +1,6 @@
 ---
 name: ocas-forge
-description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory eight-phase pipeline: existence gate, research, classify, scope, architecture, plan, build, validate. Default output is the finished installable package. Do NOT use for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
+description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory eight-phase pipeline: existence gate, research, classify, scope, architecture, plan, build, validate. Default output is the finished installable package. Not for skill evaluation (use skilllab''s Critique procedure) or variant proposals (use ocas-mentor).'
 license: MIT
 source: https://github.com/indigokarasu/forge
 includes:
@@ -8,7 +8,7 @@ includes:
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
-  version: 3.6.0
+  version: 3.7.1
 tags:
 - skill-builder
 - architecture
@@ -21,9 +21,7 @@ triggers:
 - design skill package
 - skill builder
 ---
-## Interactive Menu
-
-When invoked interactively, present a two-level menu. See `references/interactive-menu.md` for the full menu structure.
+- **`nargs='[]'` is invalid in argparse** — When defining command-line arguments, `nargs='[]'` is not a valid option and will cause a ValueError. To accept zero or more arguments, use `nargs='*'` instead. This caused the run_dispatch_pipeline.py script to fail until corrected.
 
 
 
@@ -50,6 +48,8 @@ Forge is the system's skill architect — given a capability idea or broken exis
 - Authentication and service wiring (use ocas-auth)
 - Building non-skill artifacts
 - Web research — use Sift
+- **Skill structure reference / frontmatter template lookup** — use `write-a-skill` for quick
+  reference on field requirements, file layout, and description conventions. Forge is for building.
 
 ## Responsibility boundary
 
@@ -154,6 +154,7 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 
 ## Anti-patterns to reject
 
+- **Skipping research on skill improvement.** Phase 1.5 (Research) is mandatory for ALL forge operations — not just new builds. When asked to "improve" or "update" an existing skill, you MUST still research external sources (GitHub, arxiv, community patterns) to find new patterns, techniques, and taxonomies that could improve the skill. The user correction "did you do the research phase?" is a signal that you skipped Phase 1.5. Research is not optional just because the skill already exists — the whole point of improvement is to find what you don't already know.
 - Vague or overly broad scope
 - Generic descriptions that don't route well
 - SKILL.md bloated with background explanation
@@ -167,33 +168,40 @@ Skills that hardcode `~/.hermes/` paths will NOT work on other agent harnesses (
 
 ## Gotchas
 
-- **Duplicate file entries cause patch failures**: Before patching a skill file, always check for duplicate entries (especially in Gotchas sections). The `patch` tool's `old_string` must be unique — if a Gotcha appears twice, expand the surrounding context to make the match unique, or use `replace_all=true` intentionally. When patching skill files you haven't read in full this session, scan for duplicates first.
-- **Stale files in `processed/` vs `intake/processed/`**: The Forge journal-scan cross-references proposals against `intake/processed/` first. Files can accumulate in `processed/` without being mirrored to `intake/processed/`. During `forge:journal-scan`, always check both locations. Newly found files in `processed/` should be copied to `intake/processed/` after processing to keep the two directories in sync.
+- **Fixed argparse nargs error in run_dispatch_pipeline.py** — Changed `nargs='[]'` to `nargs='*'` for the --new-files argument to accept zero or more arguments. This fixed a ValueError that occurred when the script was called during dispatch processing.
+- **Stale files in `processed/` vs `intake/processed/`** — check both locations during journal-scan
+- **Missing `includes:` in frontmatter** — required when references/ or scripts/ dir exists
+- **Scope boundary for sync** — `forge.sync`/`forge.audit` only on `ocas-*` skills
+- **Doing more than asked** — match work to the scope of the request
+- **Incorrect Naming** — NEVER create/rename `ocas-*` without user authorization
+- **Non-durable fixes** — put rules in skill's own git repo or MEMORY.md, not hermes core
+- **Runaway repo creation** — check for 3rd-party skills before `gh repo create`
+- **YAML block scalar truncation** — `description: >` / `|` contain newlines; use `read_file` + `patch`
+- **`action` field is polymorphic in forge journals** — guard with `isinstance` before every access
+- **Dispatcher `new_files` paths lack prefix** — check both profile-scoped and commons paths
+- **Appending to JSONL files** — ALWAYS use `echo >>`, NEVER heredoc with `>`
+- **`write_file` escapes quotes in Python files** — use `terminal()` with heredoc for .py files
+- **Placeholder-then-patch anti-pattern** — never write placeholder strings intending to fix later
+- **Heredoc `$(date)` timestamp mismatch** — compose TS into a variable first, use for both filename and content
+- **Research is not optional for improvements** — MUST run Phase 1.5 research before touching files
+- **`forge.update` vs `git pull` divergence** — cross-check git log against SKILL.md version field
+- **`forge_audit_skills.py` is a non-functional stub** — The script at `scripts/forge_audit_skills.py` only prints "Forge skill audit starting (dry_run=...)" and exits with a `# TODO: Implement compliance audit` comment. It produces NO output file and performs NO checks. When `forge.audit` is invoked, the agent must perform the full audit manually: scan the skill directory, check for SKILL.md presence, read frontmatter, verify cross-references, and identify orphans. Do NOT wait for or look for a report file from this script. Confirmed 2026-06-29: full manual audit of 65+ skills required.
 
-- **Non-proposal/decision files in data root are not work items**: Files like `config.json`, `decisions.jsonl`, and other non-`.json` or non-proposal/decision-named files in the Forge data root are not unprocessed work. The journal scan should only flag files matching the VariantProposal (`vp_*.json`) or VariantDecision (`vd_*.json`) naming patterns, or files in `proposals/` / `intake/` subdirectories. Skip everything else.
-- **Missing `includes:` in frontmatter**: When a skill has a `references/` or `scripts/` directory, the frontmatter must include `includes: [references/**]`. Without it, the agent won't auto-discover support files.
-- **Scope boundary for sync**: `forge.sync` and `forge.audit` must ONLY operate on `ocas-*` skills. Never upload, sync, or publish non-OCAS skills to the indigokarasu GitHub account or agentskill.sh. Before any sync operation, verify each skill name starts with `ocas-`. If a non-OCAS skill is encountered, skip it and report to the user.
-- **Doing more than asked**: When the user says "review these skills," review them — don't also rewrite, restructure, or push to GitHub unless explicitly asked. When the user says "fix this one thing," fix that one thing — don't also refactor unrelated sections. Match your work to the scope of the request.
-- **Over-structuring responses**: Don't present a table of findings, severity ratings, and recommendations when the user asked you to just do something. Execute first, report concisely after. Match complexity to the question.
-- **Orphan Skills**: Skills that duplicate parent functionality.
-- **Overlap**: Multiple skills handling the same task.
-- **Bloat**: Skills that grow too large and should be split.
-- **Incorrect Naming**: NEVER create new `ocas-*` or rename to `ocas-*`/`util-*` without explicit user authorization. See `references/naming-and-authorship.md`.
-- **Non-durable fixes**: If a fix or rule is added to a skill, ensure it is in the skill's own git repo or in MEMORY.md — not in hermes core, which gets wiped on updates.
-- **Skill library organization**: The target shape is CLASS-LEVEL umbrella skills. Session-specific artifacts should be absorbed into existing umbrellas, not created as standalone skills.
-- **Frontend anti-slop reference**: When building any skill that produces or evaluates frontend UI, load the anti-slop rules from the taste-skill reference at `~/.hermes/references/design/taste-skill/anti-slop-rules.md` and the pre-flight checklist at `~/.hermes/references/design/taste-skill/anti-slop-preflight.md`. These are the canonical AI-frontend anti-pattern references. See `~/.hermes/references/design/INDEX.md` §6 for the full taste-skill integration.
-- **Runaway repo creation (`forge.sync`)**: The `forge.sync` and `forge.consolidate` workflows call `gh repo create` for any skill they process, and default to `--public`. Before creating any GitHub repo, check whether the skill is a known 3rd-party skill (hermes-agent bundled skills, agentskill.sh skills, hub-installed skills, etc.). If it is, **do NOT create a repo for it**. Creating repos for 3rd-party skills pollutes the user's GitHub and can accidentally publish code that isn't theirs. Keep 3rd-party skills local-only unless the user explicitly asks to publish.
-- **Panic reporting**: When checking for the existence of skills or repos, verify the actual state (local directory, git remote, GitHub API) before reporting catastrophic findings like "lost and deleted with no copy." Incorrect panic reports erode trust and waste investigation time.
-- **Duplicate repos**: Before creating a new repo, always check if one already exists with `gh repo list`. If a repo with the same or similar name exists, use the existing one.
-- **Re-applying fixes that are already done**: Before patching a skill to address a scanner finding or audit issue, CHECK THE CURRENT STATE. Read the skill file first. If the fix is already applied, don't re-apply.
-- **YAML block scalar truncation**: `description: >` and `description: |` block scalars contain embedded newlines. `execute_code` with `content.split('---')` WILL truncate the file at the first `---` inside the block scalar, destroying body content. Always use `read_file` for exact line ranges, then `patch` with precise old_string. After any frontmatter edit, verify line count, YAML parse, and body start heading.
+- **`nargs='[]'` is invalid in argparse** — When defining command-line arguments, `nargs='[]'` is not a valid option and will cause a ValueError. To accept zero or more arguments, use `nargs='*'` instead. This caused the run_dispatch_pipeline.py script to fail until corrected.
 
-- **`action` field is polymorphic in forge journals — guard with `isinstance` before every access** — Forge scan journals store `action` as one of three types: (1) **dict** with `result` + `findings` keys; (2) **string** containing a human-readable result message; (3) **empty list** `[]` with no `result` key. Inline ingest scripts must branch: `isinstance(action, dict)` → `action.get("result")`; `isinstance(action, str)` → `startswith` against `FORGE_NO_OP_RESULTS`; `isinstance(action, list)` → check `findings.unprocessed_proposals == 0`. A bare `action.get("result")` crashes on string/list. Confirmed 2026-06-21.
-- **Don't change repo visibility**: When updating or syncing a skill that already has a GitHub repo, never change its visibility unless the user explicitly tells you to.
-- **Appending to JSONL files**: When appending to `.jsonl` files (e.g., `decisions.jsonl`), ALWAYS use `echo '{"key": "val"}' >> file.jsonl`. NEVER use heredoc redirection (`cat > file << 'EOF'`) — the `>` operator truncates the file first, destroying all existing entries.
-- **Stale proposal duplicates in data root**: After Mentor drops VariantProposal files, copies can remain in `{agent_root}/commons/data/ocas-forge/` (data root) even after processing. During `forge:journal-scan`: (1) Check if `intake/processed/` exists — if so, cross-reference each data-root `.json` `proposal_id` against filenames there; skip any already present. (2) If `intake/processed/` does NOT exist, check for a `processed/` subdirectory within the data root itself. (3) If neither processed directory exists, all `.json` files in the data root are unprocessed. After processing, move files to `processed/` (create it if needed).
-- **Path mismatch in `comm` cross-reference**: When using `comm` to compare file lists between `proposals/` and `processed/` directories, strip directory prefixes first — `comm` compares lines literally, so `proposals/vp_0625cecd.json` never matches `vp_0625cecd.json`, making every file appear unprocessed. Use `sed 's|proposals/||'` or `basename` on both sides. After running the comparison, spot-check: pick one filename from the "unprocessed" list and verify it's actually missing from the processed dir before taking action.
-- **`write_file` escapes quotes in Python files**: When writing `.py` files via `write_file`, inner double quotes in Python string/dict literals get backslash-escaped, producing `SyntaxError: unterminated string literal` pointing to the wrong line. This is especially insidious with dict literals. **Workaround**: For Python scripts, use `terminal()` with a single-quoted heredoc: `cat > /tmp/script.py << 'SCRIPTEOF'` ... `SCRIPTEOF`, then run with `python3 /tmp/script.py`. Always verify with `python3 -c "compile(open(f).read(), f, 'exec')"` first. For non-Python files (markdown, JSON, YAML), `write_file` is safe.
+
+- **`nargs='[]'` is invalid in argparse** — When defining command-line arguments, `nargs='[]'` is not a valid option and will cause a ValueError. To accept zero or more arguments, use `nargs='*'` instead. This caused the run_dispatch_pipeline.py script to fail until corrected.
+
+The Forge build pipeline: **existence gate → research → classify → scope → architecture → plan → build → validate**.
+
+1. Existence gate — check if skill already exists
+2. Research — search GitHub, arxiv, skill registries for patterns
+3. Classify — determine skill type and scope
+4. Scope — define boundaries and interfaces
+5. Architecture — design the package structure
+6. Plan — create implementation plan
+7. Build — implement the skill
+8. Validate — run critique and verify 50/50
 
 ## Inter-skill interfaces
 
@@ -236,24 +244,85 @@ exact sequence.
 
 ## Dispatch / Cron Integration
 
-When triggered by the dispatcher (`dispatcher.py`) or the `forge:journal-scan` cron:
+When triggered by dispatcher or `forge:journal-scan` cron:
 
-1. Check `{agent_root}/commons/data/ocas-forge/` for unprocessed `vp_*.json` (VariantProposal) or `vd_*.json` (VariantDecision) files in the data root, `proposals/`, and `intake/` directories
+1. Check for unprocessed `vp_*.json` / `vd_*.json` in data root, `proposals/`, `intake/`
 2. Cross-reference against `intake/processed/` and `processed/` to skip already-processed files
-3. Process any new files: build variant packages, apply fixes, or queue for Mentor evaluation
-4. After processing, move files to `processed/`
-5. If no unprocessed files: scan is clean, write journal entry and exit
+3. Process new files: build variants, apply fixes, queue for Mentor
+4. Move processed files to `processed/`
+5. If no unprocessed files: write no-op journal and exit
+6. Perform phantom file cleanup: After every dispatch run, ls journal directories and check for files with empty timestamp fields, double timestamps, or malformed names. Rename/fix any phantom files. See `references/phantom-file-cleanup.md` for details and warnings about false positives.
 
-The most recent forge scan journal should show `result: "no_op"` with `findings.unprocessed_proposals: 0` when the queue is empty.
+**Multi-skill dispatch:** Forge runs independently — scan for variants, write no-op if clean. Don't block on sibling skills.
 
-**Multi-skill dispatch pattern:** When the dispatcher triggers multiple skills in one dispatch (e.g., Forge + Mentor + Praxis), each pipeline runs independently. Forge's job is to scan for unprocessed variants and write its journal. If nothing found, write a no-op journal and exit. Don't block on sibling skills.
+**Explicit dispatch prompt overrides the no-op shortcut (confirmed 2026-07-07):** When the dispatcher's `type` is `new_journals` and its `prompt` contains an EXPLICIT instruction to run the pipelines (e.g., "run Forge journal scan", "run Mentor light heartbeat", "run Praxis journal ingest"), that instruction takes precedence over the dispatch-pipeline-guide's genuine-no-op shortcut. Even if every `new_file` is already content-evaluated in praxis eval and all content is routine, the pipelines must still be executed — the run itself is the deliverable. Expected outcome: all resolve to no-op (Forge: 0 unprocessed proposals → forge-scan no_op journal; Mentor: self-referencing heartbeat; Praxis: only Bug-2 noise lessons + no_signal events). After running, still write the pipeline output journals (forge-scan, praxis-dispatch, the heartbeat's mentor-light) and apply third-wave eval mitigation — do NOT suppress them, because the pipelines actually executed and produced real output journals. The shortcut applies only to routine re-detections (second-wave / `dispatch.wave` meta-journals) with no explicit run instruction.
 
-**Third-wave self-referential pattern (confirmed 2026-06-22):** After a multi-skill dispatch, the dispatcher re-scans and detects journals written by the dispatch's own run (forge-scan, praxis-dispatch, mentor-light). This is the **second wave** — expected and harmless if journals are already in Praxis's eval file. But a **third wave** can occur when the forge-scan or praxis-dispatch journal is written AFTER the Praxis ingest updates `last_ingest_run`. These journals have mtimes after the state timestamp, so the dispatcher detects them as "new" again. **Mitigation:** After the Praxis ingest completes, the caller must also add all dispatch-output journals (especially forge-scan) to `journals_evaluated.jsonl` and advance `last_ingest_run` past their mtimes. See `references/session-20260622-dispatch.md`.
+**Second-wave detection:** If journal timestamp is BEFORE dispatch `detected_at` → second-wave. Write no-op. If ANY `new_file` not in eval file → genuine dispatch, run full pipeline.
+
+**Consolidated reference:** The multi-skill dispatch workflow is now documented in `references/dispatch-pipeline-guide.md`. Read this before running any dispatch pipeline for the canonical decision procedure.
+
+  - **Eval file gap edge case (confirmed 2026-06-26 dispatch #142):** Even when `last_ingest_run` is set to a timestamp AFTER a journal's file timestamp, that journal can still be MISSING from the eval file. The Praxis state's `last_ingest_run` is updated at the END of a dispatch wave, but individual journals from that wave may not have been added if the eval check was skipped. **Fix:** During second-wave handling, ALWAYS check each dispatcher `new_file` individually against the eval file with `grep -q "filename" eval_file` — never assume `last_ingest_run` coverage. If a journal is missing from eval file, add it before writing no-op journals. See `references/session-20260626-dispatch-027-forge.md`.
+  - **Cron journal eval gap (confirmed 2026-06-26 dispatch #143):** Cron pipeline journals (`praxis-cron-*`, `mentor-light-*` from cron source) can also be missing from the eval file during second-wave detection. These are NOT dispatch-output journals — they're written by the cron pipeline between dispatch waves. One journal from a cron cycle may be present while another from the same cycle is absent (e.g., `mentor-light-063212Z` in eval but `praxis-cron-063348Z` missing). **Fix:** During second-wave, check ALL `new_file` entries against the eval file regardless of `source` field (dispatcher vs cron). Add any missing cron journals before writing no-op journals. **Third-wave scope for this pattern:** Add 7+ journals — 3 from current dispatch wave, 3 from detected dispatch wave, plus all missing cron journals from prior cycles. See `references/session-20260626-dispatch-143-forge.md`.
+  - **Partial cycle gap between sibling pipelines (confirmed 2026-06-26 dispatch #146):** A sub-variant of the cron journal gap where one cron pipeline's journal is in the eval file but another cron pipeline's journal from the SAME cycle is absent. Example: `mentor-light-20260626T073205Z` present in eval, but `praxis-cron-20260626T073343Z` (written 90 seconds later by the cron pipeline) missing. Root cause: Praxis cron ingest processed the mentor journal but completed before the praxis-cron journal was written, or the eval check only covered journals already in the state's `last_ingest_run` window. **Fix:** Same universal rule — `grep -q "filename" journals_evaluated.jsonl` for EVERY `new_file` individually, regardless of whether sibling journals from the same cycle are already present. Never infer that "if mentor-light is evaluated, praxis-cron from the same cycle must be too."
+  - **Dispatch-output eval gap (confirmed 2026-06-26 dispatch #144):** Prior dispatch wave's own output journals (`forge-scan-*`, `praxis-dispatch-*`) can be missing from the eval file even when a sibling journal from the same wave IS present (e.g., `mentor-light-070339Z` in eval but `forge-scan-070643Z` and `praxis-dispatch-070643Z` missing). **Root cause:** The prior wave's Praxis ingest may evaluate only the mentor-light journal but not the forge-scan/praxis-dispatch journals before the ingest completes. `last_ingest_run` timestamp (07:06:55) is AFTER journal file timestamps (07:06:43), creating false confidence of coverage. **Fix:** During second-wave, always grep each `new_file` individually against the eval file — never assume same-wave journals share eval status. Add missing dispatch-output journals before writing no-op journals. See `references/session-20260626-dispatch-144-forge.md`.
+  - **Post-ingest cron gap (confirmed 2026-06-26 dispatch #145):** Cron journals created AFTER `last_ingest_run` but BEFORE the next dispatch wave are missing from the eval file. The state's `last_ingest_run` reflects the last ingest OPERATION timestamp, not the last journal CREATION. Between waves, the cron pipeline continues writing new journals that the state doesn't know about. **Fix:** Same as other eval gap variants — grep each `new_file` individually against the eval file. This is the same root cause as the cron journal gap (#141, #143) but with a different trigger timing. See `references/session-20260626-dispatch-145-forge.md`.
+  - **Hybrid second-wave with stale cron gap (confirmed 2026-06-26 dispatch #152):** A second-wave dispatch can contain BOTH self-referential dispatch-output journals (correctly in eval) AND stale cron journals from prior cycles that were missed by ALL prior waves. Example: 4 of 5 "new" files are our own dispatch-output (in eval), but 1 is `mentor-light-20260626T084028Z.json` from a prior cron cycle — NOT in eval. **Response:** Add the missing cron journal(s) to eval file, advance `last_ingest_run`, but do NOT write additional dispatch-output journals (that would create third-wave noise). The rule: second-wave = add gaps + advance state, never write new journals. See `references/session-20260626-dispatch-152-forge.md`.
+  - **Combined before-ingest + dispatch-output gap (confirmed 2026-06-26 dispatch #159):** A genuine dispatch where the dispatcher's `new_files` are BEFORE `last_ingest_run` (pattern #4) AND a prior wave's dispatch-output journal is ALSO missing from eval (pattern #6). Both are caught by the per-journal grep. The broader `find` scan may reveal additional post-ingest cron gaps (pattern #3). **Response:** Full pipeline execution. Backfill ALL gaps found (dispatcher new_files + prior wave output + cron gaps). Apply third-wave mitigation for current dispatch output. This combination is normal when a prior wave's Praxis ingest completed before the forge-scan/praxis-dispatch journals were written. See `references/session-20260626-dispatch-159-forge.md`.
+  - **Third-wave mitigation scope:**
+- **Third-wave self-referential pattern (confirmed 2026-06-22):** After a multi-skill dispatch, the dispatcher re-scans and detects journals written by the dispatch's own run (forge-scan, praxis-dispatch, mentor-light). This is the **second wave** — expected and harmless if journals are already in Praxis's eval file. But a **third wave** can occur when the forge-scan or praxis-dispatch journal is written AFTER the Praxis ingest updates `last_ingest_run`. These journals have mtimes after the state timestamp, so the dispatcher detects them as "new" again. **Mitigation:** After the Praxis ingest completes, the caller must also add all dispatch-output journals (especially forge-scan) to `journals_evaluated.jsonl` and advance `last_ingest_run` past their mtimes. See `references/session-20260622-dispatch.md`.
+
+- **Phantom file cleanup pattern (confirmed 2026-06-25 dispatch #100, 2026-06-26 dispatch #150):** When writing JSON journals via `python3 -c` inside `terminal()`, f-string curly braces `{}` can be silently consumed by bash's `${}` expansion, producing files with empty or corrupted names (e.g., `forge-scan-.json`). Double timestamps can also occur (e.g., `dispatch-20260626T20260626T082335Z.json`) when shell variable interpolation duplicates the timestamp. After every dispatch run, `ls` the journal directory and check for files with empty timestamp fields, double timestamps, or malformed names. Rename/fix any phantom files before they get detected as "new" by the next dispatcher scan. **Beware false positives:** during 2026, timestamps in the 20:xx:xx hour range (e.g., `T202602Z` = 20:26:02) will contain "2026" in the time portion — this is valid, not a phantom. See `references/phantom-file-cleanup.md`.
+
+- **Path typo: `oras-praxis` vs `ocas-praxis` (confirmed 2026-06-29 dispatch):** When constructing the Praxis data directory path, a single-character typo (`oras-praxis` instead of `ocas-praxis`) causes `cp` and `python3` to fail with "No such file or directory". **Fix:** The canonical path is `<hermes-home>/commons/data/ocas-praxis/` — always verify with `ls -d <hermes-home>/commons/data/oca*` before constructing script paths. The skill name is `ocas-` (with `s`), not `ora-`. Confirmed: `cp template /root/.../oras-praxis/script.py` failed silently, then `python3 /root/.../oras-praxis/script.py` raised FileNotFoundError. When using `cat > file << EOF` inside `terminal()`, any commands placed AFTER the JSON/YAML content but BEFORE the `EOF` delimiter are treated as heredoc body text and written into the file. Example: `cat > "$DIR/file.json" << EOF\n{...json...}\necho "Written: ..."\ncat "$DIR/file.json" | python3 -c "..."\nEOF` — the `echo` and `cat` lines end up inside the JSON file, corrupting it. **Fix:** Never place commands after the file content in a heredoc. If you need to verify the file, do it in a SEPARATE `terminal()` call. Better yet, use `write_file` for JSON/YAML — it's atomic, validates syntax, and can't leak trailing commands. Confirmed 2026-06-26: `forge-scan-20260626T014859Z.json` contained valid JSON followed by `echo "Written: ..."` and `cat ... | python3 ...` lines.
+
+- **`execute_code` is blocked in cron mode** — When running as a scheduled cron job, `execute_code` is rejected with: "BLOCKED: execute_code runs arbitrary local Python (including subprocess calls that bypass shell-string approval checks). Cron jobs run without a user present to approve it." **Fix:** Use `terminal()` with a heredoc Python script instead: `python3 << 'PYEOF'\n...code...\nPYEOF`. This is the cron-safe way to run multi-step Python that walks filesystems, builds sets, or processes JSON. Confirmed 2026-06-26 dispatch: Praxis journal ingest scan (walk 10k+ files, compute set difference) had to use `terminal()` heredoc instead of `execute_code`.
+- **`write_file` line-wrapping corrupts Python (confirmed 2026-06-30T10:20Z)** — The `write_file` tool silently wraps long lines (~80 chars), splitting Python string literals and variable assignments mid-token. Example: `"<hermes-home>/..."` becomes `"/rootfiles/indigo/..."` and two separate `VAR = "..."` assignments merge into one corrupted line. **Fix:** After writing Python via `write_file`, run `python3 -c "import py_compile; py_compile.compile('/tmp/script.py', doraise=True)"` before executing. For scripts >30 lines, write to `/tmp/`, compile-check, then run. See `references/dispatch-pipeline-guide.md` § write_file line-wrapping corrupts Python.
+
+- **`run_dispatch_pipeline.py` Python 3.14 compatibility** — Previously experienced issues related to argparse nargs configuration (fixed by using `nargs='*'` instead of invalid `nargs='[]'`). Verified working correctly on Python 3.14 in dispatch scenarios as of 2026-06-30.
+- **Praxis-cron double-Z timestamp bug still active** — The Praxis cron ingest script continues to produce journals with double-Z suffixes (e.g., `praxis-cron-20260630T092758ZZ.json`). Root cause is `ts.rstrip('Z') + 'Z'` applied to a value already ending in Z. **Mitigation:** dispatch pipeline treats these filenames as-is for eval registration. Fix needed in `praxis_ingest_run.py` / `praxis_common.py`. Confirmed 2026-06-30.
+- **Inline Python blocks compose their own timestamps independently of prior shell `TS` variables** — When a Forge/Mentor/Praxis pipeline writes journals in one `terminal()` call (using a shell `TS=$(date ...)` variable) and then runs eval/third-wave logic in a SEPARATE `terminal()` call with inline Python, the Python block's `datetime.now()` diverges from the shell `TS`. Third-wave eval entries then use the Python timestamp for journal IDs that were written with the shell timestamp — producing phantom entries referencing non-existent files. **Fix:** Compose ALL timestamps inside the SAME Python block, or write actual journal filenames to a temp file so subsequent steps read them verbatim. Never carry a shell `TS` across `terminal()` boundaries and assume inline Python will match it. Confirmed 2026-06-29 dispatch.
+- **Dispatcher new_file vs heartbeat output journal divergence (confirmed 2026-06-29T04:40Z):** When a dispatch triggers a Mentor heartbeat, two mentor-light journals exist: (1) the dispatcher's `new_file` (e.g., `mentor-light-043547Z` — written by a prior cron heartbeat) and (2) the current heartbeat's output (e.g., `mentor-light-044551Z` — written by the script we just ran). Third-wave mitigation typically registers only journal #2 because it scans for recently-written files. Journal #1 (the dispatcher's original `new_file`) is a DIFFERENT file that also needs eval registration. **Fix:** After third-wave mitigation, ALWAYS re-grep each dispatcher `new_file` individually against the eval file. If any are missing, register them with `action_taken: "dispatch_new_journal_registration"`. Do NOT assume that registering the heartbeat's output covers the dispatcher's input — they are distinct files with distinct timestamps. Confirmed: `mentor-light-043547Z` was missed on first pass and caught by verification grep.
+
+- **Post-dispatch cleanup can trigger massive legacy backfill** — The post-dispatch cleanup does a full `os.walk` of the journals directory and registers every `.json` file not in the eval file. If the eval file was created after journals started accumulating (mid-June 2026), the first cleanup will register hundreds or thousands of legacy files at once. This is a **one-time event** — after the initial backfill, only new journals will be caught. The eval file growing by 800+ entries in a single dispatch is normal for the first cleanup after eval tracking begins. Do NOT treat this as an error or re-processing event. Confirmed 2026-06-26 dispatch #160: 865 legacy files backfilled.
+- **State file timestamp double-Z suffix** — When composing a timestamp like `20260626T%H%M%SZ` in Python and appending `"Z"`, the result can be `20260626T103652ZZ` if the format string already included `Z`. **Fix:** `ts.rstrip('Z') + 'Z'`. **Prevention:** Compose the timestamp once in a shell variable (`TS=$(date -u +%Y%m%dT%H%M%SZ)`) and reuse it for both filename and content. Never embed the timestamp in two separate string compositions. Confirmed 2026-06-26 dispatch #160: `ingest_state.json` had `last_ingest_run: "20260626T103652ZZ"`.
+- **Cross-skill journal gap (confirmed 2026-06-26 dispatch #154):** After completing the standard Praxis ingest (processing the dispatcher's `new_files`), a broader gap can exist: journals from skills NOT in the dispatcher's detection scope, written by cron pipelines with non-standard filename conventions (e.g., `ocas-rally` uses `jrn_YYYYMMDD_HHMMSS.json` instead of `*-dispatch-*` or `*-light-*`). These journals have timestamps between `last_ingest_run` and "now" but were never detected by the dispatcher. **Fix:** After the standard ingest completes, run a final `find` for ANY `.json` file in `{agent_root}/commons/journals/` with mtime after `last_ingest_run` that is NOT in the eval file. This catches cross-skill journals the dispatcher missed. Always do this before writing the dispatch-output journals (third-wave mitigation). See `references/session-20260626-dispatch-154-forge.md`.
+- **Post-dispatch cron journal gap (confirmed 2026-06-26 dispatch #155):** After completing all 3 pipelines, backfilling eval gaps, AND applying third-wave mitigation, a cron pipeline can write additional journals between our eval backfill and our third-wave mitigation. These journals are NOT in the eval file and WILL be detected as "new" by the next dispatch. **Root cause:** The cron pipeline runs independently of the dispatch pipeline. Between the moment we read the eval file and the moment we add own-output journals, the cron pipeline can write new journals. **Detection:** After writing all dispatch-output journals and third-wave mitigation entries, do ONE MORE `find` for any `.json` file with mtime after `last_ingest_run` that is NOT in the eval file. **Response:** Add any found entries to the eval file with source `post-dispatch-cleanup`. Do NOT trigger another dispatch or re-processing — just append to eval and advance `last_ingest_run`. See `references/session-20260626-dispatch-155-forge.md`.
+- **Complete eval gap pattern catalog (7 patterns, confirmed 2026-06-26):**
+
+  | # | Pattern | Journal vs last_ingest_run | Gap Cause |
+  |---|---------|---------------------------|-----------|
+  | 1 | Cron journal gap (#143) | AFTER | Ingest ran before journal was written |
+  | 2 | Tight eval gap (#151) | AFTER | Ingest ran between cron cycles |
+  | 3 | Post-ingest cron gap (#145) | AFTER | Cron writes after ingest completes |
+  | 4 | Before-ingest cron gap (#153) | BEFORE | Ingest didn't re-evaluate pre-existing journals |
+  | 5 | Cross-skill gap (#154) | ANY | Dispatcher misses non-standard naming |
+  | 6 | Dispatch-output gap (#144) | AFTER | Prior wave's own journals missed |
+  | 7 | Post-dispatch cron gap (#155) | AFTER | Cron writes between our backfill and third-wave mitigation |
+- **Eval file entries must use relative paths** — When writing to `journals_evaluated.jsonl`, the `journal` and `filename` fields MUST be relative to `{agent_root}/commons/journals/` (e.g., `ocas-forge/2026-06-26/forge-scan-TS.json`). Never use absolute paths (`<hermes-home>/commons/journals/...`). Absolute paths break the dispatcher's grep-based eval checks and cause false "gap" detection on subsequent dispatches. Confirmed 2026-06-26: third-wave mitigation wrote 3 entries with absolute paths, which had to be post-hoc corrected.
+- **`grep -c` in shell conditionals produces unexpected exit codes** — `grep -c` returns count `0` AND exit code 1 when no matches found. In `count=$(grep -c ...) ; if [ "$count" -eq 0 ]`, the `[` test may behave unexpectedly with newline in output. **Fix:** Use `grep -q "pattern" file` for boolean checks (no output, correct exit code). Or use `grep "pattern" file > /dev/null 2>&1` then check `$?`. Never parse `grep -c` output as a variable for arithmetic comparison. Confirmed 2026-06-26 dispatch #142: `grep -c` returned `0\n0` (two lines) due to shell quoting, causing `[ "0\n0" -eq 0 ]` to fail with "integer expected".
+- **Verification grep false negative from `$(date)` micro-differences** — When verifying that dispatch-output journals are in the eval file, the eval entry's timestamp may differ from the journal filename's timestamp by seconds (each is generated by a separate `$(date)` call). A `grep "forge-scan-20260626T092740Z"` check fails if the eval entry has `T092806Z`. **Fix:** Use partial timestamp matching for verification: `grep "forge-scan-20260626T0927"` (drop the last 2-3 chars of the timestamp). Or use `grep -q "dispatch-third-wave-mitigation"` to find all third-wave entries regardless of timestamp. Confirmed 2026-06-26 dispatch #156.
+- **`ingest_state.json` in dispatcher `new_files` is not a journal** — The dispatcher lists `ocas-praxis/ingest_state.json` in `new_files` on every genuine dispatch because its mtime updates when state advances. This is NOT a journal that needs eval tracking — it's a state file. The eval file should already have an entry for it from the first dispatch that processed it. If grep confirms it's already in the eval file, skip it. If somehow missing, add it with source `state-file-init` but do NOT treat its presence as evidence of a genuine dispatch — it's always "new" because it's always being updated. Confirmed 2026-06-26 dispatch #157.
+- **Eval entry path base: `commons/journals/` not profile root** — When constructing `journal_id` for `journals_evaluated.jsonl`, use `os.path.relpath(fpath, "commons/journals")` NOT `os.path.relpath(fpath, ".")`. The latter produces paths prefixed with `commons/journals/` which fail all grep lookups and cause false "gap" detection on every subsequent dispatch. Confirmed 2026-06-26: post-dispatch cleanup wrote a mismatched entry that had to be manually corrected. See `references/session-20260626-dispatch-wave-second-wave-path-fix.md`.
+- **`read_file` returns stale/wrong state content — ALWAYS use Python `json.load()` for state files** — The `read_file` tool may return the commons-scoped copy, a cached version, or a file with a different schema than the profile-scoped `ingest_state.json`. In dispatch ~#161, `read_file` showed `last_ingest_run: "20260626T104320Z"` with fields like `dispatch_wave` and `eval_file_total`, while Python `json.load()` on the same path returned `last_ingest_run: "2026-06-26T10:36:03.950989+00:00"` with completely different fields (`journals_evaluated_count`, `note`, etc.). Trusting `read_file` would have caused misclassification as second-wave and missed 11 genuine journals. **Fix:** Always read state files via `python3 << 'PYEOF'` heredoc with `json.load()`. Never use `read_file` for JSON state that drives dispatch decisions. Cron-safe pattern: `python3 -c "import json; s=json.load(open('<hermes-home>/commons/data/ocas-praxis/ingest_state.json')); print(s['last_ingest_run'])"`. Confirmed 2026-06-26 dispatch ~#161.
+
+- **`journals_evaluated_count` drift (confirmed 2026-06-26 dispatch ~#165)** — The `ingest_state.json` `journals_evaluated_count` and `last_eval_file_line` fields only increment by what the current dispatch explicitly adds. Post-dispatch cleanup entries (source `post-dispatch-cleanup`) are appended to the eval file without updating these counters. Over multiple dispatches, the state counter diverges from the actual eval file line count (e.g., state said 39603 while eval file had 39737 lines — a 134-entry drift). **Fix:** After post-dispatch cleanup completes, do a final `wc -l` (or Python line count) of the eval file and set both `journals_evaluated_count` and `last_eval_file_line` to the actual count. Not critical for correctness (grep checks are authoritative), but keeps diagnostics accurate.
+- **`~` does NOT expand in `cd` inside `terminal()`** — When using `terminal()`, the tilde `~` is NOT expanded by bash in `cd ~/path` commands. Use absolute paths: `cd <hermes-home>/skills/ocas-forge`. Confirmed 2026-06-29: `cd ~/.hermes/...` failed with "No such file or directory".
+- **Inline Python typo pitfall (`state_count` truncation + import shadowing + double-assignment)** — When writing multi-step gap backfill scripts as inline Python in `terminal()`, three specific errors have bitten the pipeline: (1) Truncated dict key like `state_count']` instead of `state['journals_evaluated_count']` causes SyntaxError. (2) Mixing `import datetime` with `from datetime import datetime` causes `AttributeError` on `datetime.now()`. (3) Chained dict assignment like `state["k1"] =["k2"] = val` → `SyntaxError: cannot assign to literal` (cannot chain-assign to dict keys — use one line per assignment). **Fix**: Local variables for dict keys; only `from datetime import datetime, timezone`; never chain-assign to dict keys. Confirmed 2026-06-30T10:35Z dispatch.
+
+- **JSON journal writing in cron: prefer shell heredoc — When writing JSON journal files, inline Python heredocs (`python3 << 'PYEOF'` with dict literals containing double-quotes) suffer from (1) smart-quote corruption by the heredoc parser, (2) variable name truncation when identifiers appear immediately after closing quotes, (3) `SyntaxError: invalid decimal literal` from mangled dict literals. **Fix:** For output, use shell heredoc with pre-composed `TS=$(date -u +%Y%m%M%SZ)` and `$NOW` variables. Reserve Python heredocs for eval file reads/writes where content is built programmatically (no raw double-quoted JSON). Confirmed 2026-06-30T11:25Z dispatch (6 consecutive failures before switching to shell heredoc). See `references/session-20260630-dispatch-1125Z-forge.md`.
+
+- **Pure eval-registration dispatch (confirmed 2026-06-30T11:25Z)** — A dispatch variant where ALL `new_files` need eval registration but NONE require pipeline skill loading. Detection: all `new_files` are either (a) already in praxis eval but missing from dispatch eval (bridge case), or (b) prior-wave dispatch-wave artifacts (timestamp < detected_at). **Response:** Grep each `new_file` against both eval files → register missing entries directly → write dispatch-wave journal with `classification: "mixed_genuine_no_op"` → advance `last_ingest_run` → skip all pipeline skills. Do NOT load Forge/Mentor/Praxis or run `praxis_ingest_run.py`. The `journals_evaluated_count` in state does NOT change (no praxis eval entries added). See `references/session-20260630-dispatch-1125Z-forge.md`.
 
 ## Self-update
 
 `forge.update` pulls the latest package from the `source:` URL in frontmatter.
 Runs silently unless version changed or error.
+
+**Drift detection procedure** (added 2026-06-23, extended 2026-06-29): Two distinct drift scenarios exist — handle BOTH:
+
+**Scenario A — Origin ahead (upstream has new commits):** Dev installs can accumulate local commits that diverge from origin, causing `git pull` to falsely report "Already up to date." Before declaring up-to-date: (1) `git fetch origin`, (2) `git log --oneline HEAD..origin/main` — any output = upstream ahead, (3) `git diff --stat origin/main` — any diff = content drift regardless of commit history, (4) cross-check SKILL.md `version:` field against `git log origin/main --oneline -1` — frontmatter can lag commit messages. See Gotchas for conflict resolution when local modifications contradict upstream direction.
+
+**Scenario B — Local drift (working tree dirty, origin NOT ahead):** When `git log HEAD..origin/main` is EMPTY but `git diff --stat origin/main` shows changes, OR when `git status` lists untracked files, the local working tree has accumulated modifications that origin doesn't have. This commonly happens when: session journals are written into `references/`, SKILL.md gets edited locally without committing, or new support files are added but not pushed. **Diagnostic:** `git status --short` — if output is non-empty with origin at same commit, you have local drift. **Response:** (1) Separate operational artifacts (session journals in `references/`) from skill content changes (SKILL.md edits, new reference docs). (2) Session journals should be moved to `commons/data/ocas-forge/journals/` — they do NOT belong in the skill repo. (3) Skill content changes should be committed and pushed, or stashed if experimental. (4) NEVER `git add .` blindly — this commits operational logs into the skill's git history. Confirmed 2026-06-29: 100+ session journals accumulated in `references/` over 7 days, causing `git diff --stat` to show 100+ untracked files with origin at same commit.
 
 ## Skill consolidation
 
@@ -270,33 +339,14 @@ Before creating any GitHub repo, verify the skill is OCAS-authored. See
 
 ## Skill library search APIs
 
-When Phase 1.5 triggers skill library research, use these APIs to find and review existing skill packages. The goal is to **understand approaches, patterns, and architectures** — not to copy verbatim.
+When Phase 1.5 triggers skill library research, use these APIs to understand approaches and patterns — not to copy verbatim.
 
-### SkillsMP
-API key: `<STRIPE_LIVE_KEY>`
-- Base URL: https://skillsmp.com/docs/api
-- Use: Search existing skill marketplace for patterns and approaches
-
-### AgentSkill.sh
-- CLI: `agentskill` (already installed)
-- Hub: https://agentskill.sh
-- Use: Search for published skill packages, review their structure and approach
-
-### LobeHub
-- CLI: `lobehub` (see https://lobehub.com/cli)
-- Use: Search skill packages, understand community patterns
-
-### Skills.sh
-- API: https://www.skills.sh/docs/api
-- Use: Search skill library for relevant packages
-
-### OpenClaw
-- CLI: `clawhub` (see https://docs.openclaw.ai/clawhub/cli)
-- Use: Search ClawHub for skill packages
-
-### GitHub OCAS repos
-- `gh search repos "ocas-* user:indigokarasu" --json fullName,description,url`
-- Search known OCAS skill repos directly
+- **SkillsMP** — `sk_liv...370I` key, https://skillsmp.com/docs/api
+- **AgentSkill.sh** — `agentskill` CLI, https://agentskill.sh
+- **LobeHub** — `lobehub` CLI, https://lobehub.com/cli
+- **Skills.sh** — https://www.skills.sh/docs/api
+- **OpenClaw** — `clawhub` CLI, https://docs.openclaw.ai/clawhub/cli
+- **GitHub OCAS repos** — `gh search repos "ocas-* user:indigokarasu" --json fullName,description,url`
 
 **Output of library search:** For each relevant skill found, note: name, description, how it works (architecture), what patterns it uses, and what the new skill can learn from it. Synthesize — don't clone.
 
@@ -316,36 +366,59 @@ Forge uses the `memory` tool lightly — only for build state during multi-step 
 
 | File | When to read |
 |------|-------------|
-| `references/design_pipeline.md` | Before running forge.build — the mandatory 8-phase pipeline (existence gate → research → classify → scope → architecture → plan → build → validate) |
+| `references/design_pipeline.md` | Before forge.build — the mandatory 8-phase pipeline |
 | `references/init_procedure.md` | On first invocation of any Forge command |
 | `references/sync_audit_procedure.md` | Before forge.sync-audit |
-| `references/enforcement_durability.md` | Before writing rules that must survive skill updates |
 | `references/package_patterns.md` | Before structuring a new skill package |
 | `references/authoring_rules.md` | Before writing or editing any skill SKILL.md |
-| `references/compliance-audit-checklist.md` | Before auditing an existing skill |
 | `references/builder_workflows.md` | Before forge.verify-update, forge.consolidate, forge.sync, or forge.audit |
 | `references/github_repo_guardrails.md` | Before creating any GitHub repo or PR |
 | `references/synthesis-methodology.md` | When synthesizing a new skill from multiple source skills |
-| `references/examples.md` | When looking for concrete examples of OCAS skill patterns |
 | `references/schemas.md` | Before creating or validating data structures |
-| `references/storage_conventions.md` | When designing storage layouts |
-| `references/ontology.md` | When determining which entity types to use |
-| `references/journal.md` | Before calling forge.journal; at end of every run |
-| `references/workflow_plans.md` | Before creating or executing workflow plans |
-| `references/interfaces.md` | When designing inter-skill communication |
-| `references/skill-script-organization.md` | When organizing scripts within a skill package |
-| `references/consolidation_pattern_diagnosis.md` | When diagnosing skill overlap or redundancy |
-| `references/recovery-standardization-pattern.md` | When implementing recovery contracts |
-| `references/script-placement-convention.md` | When deciding where to place scripts |
-| `references/frontmatter-editing-pitfalls.md` | Before editing any skill frontmatter |
 | `references/storage-layout.md` | When debugging data path issues or managing disk |
-| `references/okrs.md` | When reviewing skill performance against targets |
-| `references/naming-and-authorship.md` | Before naming, renaming, or setting author on any skill; before deleting auto-generated skills |
-| `references/dojo-skill-cleanup.md` | Before deleting auto-generated skills; when identifying auto-generated skill candidates |
-| `references/journal-scan-cron-guide.md` | Before running forge:journal-scan — cron mode procedures and pitfalls |
-| `references/session-20260622-dispatch.md` | Session-specific: dispatch-triggered clean scan, third-wave self-referential pattern (forge-scan written after Praxis ingest) |
-| `references/session-20260622-dispatch-21.md` | Session-specific: dispatch #21, clean scan, second-wave self-referential pattern confirmed |
-| `references/session-20260621-dispatch-7.md` | Session-specific: dispatch #7 — clean scan, 0 unprocessed, cross-ref technique |
-| `references/session-20260621-dispatch-6.md` | Session-specific: dispatch #6 — heredoc single-quote expansion bug, all pipelines clean |
-| `references/session-20260621-dispatch.md` | Session-specific: dispatch-triggered clean scan, multi-skill dispatch pattern (Forge+Mentor+Praxis) |
+| `references/naming-and-authorship.md` | Before naming, renaming, or setting author on any skill |
+| `references/journal-scan-cron-guide.md` | Before running forge:journal-scan — cron mode procedures |
+| `references/frontmatter-editing-pitfalls.md` | Before editing any skill frontmatter |
+| `references/dispatch-pipeline-guide.md` | **Multi-skill dispatch workflow (Forge+Mentor+Praxis)** — genuine vs second-wave decision procedure, 7 eval gap patterns, cross-directory relpath false positive, journal writing standards, third-wave mitigation, post-dispatch cleanup, phantom file prevention. CONSOLIDATES 60+ dispatch patterns. Load BEFORE running any dispatch pipeline. |
+| `references/session-20260630-dispatch-1035Z-forge.md` | Dispatch 2026-06-30T10:35Z: Mixed genuine no-op, dict double-assignment typo (`state["k1"] =["k2"] = val` → SyntaxError). Eval file: 48,940. |
+| `references/stale-proposal-backlog.md` | Before scanning proposals — handling stale unprocessed proposals |
+| `references/journal-file-path-construction.md` | Before writing any journal — correct path pattern with date subdirectory, recovery from misplaced files |
+| `references/session-20260624-forge-update.md` | Session-specific: forge.update — untracked files caused false "drift" signal, diagnostic sequence |
+| `references/session-20260624-dispatch-36.md` | Session-specific: dispatch #36 — routine multi-skill dispatch, third-wave mitigation |
+| `references/session-20260625-dispatch-126-forge.md` | **Dispatch #126 (2026-06-25):** Email triage + multi-skill. Fork-vs-local mismatch: PR fix already in fork from prior dispatch — wasted re-fix before checking `git log fork/<branch>`. |
+| `references/session-20260626-dispatch-135-forge.md` | **Dispatch ~#133 (2026-06-25):** Multi-skill clean scan + email second-wave. 0 unprocessed proposals (11 total). All 4 new journals already in eval file. State file age gap (50 min) confirms `is_new: false` authoritative. |
+| `references/session-20260626-dispatch-021-forge.md` | **Dispatch #21 (2026-06-26):** Multi-skill clean scan + email wave 21. Heredoc leak incident (commands after JSON in heredoc body). Phantom file cleanup. Third-wave mitigation applied. |
+| `references/session-20260626-dispatch-139-forge.md` | **Dispatch #139 (2026-06-26):** Multi-skill clean scan + email second-wave. 0 unprocessed proposals (11 total). Third-wave mitigation applied. |
+| `references/session-20260626-dispatch-140-forge.md` | **Dispatch #140 (2026-06-26):** Second-wave self-referential pattern confirmed. Dispatcher detected prior wave's own journals as "new_files". All pipelines clean. No escalations. |
+| `references/session-20260626-dispatch-027-forge.md` | **Dispatch #142 (2026-06-26):** Second-wave with eval file gap. Prior-wave journal missing from eval file despite `last_ingest_run` coverage. Third-wave mitigation scope must include all 7 relevant journals. `grep -c` shell parsing pitfall. |
+| `references/session-20260626-dispatch-141-forge.md` | **Dispatch #141 (2026-06-26):** Cron-output journal detected as new file. Praxis-cron journal NOT in eval file — must add manually. Wikipedia email (Francis Ralph Rambo accepted). |
+| `references/session-20260626-dispatch-146-forge.md` | **Dispatch #146 (2026-06-26):** Partial cycle eval gap between sibling pipelines. Mentor-light in eval but praxis-cron from same cycle missing. Confirms universal per-journal grep rule — never infer sibling coverage. |
+| `references/session-20260626-dispatch-144-forge.md` | **Dispatch #144 (2026-06-26):** Second-wave with dispatch-output eval gap. Prior wave's forge-scan and praxis-dispatch journals missing from eval file despite mentor-light from same wave being present. Consolidated eval gap pattern table (all 3 sub-variants). |
+| `references/session-20260626-dispatch-cron-execute-code-blocked.md` | **Dispatch (2026-06-26):** `execute_code` blocked in cron mode — workaround via `terminal()` heredoc Python. Steady-state multi-skill dispatch. |
+| `references/phantom-file-cleanup.md` | After writing journals via `terminal()` — empty timestamps, double timestamps, malformed filenames |
+| `references/session-20260626-dispatch-148-forge.md` | Dispatch #148 (2026-06-26T08:00Z): Genuine new dispatch with eval gap backfill. All 4 new_files NOT in eval file → full pipeline execution required. Key pattern: distinguishing genuine dispatch from second-wave via per-journal grep + eval file staleness check. |
+| `references/session-20260626-dispatch-150-forge.md` | Dispatch #150 (2026-06-26T08:23Z): Genuine dispatch, 5 eval gaps backfilled. Prior wave's dispatch journal self-identified as "second-wave" but its journals were NOT in eval file — self-identification is not authoritative. |
+| `references/session-20260629-dispatch-0245Z-forge.md` | **Dispatch 2026-06-29T02:45Z:** Genuine dispatch + second-wave hybrid with stale cron gap. 4 of 5 second-wave files in eval, but 1 stale cron journal (`mentor-light-084028Z`) missed by all prior waves. Key learning: second-wave = add gaps + advance state, never write new dispatch-output journals (creates third wave). |
+| `references/session-20260629-dispatch-0440Z-forge.md` | **Dispatch 2026-06-29T04:40Z:** Genuine dispatch. Dispatcher new_file vs heartbeat output divergence — `mentor-light-043547Z` (dispatcher) ≠ `mentor-light-044551Z` (heartbeat). Both need eval registration. Forge clean, Mentor correction 8→22. |
+| `references/session-20260629-dispatch-0513Z-forge.md` | **Dispatch 2026-06-29T05:13Z:** Genuine full pipeline. 2 eval gaps (rally weekend research + praxis-cron). Classification-first, dual eval check, prior-wave skip, new_file/heartbeat divergence all confirmed working. Mentor correction 8→22 (confirmation #51+). Eval file: 48,276. Steady-state confirmation #56+. |
+| `references/session-20260626-dispatch-154-forge.md` | **Dispatch #154 (2026-06-26T08:55Z):** Cross-skill journal gap — `ocas-rally` journal missed by dispatcher detection. Eval file path consistency (absolute vs relative). Broader post-ingest gap scan pattern. |
+| `references/session-20260626-dispatch-155-forge.md` | **Dispatch #155 (2026-06-26T09:06Z):** Post-dispatch cron journal gap — cron writes between eval backfill and third-wave mitigation. Complete 7-pattern eval gap catalog. Post-dispatch cleanup rule. |
+| `references/session-20260626-dispatch-153-forge.md` | **Dispatch #153 (2026-06-26T08:50Z):** Genuine dispatch with "before last_ingest_run" eval gap. `mentor-light-084534Z` (08:45:34) was 90 seconds BEFORE `last_ingest_run` (08:46:42) but NOT in eval file. Key learning: `last_ingest_run` is an operation boundary, not a coverage boundary — always grep, never assume prior-timestamp journals are covered. |
+| `references/session-20260626-dispatch-151-forge.md` | **Dispatch #151 (2026-06-26T08:35Z):** Genuine dispatch with tight eval gap (2-4 min). `last_ingest_run` was 08:28:23 but cron journals written at 08:30-08:32 were NOT in eval file. Key learning: eval gap is measured in WAVES not minutes — always grep, never infer from timestamp proximity. |
+| `references/session-20260626-dispatch-156-forge.md` | **Dispatch #156 (2026-06-26T09:27Z):** Genuine dispatch with post-dispatch cron gap. 3 prior-wave journals + 1 cron gap backfilled. Verification pitfall: `$(date)` micro-differences between journal filename and eval entry timestamp cause false-negative grep. Use partial timestamp matching for verification. |
+| `references/session-20260626-dispatch-161-state-file-read-discrepancy.md` | **Dispatch ~#161 (2026-06-26T10:51Z):** `read_file` returns stale/wrong state file content vs Python `json.load()`. Critical pitfall for dispatch classification. |
+| `references/session-20260626-dispatch-160-forge.md` | **Dispatch #160 (2026-06-26T10:21Z):** Genuine dispatch + massive legacy backfill (865 files). Double-Z timestamp bug in `ingest_state.json`. Post-dispatch cleanup one-time backfill pattern. |
 | `references/interactive-menu.md` | When invoked interactively via `/` command — two-level menu layout, response parsing, platform adaptation |
+| `references/session-20260626-dispatch-158-forge.md` | **Dispatch #158 (2026-06-26T09:45Z):** Genuine dispatch, 3 cron-written journals (09:40-09:43) not in eval → full pipeline execution. All 3 pipelines clean. 3 eval gaps backfilled + 3 third-wave mitigation entries. Eval file: 10,336 entries. Confirmation #56+ of steady-state pattern. |
+| `references/session-20260626-dispatch-165-forge.md` | **Dispatch #165 (2026-06-26T13:13Z):** Genuine no-op mixed dispatch (journals + email), state counter drift fix (journals_evaluated_count sync). Steady-state confirmed. |
+| `references/session-20260627-dispatch-1240-forge.md` | **Dispatch ~#1240 (2026-06-27T12:40Z):** Mixed genuine no-op. 4/5 journals in eval, 1 eval gap (praxis decay-check). All content routine. No pipeline skills loaded. Eval file: 39,905 entries. |
+| `references/session-20260627-dispatch-1424Z-forge.md` | **Dispatch ~#1424 (2026-06-27T14:24Z):** Genuine no-op. 2 routine mentor-light journals not in eval + 2 eval gaps from post-ingest cron. Skipped all pipeline skills. 4 eval gaps registered. Eval file: 40,560 entries. |
+| `references/session-20260626-dispatch-wave-second-wave-path-fix.md` | **Second-wave no-op + eval path base fix** — `os.path.relpath(fpath, ".")` vs `relpath(fpath, "commons/journals")` causes mismatched eval entries on every cleanup. Confirmed 2026-06-26. |
+| `references/session-20260628-dispatch-0835Z-forge.md` | **Dispatch 2026-06-28T08:35Z:** Second-wave where agent incorrectly wrote forge-scan/mentor-light/praxis-dispatch journals before classification. Classification-first ordering pitfall — classify BEFORE writing any journals. Corrected by removing pipeline journals, writing only dispatch-wave. |
+| `references/session-20260628-dispatch-035335Z-forge.md` | **Dispatch 2026-06-28T03:53Z:** Mixed genuine no-op (journals + email). `is_new: true` promotional email (Verily Me survey) ≠ actionable. GitGuardian on indigo config repo = known pattern (auth tokens in operational config). Genuine-no-op shortcut applied. |
+| `references/session-20260627-dispatch-233646Z-forge.md` | **Dispatch @23:36Z (2026-06-27T23:36Z):** Second-wave with explicit pipeline prompt. Wrote `forge-scan-*.json` journals incorrectly — should write `dispatch-wave-*.json` only on second-wave. |
+| `references/session-20260628-prior-wave-dispatch-wave-skip.md` | **Prior-wave dispatch-wave skip rule** — timestamp < detected_at → skip entirely |
+| `references/session-20260629-skill-audit-consolidation.md` | **2026-06-29 skill audit** — `forge_audit_skills.py` is a stub, manual audit procedure, `ocas-critique` → `ocas-skilllab` consolidation |
+| `references/session-20260629-forge-update-local-drift.md` | **2026-06-29 forge.update** — Local drift pattern (origin at same commit, working tree dirty). `~` expansion pitfall in `terminal()`. Session journals in `references/` vs skill content. |
+| `references/session-20260630-dispatch-0642Z-forge.md` | Dispatch 2026-06-30T06:42Z: Multi-skill dispatch, 20 journals ingested. Dispatch-wave `mixed_genuine_no_op` false positive — Praxis ingest incorrectly recorded it as an event, required manual cleanup. New rule: dispatch-wave outcomes containing `no_op` are routine orchestration, not behavioral signals. Eval file: 48,895. Steady-state. |
+| `references/session-20260630-dispatch-1125Z-forge.md` | **Dispatch 2026-06-30T11:25Z:** Pure eval-registration dispatch. All new_files already in praxis eval or prior-wave artifacts. 0 pipelines loaded. Shell heredoc vs inline Python JSON writing pitfall (6 failures). New pattern: pure eval-registration shortcut. Eval file: 48,947. Dispatch eval: +2. |

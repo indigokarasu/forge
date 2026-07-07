@@ -192,3 +192,56 @@ EOF
 Note: Double-quoted heredoc expands variables but requires escaping `\"` inside JSON strings.
 
 **Best practice: Use `write_file()` for all JSON journal writes.** It avoids heredoc quoting issues entirely and produces valid JSON without manual escaping.
+
+## Second-Wave Self-Referential Dispatch Pattern (confirmed 2026-06-26)
+
+When the dispatcher triggers on journals written by its own prior waves:
+
+1. **Read the journal content first** — if `type` contains "dispatch.wave", "multi-skill", "heartbeat", or `result: "no_op"` → it's an output journal, skip without loading skills
+2. **Check `journals_evaluated.jsonl`** — if all listed journals are already evaluated → log as `all_already_evaluated`, write no-op journal, exit
+3. **If genuinely new journals exist** — process only the unevaluated ones
+4. **After processing** — add ALL dispatch-output journals to eval file and advance `last_ingest_run`
+
+**Confirmed 2026-06-26 wave ~#24:** Dispatch listed 5 journal files (forge-scan, mentor-light ×2, praxis-dispatch, dispatch-wave). All were outputs from waves 22-23. All already in eval file. Clean no-op.
+
+### Eval File Gap Edge Case (confirmed 2026-06-26 dispatch #142)
+
+Even when `last_ingest_run` is set to a timestamp AFTER a journal's file timestamp, that journal can still be MISSING from the eval file. The Praxis state's `last_ingest_run` is updated at the END of a dispatch wave, but individual journals from that wave may not have been added if the eval check was skipped or if the journal was written by a different pipeline (e.g., Mentor cron) that doesn't update Praxis state.
+
+**Fix:** During second-wave handling, ALWAYS check each dispatcher `new_file` individually against the eval file with `grep -q "filename" eval_file` — never assume `last_ingest_run` coverage. If a journal is missing from eval file, add it before writing no-op journals.
+
+**Detection:** `grep -q "filename" journals_evaluated.jsonl` returns exit code 1 if missing.
+
+### Partial Cycle Gap Between Sibling Pipelines (confirmed 2026-06-26 dispatch #146)
+
+A sub-variant of the cron journal gap where one cron pipeline's journal is in the eval file but another cron pipeline's journal from the SAME cycle is absent. Example: `mentor-light-20260626T073205Z` present in eval, but `praxis-cron-20260626T073343Z` (written 90 seconds later) missing.
+
+**Root cause:** Praxis cron ingest processed the mentor journal but completed before the praxis-cron journal was written, or the eval check only covered journals already in the state's `last_ingest_run` window. The two pipelines (mentor and praxis) write independently and their journals may straddle an ingest boundary.
+
+**Fix:** Same universal rule — `grep -q "filename" journals_evaluated.jsonl` for EVERY `new_file` individually, regardless of whether sibling journals from the same cycle are already present. Never infer that "if mentor-light is evaluated, praxis-cron from the same cycle must be too."
+
+### Third-Wave Mitigation Scope (confirmed 2026-06-26)
+
+After second-wave handling, add ALL relevant journals to the eval file — not just the 4 dispatcher `new_files`, but also the 3 dispatch-output journals written by the current wave (forge-scan, mentor-light, praxis-dispatch). This prevents the next wave from detecting its own outputs as "new".
+
+**Pattern:** Add 7 total journals (4 prior-wave + 3 current-wave) to eval file, then advance `last_ingest_run` past all of them.
+
+## Phantom file cleanup after every dispatch run (confirmed 2026-06-25)
+
+After writing any journal or eval file during a dispatch run, `ls` the target directory and check for:
+1. **Typo phantom files** — filenames similar to expected but with a character transposition or suffix difference (e.g., `journals_evaligated.jsonl` vs `journals_evaluated.jsonl`, `forge-scan-.json` vs `forge-scan-20260625T154905Z.json`)
+2. **Empty-timestamp files** — `forge-scan-.json`, `mentor-light-.json` (bash `${}` expansion consumed by shell)
+3. **TS_PLACEHOLDER files** — literal `TS_PLACEHOLDER` in filename from failed Python string interpolation in `terminal()`
+4. **Zero-byte JSON files** — write failures that created the file but wrote no content
+
+**Detection:**
+```bash
+# Check for files with empty timestamp fields
+ls /path/to/journals/ | grep -E "^-*\.json$"
+ls /path/to/journals/ | grep "PLACEHOLDER"
+find /path/to/journals/ -name "*.json" -size 0
+```
+
+**Fix:** Delete phantom files immediately. They will be detected as "new" by the next dispatcher wave and cause spurious re-processing.
+
+**Root cause:** Python f-strings inside `terminal()` are vulnerable to bash `${}` expansion. `f'forge-scan-{TS}.json'` where `${TS}` is a shell variable produces `forge-scan-.json`. Always use string concatenation (`'forge-scan-' + ts + '.json'`) or `write_file` to compose paths in `terminal()`.
