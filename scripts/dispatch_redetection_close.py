@@ -112,14 +112,19 @@ def discover_gaps(prax, disp):
             if not fn.endswith(".json") or fn.startswith("dispatch-wave-"):
                 continue
             rel = "%s/%s/%s" % (skill, DATE, fn)
-            if rel in prax and rel in disp:
-                continue
             try:
                 mt = os.path.getmtime(os.path.join(sdir, fn))
             except Exception:
                 continue
+            # Track max mtime across ALL today-journals (incl. already-evaluated
+            # ones), NOT only gap files. Bug (2026-07-15): the prior code computed
+            # mtime AFTER the membership skip, so when the re-sweep found 0 gaps
+            # max_mtime stayed 0.0 and last_ingest_run was advanced to epoch 0,
+            # re-firing the dispatcher harder. Compute + record mt before branching.
             if mt > max_mtime:
                 max_mtime = mt
+            if rel in prax and rel in disp:
+                continue
             if rel not in prax and rel not in disp:
                 gaps_both.append(rel)
             elif rel not in prax:

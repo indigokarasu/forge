@@ -15,7 +15,7 @@ new_journals+new_emails in ONE wave") into one mechanical decision.
 |------|---------|--------|
 | **A. Fresh explicit-run** | No `dispatch-wave-*.json` for the window, OR existing one already records genuine pipeline execution; AND at least one `new_file` absent from an eval store | Run full 3-pipeline (Forge scan + Mentor heartbeat + Praxis ingest), WRITE a NEW `dispatch-wave-<TS>.json`, bridge all 4 relpaths to both eval stores, advance state |
 | **B. Prior-wave-misclassification RECOVERY** | A `dispatch-wave-*.json` for the window EXISTS, classified `mixed_no_op`/`second-wave`/genuine-no-op with notes like "No pipeline skills re-run"; `last_ingest_run` is BELOW the `new_file` mtimes; no `forge-scan-*.json` for the window | Run full genuine 3-pipeline, **REWRITE the EXISTING `dispatch-wave-<TS>.json` (same run_id)** to record genuine execution, bridge all 4 relpaths, advance state. Do NOT mint a new wave journal |
-| **C. Re-detection closure** | A LATER `dispatch-wave-*.json` (timestamp > dispatcher `detected_at`) already recorded `genuine_gap=0` / email `action:none` for the same files/threads | Closure-ONLY: bridge residual one-sided gaps, re-affirm email `verified_second_wave`, advance state, assert GENUINE GAP=0. Do NOT re-run pipelines or write/mint a wave journal |
+| **C. Re-detection closure** | Journal already in BOTH eval stores AND a prior closure for the same files/threads already recorded `genuine_gap=0` / email `action:none`. Evidence: a `dispatch-wave-*.json` OR `wave-redet-*.json` (timestamp > dispatcher `detected_at`) for the same files, OR `last_ingest_run` is below the journal mtime (stale-state loop). | Closure-ONLY: bridge residual one-sided gaps, re-affirm email `verified_second_wave`, advance state to MAX today-journal mtime, assert GENUINE GAP=0. Do NOT re-run pipelines or write/mint a wave journal |
 
 ## Pre-flight (copy-pasteable, read-only — composes no timestamps)
 Run BEFORE any pipeline step. Prints the recommended mode.
@@ -71,7 +71,18 @@ if wave and ("No pipeline skills" in (wave.get("notes") or "") or wave.get("type
     else:
         print("\n>>> MODE A-variant: wave journal exists but state covers files - inspect fresh/re-detection")
 elif all_in_both and not wave:
-    print("\n>>> MODE A: FRESH explicit-run - write NEW dispatch-wave journal, run genuine pipeline")
+    lir_dt=datetime.datetime.fromisoformat(lir.replace("Z","+00:00")) if lir else None
+    nf_dt=datetime.datetime.fromtimestamp(max(mts),tz=datetime.timezone.utc) if mts else None
+    if lir_dt and nf_dt and lir_dt < nf_dt:
+        print("\n>>> MODE C (re-detection STALE-STATE LOOP): journal ALREADY in BOTH eval stores, but")
+        print("    last_ingest_run is BELOW the journal mtime -> dispatcher re-fires the same wave forever")
+        print("    (redetection-stale-state-pitfall). Do NOT re-run pipelines (already closed; re-running")
+        print("    mints duplicate journals = anti-journalization gate violation). Closure-ONLY: bridge")
+        print("    residual one-sided gaps, advance last_ingest_run to MAX today-journal mtime (incl. any")
+        print("    heartbeat AFTER detected_at), re-affirm email verified_second_wave (inbox untouched),")
+        print("    converge, assert GENUINE GAP=0.")
+    else:
+        print("\n>>> MODE A: FRESH explicit-run - write NEW dispatch-wave journal, run genuine pipeline")
 else:
     print("\n>>> inspect MODE C (re-detection: a LATER wave journal records genuine_gap=0) or MODE A")
 PYEOF
@@ -87,6 +98,14 @@ PYEOF
 real Mentor heartbeat + real Praxis ingest, bridged all 4 relpaths to both eval stores,
 advanced `last_ingest_run` to 11:20:47Z (max mtime of 193 today-journals), re-affirmed email
 `verified_second_wave`, convergence sweep -> **GENUINE GAP=0**. Held.
+
+## Worked example — MODE C re-detection stale-state loop (2026-07-15T21:20Z)
+- Dispatcher fire carried `new_journals` (`mentor-light-20260715T211519Z.json`, explicit-run) + `new_emails` (7 `owner` threads, all `is_new:false`).
+- Named journal ALREADY in BOTH eval stores (`post-dispatch-cleanup` entries present) -> `all_in_both` TRUE.
+- No `dispatch-wave-*.json` in the **preflight's hardcoded `new_files` list** -> the naive script branch would print MODE A and re-run pipelines. **WRONG.**
+- Correct signal: `last_ingest_run` = 20:50:58Z, BELOW the journal mtime 21:15:19Z AND below a `21:20:21Z` mentor heartbeat written *after* `detected_at` (21:20:18Z). A prior `wave-redet-20260715T2120Z` closure had already processed/evaluated everything and re-affirmed email but **forgot to advance `last_ingest_run`** -> the dispatcher re-fires the same wave forever (classic redetection-stale-state-pitfall).
+-> **MODE C**. Did NOT re-run pipelines. Ran `closure_convergence_sweep.py` (bridged the 21:20:21Z heartbeat: 1 gap), asserted `GENUINE GAP=0`, advanced `last_ingest_run` to `2026-07-15T21:20:21.590258+00:00` (max today-journal mtime, NOT just the named file), re-affirmed email `verified_second_wave` (inbox untouched), re-swept to `GAPS BRIDGED: 0`. Loop broken.
+- **Lesson:** the preflight's `new_files` list is a sample, not ground truth. The decisive test is `last_ingest_run` vs MAX journal mtime — if state is behind the files AND the files are already evaluated, it's closure-only, never a fresh pipeline run.
 
 ## Key guardrails (carried from parent SKILL.md)
 - Never mint a second `dispatch-wave-*.json` in a recovery - rewrite the existing one (orphaning re-fires).

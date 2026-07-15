@@ -33,6 +33,11 @@ import os
 import sys
 from datetime import datetime, timezone
 
+_HELP_ARGS = {"--help", "-h"}
+if set(sys.argv[1:]) & _HELP_ARGS:
+    print((__doc__ or "").strip() or "Usage: python3 verify_genuine_gap_profile.py [--date YYYY-MM-DD] [--json]")
+    sys.exit(0)
+
 BASE = "<hermes-home>"
 JD = os.path.join(BASE, "commons/journals")
 DISP = os.path.join(BASE, "commons/data/ocas-dispatch/journals_evaluated.jsonl")
