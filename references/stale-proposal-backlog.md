@@ -57,4 +57,18 @@ done
 
 When the dispatcher triggers a `new_journals` dispatch, the Forge pipeline's job is to check for NEW proposals/decisions from Mentor. If none exist, write no-op journal and exit. Do NOT attempt to process stale April proposals — they are not the dispatch's work item. The dispatcher's `new_files` list (if it contains Forge files) is the authoritative source of new work.
 
+## Surfacing to User (explicit-run dispatch)
+
+When the stale backlog is detected during an **explicit-run override** dispatch (the dispatcher prompt says "run Forge journal scan" or similar), do NOT silently skip it. The backlog is a genuine signal worth the user's attention:
+
+- Write the no-op forge-scan journal with `stale_proposals_skipped: N` (per the format above).
+- Add a `notes` entry to the dispatch-wave journal summarizing the count and age range.
+- **Surface it in the delivered dispatch report** under an "Items needing your attention" section. The user (owner) should decide whether to process, archive, or retire the backlog — Forge must not auto-build variant packages autonomously in a cron run (that could create GitHub repos/PRs without human review).
+
+**Threshold:** 12 files (2026-07-13 session) is below the 20+ archive threshold but still worth flagging. Use judgment: any stale backlog ≥ ~10 files that recurs across dispatches is worth a one-line flag.
+
+## Field-naming pitfall (confirmed 2026-07-13)
+
+Do NOT conflate the backlog count with `unprocessed_proposals`. `unprocessed_proposals` means proposals NEW to THIS dispatch (Mentor just queued them) — in a stale-backlog-only scan this is `0`. The stale count goes in `stale_proposals_skipped`. The 2026-07-13 session incorrectly set `unprocessed_proposals: 12` for a stale backlog; correct form is `unprocessed_proposals: 0, stale_proposals_skipped: 12`. A future dispatcher reading `unprocessed_proposals: 12` would misclassify the dispatch as carrying 12 new Forge work items.
+
 **Confirmed 2026-06-25:** Dispatch listed only `ocas-mentor/` journals in `new_files`. No Forge proposals were queued. The 11 stale proposals in `proposals/` are a pre-existing backlog, not new work.

@@ -148,6 +148,19 @@ Behavioral settings (thresholds, retention windows, feature flags, display prefs
 
 **Reference implementation:** the shipped `telephony.py` optional-skill (reads `config.yaml`). OCAS skills that predate this policy (e.g. genie) must be migrated before submission. The automated audit (`forge_audit_skills.py`) flags violations.
 
+## Single Source of Truth (MANDATORY)
+
+An OCAS skill must have exactly ONE canonical copy of each artifact (script + SKILL.md). Divergent copies are a recurring, silent failure mode: a cron `script:` field or a wrapper `.sh` may invoke a *different* file than the skill-bundled one, so the version you test and submit is never the one that actually runs.
+
+Observed incident (ocas-genie, 2026-07): the cron `prompt` was repointed to the skill-bundled script, but the job's actual `script:` was `rr_genie.sh`, which still `exec`-ed the *old, deleted* `profiles/<profile>/scripts/genie.py`. The job would have failed at runtime despite the `prompt` text showing the correct path. Caught only by reading the wrapper end-to-end.
+
+Audit checklist:
+- [ ] Exactly one version of each `scripts/*.py` is the runtime source. If a legacy copy also lives under `profiles/<profile>/scripts/`, the cron `script:`/wrapper MUST point at the skill-bundled copy, not the legacy path.
+- [ ] The cron job's `prompt` AND its `script:`/wrapper agree on the same path (the `prompt` is NOT authoritative for what executes — read the wrapper).
+- [ ] The PR-tree / submission copy is the same bytes as the live profile copy (or generated from it). Diff them before pushing.
+- [ ] No `.bak` / `removed-*` / timestamped duplicate scripts linger in `scripts/` — delete after confirming the canonical copy works.
+- [ ] When merging two divergent copies, take the UNION of real fixes (e.g. one copy had correct config reads, the other had a bug-fix block). Neither "newest mtime" copy is automatically fully ahead.
+
 ## GitHub Sync Checklist
 
 - [ ] `gh repo create indigokarasu/{repo} --private --description "..."`

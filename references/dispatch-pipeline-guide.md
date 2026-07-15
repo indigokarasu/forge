@@ -42,7 +42,7 @@ A journal can be in one but NOT the other. Example: `mentor-light-20260628T16060
 
 **Rule:** Check the praxis eval file first. If found there, the journal is already content-evaluated — just register in dispatch eval if missing. If NOT in either, it's a genuine gap requiring full processing.
 
-**Note on field names:** The two eval files use different JSON field names for the journal path. The praxis eval file uses `journal_id` (as noted above), while the dispatch eval file uses `filename`. When grepping with `grep -q` as shown, the field name does not matter because we are searching for the raw JSON line containing the path. However, if you parse the files programmatically, be sure to use the correct field name for each file.
+**Note on field names (CORRECTED 2026-07-13):** The two eval files use DIFFERENT field names. Direct inspection on 2026-07-13 confirmed the praxis eval (`commons/data/ocas-praxis/journals_evaluated.jsonl`) keys entries with `journal_id`, while the dispatch eval (`commons/data/ocas-dispatch/journals_evaluated.jsonl`) keys entries with `filename` (every on-disk entry is `{"filename": "...", ...}`, NOT `journal_id`). **When writing programmatically: use `journal_id` for the praxis eval, `filename` for the dispatch eval.** Older text in this guide claimed both use `journal_id` — that was WRONG. Grep-based dedup reads are field-agnostic, so `grep -qF "$key"` works for both.
 
 ### Step 2 (genuine dispatch): Find additional eval gaps
 
@@ -55,6 +55,8 @@ state = json.load(open("{agent_root}/commons/data/ocas-praxis/ingest_state.json"
 last_ingest_dt = datetime.datetime.fromisoformat(state["last_ingest_run"].replace("Z", "+00:00"))
 # Walk all .json files, compare mtime, check eval set
 ```
+
+**Explicit-run override with mixed gaps (confirmed 2026-07-11):** When the dispatcher fires an explicit-run override (prompt says "run Forge/Mentor/Praxis") AND `new_files` is a MIX of (a) pipeline-output journals already in both eval files (second-wave re-detection) and (b) genuine cross-skill gaps (e.g. `ocas-reach/*` API-call journals) NOT in either eval file: you MUST run all three pipelines AND manually bridge the genuine gaps. Critical: `praxis_ingest_run.py` discovers journals via an mtime gate `>= last_ingest_run`. Any genuine gap whose mtime PRECEDES `last_ingest_run` will be INVISIBLE to the ingest script and never content-evaluated — it must be registered manually into BOTH eval files (action_taken `dispatch_ingest_no_op` for routine no-op gaps). In the 2026-07-11 run, 7 `ocas-reach` journals at 22:45-22:46Z preceded `last_ingest_run` 22:47:33Z and were missed by the ingest script; manual bridging closed them. Always grep every `new_file` against BOTH eval files to split second-wave re-detections from genuine gaps before deciding what to bridge vs. what the pipelines will auto-handle.
 
 ### Classification signals
 
@@ -146,9 +148,10 @@ When BOTH journals AND email are pure second-wave:
 3. Update email state files' `last_dispatch` timestamp
 4. Write dispatch-wave journal with `classification: "second-wave"` and `actions_taken.journals.eval_gaps_registered: 0`
 5. No pipeline skills needed
-6. No third-wave mitigation needed
+6. No third-wave mitigation needed (meaning the wave's OWN output journals need no eval registration — NOT permission to ignore the post-dispatch verifier, see step 7)
+7. **STILL run the post-dispatch cron-gap sweep to closure (pattern #7).** When you close via `ocas-dispatch/scripts/wave_close.py`, it runs an independent genuine-gap verifier (`verify_genuine_gap_independent.py`) AFTER writing the wave journal. Cron pipelines (mentor-light, finch weekly, custodian) write new journals AFTER the dispatcher's `detected_at` snapshot but BEFORE your closure — these are pattern #7 post-dispatch gaps, NOT second-wave re-detections, and the verifier will report `GENUINE GAP > 0`. Bridge those specific journals via `ocas-dispatch/scripts/bridge_eval_both_stores.py --action post_dispatch_cleanup <rel_paths>` (idempotent; always place `--action` LAST to dodge the documented value-leak bug). Confirmed 2026-07-14T20:08Z dispatch: verifier flagged `ocas-finch/2026-07-14/weekly-200631.json` (missing from BOTH stores, routine finch self-mining output) + `ocas-mentor/2026-07-14/mentor-light-20260714T200603Z.json` (routine heartbeat, missing from dispatch store only); both bridged, final gap = 0. Do NOT stop at step 6 and skip the verifier — the gap count is a SEPARATE, exogenous signal from the second-wave classification.
 
-**Key signal:** 0 new eval gaps + 0 actionable emails = complete second-wave. This is the steady-state for dispatches that arrive a few minutes after the prior wave's processing completed.
+**Key signal:** 0 new eval gaps from the DISPATCHER SNAPSHOT + 0 actionable emails = complete second-wave (steps 1–6). The post-dispatch verifier gap count is independent (step 7) and must also be closed to 0 before declaring done. This is the steady-state for dispatches that arrive a few minutes after the prior wave's processing completed.
 
 **Example (2026-06-28T00:59Z):** 3 journal new_files → 2 already in eval (second-wave re-detection) + 1 prior-wave dispatch-wave (skipped). 2 email threads → both `is_new: false` (Cloudflare limit + One Medical follow-up). Result: 0 eval entries, 0 actionable, dispatch-wave journal only.
 
@@ -322,7 +325,7 @@ Written by the dispatch pipeline itself. **Does NOT need eval registration.**
 
 ## Eval File Format
 
-Each entry: one JSON object per line, relative path (no absolute paths). **Note:** field name is `journal_id`, NOT `filename`.
+Each entry: one JSON object per line, relative path (no absolute paths). **Field name differs by file:** praxis eval uses `journal_id`; dispatch eval uses `filename` (see the field-name note above). The example block below is the praxis-eval shape.
 
 ```json
 {"journal_id": "ocas-mentor/2026-06-26/mentor-light-{TS}.json", "action_taken": "dispatch_ingest_no_op", "source": "dispatch-new-journal-{dispatcher_ts}", "backfill_at": "{now_iso}"}
@@ -471,6 +474,28 @@ for entry in entries:
 ```
 
 A dedup that removes >1000 entries is normal for the first cleanup after eval tracking begins. If it happens repeatedly, investigate whether the same journals are being re-registered across waves.
+
+## Evidence run_id vs wave-journal filename divergence (confirmed 2026-07-11)
+
+When the dispatch wave writes BOTH a `dispatch-wave-*.json` journal AND an evidence entry in `evidence.jsonl` (the dispatch skill's evidence log), the evidence entry's `run_id` field and the wave journal's actual `run_id`/`filename` MUST match. In the 2026-07-11 run, the wave journal was written as `dispatch-wave-20260711T212130Z.json` (run_id inside: `dispatch-wave-20260711T212130Z`) but the evidence entry composed its `run_id` from a SEPARATE `date` call 8 seconds earlier (`dispatch-wave-20260711T212122Z`). Result: the evidence log references a non-existent wave-journal filename, breaking traceability. (The eval-file bridge correctly used the real filename, so re-detection was not affected — but the log is internally inconsistent and any downstream join on `run_id` fails.)
+
+**Root cause:** The guide already requires composing timestamps ONCE for journal files + eval bridges, but the evidence entry is written in a THIRD terminal call with its own `date` invocation, drifting from the wave journal's timestamp.
+
+**Fix (pick one, apply consistently):**
+1. **Write the wave journal FIRST**, then read its actual `run_id` from the file and reuse that exact string as the evidence entry's `run_id`. Never re-compose a timestamp for the evidence.
+2. OR compose ONE `TS` shell variable at the very start of the wave and reuse it for the wave journal filename/run_id AND the evidence `run_id` — no second `date` call anywhere.
+
+**Rule:** The evidence entry's `run_id` must be a verbatim copy of the wave journal's `run_id`, not an independently-composed timestamp. If you wrote the wave journal in one `terminal()` call and the evidence in another, you drifted — fix by reading the journal's run_id back and using it verbatim.
+
+## Shell gotcha: `find` with multiple `-name` patterns needs `\( \)` grouping (confirmed 2026-07-11)
+
+During the Forge proposal audit, `find DIR -name "vp_*.json" -o -name "vd_*.json"` silently dropped matches (returned only `processed/` files, hiding 11 `vp_*.json` files sitting in `proposals/`). Re-running with explicit grouping `find DIR \( -name "vp_*.json" -o -name "vd_*.json" \)` returned the complete set.
+
+**Fix:** Always wrap multiple `-name`/`-path` alternatives in `\( \)` when using `-o`. Ungrouped `-o` chains produce incomplete results that can mislead audit conclusions (e.g., falsely reporting "0 unprocessed proposals" when files exist in a non-`processed/` directory).
+
+## OCAS pipeline script invocation pitfall (confirmed 2026-07-13 dispatch)
+
+**`--help` / unknown flags EXECUTE these scripts instead of printing usage.** `ocas-mentor/scripts/cron-heartbeat-light.py` and `ocas-praxis/scripts/praxis_ingest_run.py` have NO argument parser — passing `--help` (or any unrecognized flag) does NOT print usage, it runs the script for real (heartbeat with empty stdin; praxis ingest with a full filesystem scan that mutates state and eval files). Do NOT probe these scripts with `--help` to discover their interface in cron mode; you will trigger a real execution and mutate eval/state. To learn a script's behavior, read its source or the relevant SKILL.md / `references/`. (Contrast: `ocas-forge/scripts/run_dispatch_pipeline.py` uses argparse and correctly prints usage on `--help`.)
 
 ## Phantom File Prevention
 
@@ -710,6 +735,8 @@ When writing multi-step inline Python via `terminal()` heredoc, three specific t
 
 | File | When to read |
 |------|-------------|
+| `references/session-20260714-dispatch-1240Z-forge.md` | **Dispatch 2026-07-14T12:40Z:** Explicit-run override fires even when named `new_file` already evaluated — a NEW post-prior-wave cron heartbeat (`mentor-light-20260714T124039Z.json`) appeared after the prior recovery closed, requiring the full pipeline + bridge. Two pitfalls: (1) malformed dispatch-wave filename from truncated `TS` (`dispatch-wave-20260714T1244.json`); (2) legacy bare-filename eval entries (12,712) are NOT phantoms — they predate the `ocas-skill/YYYY-MM-DD/` path convention and must not be "cleaned" during a routine wave. |
+|------|-------------|
 | `references/session-20260630-dispatch-1035Z-forge.md` | **Dispatch 2026-06-30T10:35Z:** Mixed genuine no-op. Dict double-assignment typo (`state["key1"] =["key2"] = value` → SyntaxError). Praxis-cron with `events_recorded: 1` (all no_signal) correctly classified as no-op via `not_activity_reason`. Eval file: 48,940. |
 | `references/session-20260630-dispatch-1020Z-forge.md` | **Dispatch 2026-06-30T10:20Z:** Second-wave no-op. All 4 new_files already in praxis eval cron ahead: last_ingest_run > detected_at). Concurrent dispatch wave registered all in dispatch eval between our checks. 2 concurrent cron gaps backfilled. **`write_file` line-wrapping pitfall** — long Python lines silently split mid-token. Eval file: 48,932. |
 | `references/session-20260630-dispatch-0934Z-forge.md` | **Dispatch 2026-06-30T09:34Z:** Complete second-wave with prior-wave dispatch-wave artifact. Both new_files already in praxis eval but NOT in dispatch eval → register dispatch eval only. `run_dispatch_pipeline.py` broken on Python 3.14 (`nargs='[]'`). Praxis-cron double-Z timestamp bug confirmed still active. Post-dispatch cleanup caught 2 concurrent cron gaps. Eval file: 48,916. |
@@ -760,6 +787,7 @@ When writing multi-step inline Python via `terminal()` heredoc, three specific t
 | `references/session-20260629-dispatch-1208Z-forge.md` | **Dispatch 2026-06-29T12:08Z:** Second-wave re-detection with explicit pipeline instructions. All 5 new_files already in praxis eval. Mtime-discovery found 4 gaps (concurrent cron + dispatch output). Forge clean. Mentor 8→22 (confirmation #60+). Praxis: 3 journals, 0 events, 3 third-wave. Gap backfill: 0. Eval file: 48,485. Steady-state #62+. |
 | `references/session-20260629-dispatch-1240Z-forge.md` | **Dispatch 2026-06-29T12:40Z:** Mixed genuine no-op + massive legacy backfill. 2/4 new_files missing from eval (cron gap + prior-wave dispatch artifact). One-time backfill of 12,087 legacy journals (pre-eval-tracking, May 13-Jun 26). Email: Ollama newsletter re-detection (already in evidence). Eval file: 48,501→60,590. Steady-state #63+. |
 | `references/session-20260629-dispatch-1355Z-forge.md` | **Dispatch 2026-06-29T13:55Z:** Mixed genuine no-op. Dual eval file bridge — dispatch-wave artifact in praxis eval but NOT dispatch eval (recurring pattern confirmed). 1 routine mentor-light (self-referencing, entities_observed=['..']) → genuine-no-op shortcut. Email: Ollama GLM-5.2 newsletter (informational, no action). No pipeline skills loaded. Eval file: 48,531. |
+| `references/session-20260714-dispatch-1459Z-redetection-closure.md` | **Dispatch 2026-07-14T14:59Z:** Re-detection closure of a concurrent sibling wave. A newer dispatch-wave (145500Z, timestamp > detected_at) already processed the same new_files + triaged the Kyra Jones thread — current wave did closure-only (no pipeline re-run, no new wave journal). Stale `last_ingest_run` (14:41:05 despite claimed state_updated:true) was the re-fire root cause; advanced to 14:59:20. Residual mentor-cron heartbeat 145549Z bridged via `bridge_eval_both_stores.py`. Email state file fixed (bridge script never touches it). GENUINE GAP=0. |
 
 ### Genuine No-Op Count Accuracy (confirmed 2026-06-28T00:52Z)
 
