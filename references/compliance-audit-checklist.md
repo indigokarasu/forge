@@ -135,6 +135,19 @@ System skills must explicitly include:
 11. Support file map
 12. Self-update command
 
+## Configuration Policy (MANDATORY — blocks submission to Nous optional-skills catalog)
+
+Behavioral settings (thresholds, retention windows, feature flags, display prefs, paths) **MUST NOT** be read from environment variables. This is the standing `env-var-for-config` policy; the hermes-sweeper auto-closes violating PRs.
+
+- [ ] Every behavioral setting is declared in `metadata.hermes.config` with a logical key
+- [ ] Skill scripts read values from `$HERMES_HOME/config.yaml` under `skills.config.<key>` (via PyYAML), never `os.environ.get("GENIE_*" / "<NAME>_*")`
+- [ ] SKILL.md Configuration section documents `skills.config.<key>` keys, not env-var names
+- [ ] CLI flags (e.g. `--dry-run`) override config.yaml where a runtime override is useful
+- [ ] Only secrets go in `.env` (declared via `required_environment_variables`); only `HERMES_HOME`/`HERMES_PROFILE` locate the runtime
+- [ ] No `GENIE_*`, `*_MAX_AGE_DAYS`, `*_PATH`, `*_ENABLED` (non-secret) env-var reads remain in `scripts/`
+
+**Reference implementation:** the shipped `telephony.py` optional-skill (reads `config.yaml`). OCAS skills that predate this policy (e.g. genie) must be migrated before submission. The automated audit (`forge_audit_skills.py`) flags violations.
+
 ## GitHub Sync Checklist
 
 - [ ] `gh repo create indigokarasu/{repo} --private --description "..."`
