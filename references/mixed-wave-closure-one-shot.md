@@ -47,6 +47,14 @@ structural rules confirmed working:
 6. **Bridge** — `python3 skills/ocas-forge/scripts/bridge_eval_inline.py <mentor_rel> <FORGE_SCAN_REL> <named_new_file> <DISPATCH_WAVE_REL> --action mixed_wave_<date> --require-exists`.
    `--require-exists` refuses to bridge a relpath whose file is missing (phantom guard). Bridge
    list order: the dispatch-wave journal must be on disk (step 5) before this step runs.
+   **Bridge output interpretation (confirmed 2026-07-15T22:14Z):** the script prints
+   `bridged <rel> (praxis=<a1> dispatch=<a2>)` where `a1`/`a2` mean *added to that store* (boolean),
+   NOT "present / healthy". After the Praxis ingest (step 4) has already registered the
+   pipeline-input journals (forge-scan, mentor-light) into the praxis-eval store, the bridge will
+   show `praxis=False dispatch=True` for those — this is **expected**, not a failure; only the
+   dispatch-eval store still needed filling. The dispatch-wave journal itself shows
+   `praxis=True dispatch=True` (new to both). Do NOT re-run the bridge or treat `praxis=False` as
+   an error — `total bridged` counts only the ADDITIONS.
 7. **Advance `ingest_state.last_ingest_run`** to MAX `os.path.getmtime()` over a BOUNDED
    per-skill `os.listdir(commons/journals/<skill>/<DATE>/)` walk (NO recursive glob — self-nested
    symlinks emit false positives). A value derived only from `new_files` leaves a post-sweep

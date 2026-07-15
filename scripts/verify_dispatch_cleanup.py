@@ -15,6 +15,11 @@ import sys
 import json
 import datetime
 
+_HELP_ARGS = {"--help", "-h"}
+if set(sys.argv[1:]) & _HELP_ARGS:
+    print((__doc__ or "").strip() or "Usage: python3 verify_dispatch_cleanup.py")
+    sys.exit(0)
+
 JOURNALS_DIR = "<hermes-home>/commons/journals"
 EVAL_FILE = os.path.join(JOURNALS_DIR, "ocas-praxis", "journals_evaluated.jsonl")
 STATE_FILE = "<hermes-home>/commons/data/ocas-praxis/ingest_state.json"

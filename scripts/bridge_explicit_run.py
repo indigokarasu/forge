@@ -55,6 +55,11 @@ import sys
 import datetime
 from datetime import datetime, timezone
 
+_HELP_ARGS = {"--help", "-h"}
+if set(sys.argv[1:]) & _HELP_ARGS:
+    print((__doc__ or "").strip() or "Usage: python3 bridge_explicit_run.py --new-files <relpath> [...]")
+    sys.exit(0)
+
 PROFILE = "<hermes-home>"
 JDIR = os.path.join(PROFILE, "commons/journals")
 PRAXIS_EVAL = os.path.join(PROFILE, "commons/data/ocas-praxis/journals_evaluated.jsonl")

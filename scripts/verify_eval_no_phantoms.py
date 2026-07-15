@@ -17,6 +17,11 @@ import json
 import os
 import sys
 
+_HELP_ARGS = {"--help", "-h"}
+if set(sys.argv[1:]) & _HELP_ARGS:
+    print((__doc__ or "").strip() or "Usage: python3 verify_eval_no_phantoms.py [--fix]")
+    sys.exit(0)
+
 PROF = "<hermes-home>"
 JDIR = os.path.join(PROF, "commons", "journals")
 EVAL_FILES = [
