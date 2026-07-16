@@ -19,8 +19,8 @@ Do NOT skip pipelines because the content is re-detected. The override is explic
 
 ## One-shot orchestration pattern
 
-Write the whole sequence to `/tmp/run_pipeline.py` (NOT inline `python3 -c`, NOT
-shell-heredoc with dict literals) and run `python3 /tmp/run_pipeline.py`. Critical
+Write the whole sequence to a **run-unique** temp path such as `/tmp/run_pipeline_<TS>.py` (NOT inline `python3 -c`, NOT
+shell-heredoc with dict literals) and run `python3 /tmp/run_pipeline_<TS>.py`. **PITFALL — fixed `/tmp` paths collide with concurrent runs:** a second dispatch wave firing inside the same cron window, or a sibling subagent the harness spawns, can read or overwrite a fixed `/tmp/run_pipeline.py` between your `write_file` and your `terminal()` run (observed live 2026-07-16: a sibling subagent wrote the same path before execution). Always embed the wave `TS` in the temp filename (and in the mentor file list, see step 3). Critical
 structural rules confirmed working:
 
 1. **Compose ALL timestamps ONCE** at the top: `now = datetime.now(timezone.utc)`;
@@ -32,7 +32,7 @@ structural rules confirmed working:
    `ocas-forge/<DATE>/forge-scan-<TS>.json`. Capture its relpath `FORGE_SCAN_REL` VERBATIM —
    recomposing `<TS>` for the bridge writes a phantom eval line.
 3. **Mentor heartbeat** — build the 3-day file list
-   (`find <hermes-root>/commons/journals/ <hermes-home>/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_3d.txt`)
+   (`find <hermes-root>/commons/journals/ <hermes-home>/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
    and run `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
    (**stdin redirect, NOT a shell pipe** — `cat file | python3` trips `tirith:pipe_to_interpreter`
    and hangs the cron job at `approval_pending`). Capture the ACTUAL heartbeat journal by
