@@ -17,6 +17,24 @@ A dispatcher fire carrying BOTH:
 
 Do NOT skip pipelines because the content is re-detected. The override is explicit.
 
+**BUT FIRST disambiguate against MODE C (stale-state re-detection):** run the pre-flight in
+`references/redetection-stale-state-closure-oneshot.md`. If `all_in_both` is True (the named
+journal is already in BOTH eval stores) AND `last_ingest_run` (and
+`commons/data/monitor_state/journal_ingest_state.json.latest_mtime`) are ALREADY past the max
+today-journal mtime, a prior closure already did the work — this is a **stale-state re-detection**,
+NOT a genuine mixed wave. Do closure-only:
+- `closure_convergence_sweep.py --date <DATE>` → iterate to `GAPS BRIDGED: 0`
+- `verify_genuine_gap_profile.py --date <DATE>` → `GENUINE GAP = 0`
+- re-affirm BOTH email state files (see step 8 / MODE C runbook)
+- do NOT run pipeline steps 2–5 (no Forge/Mentor/Praxis re-run, no wave journal mint).
+
+A mixed wave CAN be a full re-detection of both components (journal already evaluated + email Path A);
+the explicit-run prompt is canned and does not override ground-truth state. Re-running pipelines on an
+already-closed wave double-journalizes (forbidden anti-journalization). Observed live 2026-07-16T16:45Z:
+the dispatcher fired `new_journals` + `new_emails` with a "process all three pipelines" override, but the
+journal was already in both eval stores, state was already past it, and all 13 email threads were
+`in_evidence(structured)` action:none → closure-only, no pipeline re-run.
+
 ## One-shot orchestration pattern
 
 Write the whole sequence to a **run-unique** temp path such as `/tmp/run_pipeline_<TS>.py` (NOT inline `python3 -c`, NOT
@@ -26,11 +44,11 @@ structural rules confirmed working:
 1. **Compose ALL timestamps ONCE** at the top: `now = datetime.now(timezone.utc)`;
    `TS = now.strftime("%Y%m%dT%H%M%SZ")`; `NOW = now.isoformat()`; `DATE = now.strftime("%Y-%m-%d")`.
    Never call `datetime.now()` again. Every filename and content timestamp reuses these.
-2. **Forge no-op scan** — count unprocessed `vp_*`/`vd_*` in `commons/data/ocas-forge/intake/`
-   (and root) that are NOT in `intake/processed/` AND NOT under `proposals/` (the `proposals/`
-   mirror is NOT pending work — counting it flips a `routine_no_op` into a `genuine`). Write
-   `ocas-forge/<DATE>/forge-scan-<TS>.json`. Capture its relpath `FORGE_SCAN_REL` VERBATIM —
-   recomposing `<TS>` for the bridge writes a phantom eval line.
+
+   **PITFALL — cross-call timestamp drift (observed 2026-07-16 closure):** The "compose once" rule holds ONLY when the entire sequence runs inside one `python3 /tmp/run_pipeline_<TS>.py` file. If you instead SPLIT the closure across multiple `terminal()` calls (e.g. to inspect Mentor/Praxis stdout between steps, or because a `skill_view`/`read_file` flake forced a restart), each separate shell that re-invokes `date -u +%Y%m%dT%H%M%SZ` produces a *different* second-resolution `TS`. The dispatch-wave journal then references a `triage-<TS>.json` (or other cross-journal filename) that does NOT exist on disk — breaking the bridge and the closure assertion. **Fix:** lift `TS`/`NOW`/`DATE` from the FIRST call's stdout and reuse them verbatim in every subsequent cross-referencing write — never re-invoke `date` per call. After writing the dispatch-wave journal, `ls` each `new_files` entry to confirm it exists; if one is off by a second, `patch` the reference to the real filename (observed: dispatch-wave referenced `triage-...132154Z.json` but the file was `triage-...132153Z.json` — the two parallel `date` calls disagreed by a second) BEFORE bridging.
+
+   **PITFALL — inline-heredoc timestamp scoping (observed 2026-07-16 closure):** The recommended form is a `/tmp/run_pipeline_<TS>.py` FILE run as `python3 /tmp/run_pipeline_<TS>.py` — module-level `TS`/`DATE`/`NOW` assignments persist for the whole run. If you instead run an INLINE `python3 <<'PYEOF'` heredoc with `TS=...`/`DATE=...`/`NOW=...` set as shell-prefix assignments in the same terminal command (e.g. `TS=$(date ...); python3 <<'PYEOF' ... 'dispatch-wave-'+TS ... PYEOF`), the Python subprocess does NOT inherit shell variables — you get `NameError: name 'TS' is not defined` on a later line. Fix: redefine `TS`/`DATE`/`NOW` INSIDE every heredoc block, OR (preferred) keep using the `/tmp/run_pipeline_<TS>.py` file form so the assignments live in-module.
+2. **Forge no-op scan** — count unprocessed `vp_*`/`vd_*` with `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` (bounded walk of `intake/` ONLY; excludes `intake/processed/`, the `proposals/` SOURCE MIRROR, and the top-level `processed/` dir). A hand-rolled recursive glob/`find` over the whole `ocas-forge` tree reintroduces the false-`genuine` trap (sweeps up `proposals/` + top-level `processed/`, both duplicate mirrors — bit a 2026-07-16 closure orchestrator, wrote `unprocessed_proposals: 11`/`genuine` when true value was 0). Write `ocas-forge/<DATE>/forge-scan-<TS>.json` with `unprocessed_proposals` = that count and `action: routine_no_op` iff count==0. Capture its relpath `FORGE_SCAN_REL` VERBATIM — recomposing `<TS>` for the bridge writes a phantom eval line.
 3. **Mentor heartbeat** — build the 3-day file list
    (`find <hermes-root>/commons/journals/ <hermes-home>/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
    and run `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
@@ -59,10 +77,17 @@ structural rules confirmed working:
    per-skill `os.listdir(commons/journals/<skill>/<DATE>/)` walk (NO recursive glob — self-nested
    symlinks emit false positives). A value derived only from `new_files` leaves a post-sweep
    heartbeat below coverage → the dispatcher re-fires the same wave forever.
-8. **Re-affirm email second-wave** via full-file `json.load` + `write_file` (never `patch`):
+8. **Re-affirm email second-wave (BOTH accounts, via authoritative flat paths)** via full-file
+   `json.load` + `json.dump` (never `patch` — duplicate-key JSON corruption): set
    `verified_second_wave: true`, `last_dispatch: NOW`, `last_dispatch_wave: dispatch-wave-<TS>`,
-   `last_dispatch_email_classification: second-wave`. **Inbox untouched** — hard rule on email
-   second-wave: no reads, no drafts, no sends.
+   `last_dispatch_email_classification: second-wave`. **Re-affirm owner AND indigo** — a closure that
+   only re-affirms `owner` leaves `indigo`'s `verified_second_wave` as `None` and the indigo account
+   re-fires (observed live 2026-07-16T16:45Z). Use the flat paths from `select_email_state.py`, NOT the
+   stale `owner/last_email_check.json` subdirectory path:
+   - owner: `commons/data/ocas-dispatch/last_email_check_owner.json`
+   - indigo: `commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json`
+   **Inbox untouched** — hard rule on email second-wave: no reads, no drafts, no sends (owner inbox
+   write-prohibited 2026-06-24; Indigo archive-only, never modify via this closure).
 9. **Convergence sweep** — `python3 skills/ocas-forge/scripts/closure_convergence_sweep.py --date <DATE>`,
    iterate until it prints `GAPS BRIDGED: 0`.
 10. **Optional but safe** — `python3 skills/ocas-mentor/scripts/correct_active_skills_30d.py`

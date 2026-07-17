@@ -38,12 +38,20 @@ def append_unique(fpath, key_field, key_val, action_taken, source):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("rels", nargs="*", help="relative journal paths to bridge")
+    parser = argparse.ArgumentParser(
+        description="Idempotently bridge relative journal paths into BOTH the praxis-eval "
+                    "and dispatch-eval stores, skipping entries already present.",
+        epilog="Examples:\n"
+               "  python3 bridge_eval_inline.py REL1 REL2 --action my_label\n"
+               "  python3 bridge_eval_inline.py REL1 --require-exists\n"
+               "Put --action LAST in the argument list (its value is consumed, never treated as a relpath).")
+    parser.add_argument("rels", nargs="*", help="relative journal paths to bridge "
+                                               "(e.g. ocas-forge/2026-07-16/forge-scan-TS.json)")
     parser.add_argument("--action", default="manual_bridge",
-                        help="action_taken label (place LAST)")
+                        help="action_taken label written to both eval stores (place LAST)")
     parser.add_argument("--require-exists", action="store_true",
-                        help="skip (warn) relpaths whose file is missing on disk")
+                        help="skip (with a warning) any relpath whose file is missing on disk "
+                             "(prevents phantom eval entries)")
     args = parser.parse_args()
     added = 0
     for rel in args.rels:
