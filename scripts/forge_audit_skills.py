@@ -143,11 +143,18 @@ def audit_skill(skill_dir):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Audit OCAS skills for compliance")
-    parser.add_argument("--skill", help="Audit a specific skill only (e.g. ocas-genie)")
+    parser = argparse.ArgumentParser(
+        description="Audit OCAS skills for compliance",
+        epilog="Examples:\n"
+               "  python3 forge_audit_skills.py --skill ocas-genie\n"
+               "  python3 forge_audit_skills.py --skills-dir /path/to/skills --json\n"
+               "Exit code 0 = clean (no blocking issues); 1 = blocking (ERROR) issues found.")
+    parser.add_argument("--skill", help="Audit a single skill only (e.g. ocas-genie). "
+                                         "Omit to scan every ocas-* skill in --skills-dir.")
     parser.add_argument("--skills-dir", default=DEFAULT_SKILLS_DIR,
-                        help="Directory containing ocas-* skill packages")
-    parser.add_argument("--json", action="store_true", help="Emit JSON instead of text")
+                        help="Directory containing ocas-* skill packages (default: %(default)s)")
+    parser.add_argument("--json", action="store_true",
+                        help="Emit a JSON report instead of human-readable text")
     args = parser.parse_args()
 
     skills = find_ocas_skills(args.skills_dir, only=args.skill)

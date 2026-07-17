@@ -86,9 +86,15 @@ def write_journal(skill, journal_data):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--dispatch-ts', required=True)
-    parser.add_argument('--new-files', nargs='*', default=[])
+    parser = argparse.ArgumentParser(
+        description="Run the legacy dispatch pipeline for a detected wave.",
+        epilog="NOTE: for explicit-run new_journals overrides prefer scripts/bridge_explicit_run.py.\n"
+               "Example:\n"
+               "  python3 run_dispatch_pipeline.py --dispatch-ts 20260716T050000Z --new-files ocas-forge/2026-07-16/forge-scan-TS.json")
+    parser.add_argument('--dispatch-ts', required=True,
+                        help="the dispatcher detected_at timestamp, YYYYmmddTHHMMSSZ")
+    parser.add_argument('--new-files', nargs='*', default=[],
+                        help="relative paths of the journals the dispatcher flagged as new")
     args = parser.parse_args()
 
     eval_set = read_eval_set()

@@ -39,6 +39,27 @@ block to name the REAL account (`google-workspace-user`), record
 (forge/mentor/praxis `ran:true`) recording the real pipeline execution. Do NOT
 mint a second wave journal.
 
+## 2b. Pure new_journals wave (no new_emails in the same fire) — spurious stub cleanup
+When the dispatcher fires `new_journals` ALONE (the `new_emails` item arrives as a
+SEPARATE dispatch, handled later by ocas-dispatch), `bridge_explicit_run.py`
+STILL emits a spurious `email_triage: {indigo_inbox: {threads_reviewed:0,
+actionable:0}}` block and reports `pipelines_loaded: 2`. Neither is correct for a
+pure journal wave — there is no email triage in this wave and THREE pipelines ran
+(forge/mentor/praxis). After the script returns `DONE`:
+1. Rewrite the wave journal's `actions_taken.email_triage` to a note that email
+   is handled by a separate `new_emails` dispatch item. Do NOT fabricate an
+   `indigo_inbox` account block.
+2. Add a `journal_pipeline` block recording the real pipeline execution, e.g.:
+   `forge: {ran:true, scan:"forge-scan-<TS>.json", unprocessed_proposals:N}`,
+   `mentor: {ran:true, heartbeat:"mentor-light-<TS>.json", rc:0}`,
+   `praxis: {ran:true, mode:"dispatch", new_journals:N, events:N}`.
+3. Bump `actions_taken.journals.pipelines_loaded` to 3.
+Rewrite the JSON via a `terminal()` heredoc (NOT `write_file` — the
+`DaemonThreadPoolExecutor` flake can strike `write_file` mid-session), then
+validate with `python3 -c "import json; json.load(open(<path>))"`. Confirmed live
+2026-07-16: a pure `new_journals` wave left the spurious `indigo_inbox` stub and
+`pipelines_loaded:2` until hand-patched this way before closure.
+
 ## 3. Closure (mandatory after the genuine run)
 `dispatch_redetection_close.py --new-files <rel>... --wave-run-id dispatch-wave-<TS>`
 - bridges residual one-sided / neither gaps (post-run mentor-cron heartbeats,

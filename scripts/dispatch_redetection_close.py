@@ -135,10 +135,18 @@ def discover_gaps(prax, disp):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--new-files", nargs="*", default=[])
-    ap.add_argument("--wave-run-id", default=None)
-    ap.add_argument("--dry-run", action="store_true")
+    ap = argparse.ArgumentParser(
+        description="Close a dispatch re-detection: advance last_ingest_run past all "
+                    "today-dated journals and assert GENUINE GAP=0.",
+        epilog="Examples:\n"
+               "  python3 dispatch_redetection_close.py --wave-run-id 20260716T050000Z\n"
+               "  python3 dispatch_redetection_close.py --new-files ocas-forge/2026-07-16/forge-scan-TS.json --dry-run")
+    ap.add_argument("--new-files", nargs="*", default=[],
+                    help="dispatcher new_file relative paths (e.g. ocas-forge/2026-07-16/forge-scan-TS.json)")
+    ap.add_argument("--wave-run-id", default=None,
+                    help="the dispatch wave run_id to close (YYYYmmddTHHMMSSZ)")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the intended state advance and gap assertion without writing state")
     args = ap.parse_args()
     now = datetime.now(timezone.utc).isoformat()
 
