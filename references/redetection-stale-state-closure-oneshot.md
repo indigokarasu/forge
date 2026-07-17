@@ -196,34 +196,35 @@ indigo flat + top-level = `mx.indigo.karasu@gmail.com` — and EXPLICITLY REPAIR
 the wrong value rather than skipping when present). Routing keys off the FILENAME, not this field, so
 the mislabel stays silent until something reads `account` for identity — correct it on sight.
 
-**Use the AUTHORITATIVE flat paths** (resolved by `select_email_state.py <account>`), NOT the
-account-subdirectory path (`owner/last_email_check.json`), which is stale for reads
-(confirmed 2026-07-15). The flat files are:
-- owner: `commons/data/ocas-dispatch/last_email_check_owner.json`
-- indigo: `commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json`
-
-**Also re-affirm the TOP-LEVEL dispatcher-read copies.** The dispatcher itself reads the
-top-level `commons/data/ocas-dispatch/last_email_check.json` (owner) and
-`commons/data/ocas-dispatch/last_email_check_indigo.json` (indigo) — these carry the `actionable` /
-`high_priority` counts the dispatcher surfaces. A closure that re-affirms only the two per-account
-flat files leaves the top-level copy with no `verified_second_wave`, so a later wave reading the
-top-level file re-processes the same threads. Re-affirm ALL FOUR (both per-account flat files AND
-both top-level copies) in one pass. Observed 2026-07-16T18:45Z: the top-level `last_email_check.json`
-lacked `verified_second_wave` until re-affirmed; leaving it stale would have re-fired the wave.
+**AUTHORITATIVE re-affirm set — MUST MATCH `closure_closeout_check.py` (CORRECTED 2026-07-17).**
+The 2026-07-17 verifier REQUIRES exactly four dispatch-owned email-state files for gate [3] and only
+**WARNS** on the two top-level GWS-snapshot files. Re-affirm ONLY the four required in the code block
+below. Do NOT use the older 2026-07-15 "authoritative flat paths" set
+(`last_email_check_owner.json` + top-level `last_email_check.json`) — the verifier
+only WARNS on those two and REQUIRES these four instead. **Following the old flat-only set leaves
+gate [3] failing** (the verifier requires `owner/last_email_check.json` + `last_email_check_owner.json`,
+which the old prose omitted), so the wave re-fires forever. **SUPERSEDES the 2026-07-15
+"subdir is stale for reads" note** — the 2026-07-17 verifier correction explicitly requires the
+`owner/last_email_check.json` subdir copy, so the earlier "stale for reads" claim is now wrong.
+- required (satisfies gate [3]): `owner/last_email_check.json`, `last_email_check_owner.json`,
+  `last_email_check_indigo.json`, `last_email_check_mx_indigo_karasu_gmail_com.json`
+- warn-only (do NOT rely on to close; they stay null under the monitor re-fire bug):
+  `last_email_check.json`, `last_email_check_owner.json`
 
 ```python
-import json, datetime
+import json, datetime, os
 NOW=datetime.datetime.now(datetime.timezone.utc)
 TS=NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
 DISP="<hermes-home>/commons/data/ocas-dispatch"
 note=("MODE C mixed re-detection closure: journal already evaluated (GENUINE GAP=0), both state "
       "gates advanced. All threads is_new:false and verified present in evidence.jsonl (Path A). "
       "No inbox reads/drafts/sends (READ-ONLY + 2026-06-24 hard rule). Re-affirmed verified_second_wave.")
+# REQUIRED set per closure_closeout_check.py (2026-07-17 correction) — gate [3] needs ALL four True
 files=[
-  ("owner",  f"{DISP}/last_email_check_owner.json"),   # authoritative flat
-  ("owner",  f"{DISP}/last_email_check.json"),                            # top-level dispatcher-read copy
-  ("indigo", f"{DISP}/last_email_check_mx_indigo_karasu_gmail_com.json"),  # authoritative flat
-  ("indigo", f"{DISP}/last_email_check_indigo.json"),                     # top-level indigo copy
+  ("owner",  f"{DISP}/owner/last_email_check.json"),                       # required (subdir copy)
+  ("owner",  f"{DISP}/last_email_check_owner.json"),                       # required (flat)
+  ("indigo", f"{DISP}/last_email_check_indigo.json"),                      # required (flat, indigo)
+  ("indigo", f"{DISP}/last_email_check_mx_indigo_karasu_gmail_com.json"),  # required (flat, indigo)
 ]
 for acct, p in files:
     try:
@@ -259,13 +260,16 @@ named=f"ocas-mentor/{DATE}/mentor-light-20260716T184039Z.json"  # <- the wave's 
 PRAXIS_EV=f"{PROFILE}/commons/data/ocas-praxis/journals_evaluated.jsonl"
 DISPATCH_EV=f"{PROFILE}/commons/data/ocas-dispatch/journals_evaluated.jsonl"
 PRAXIS_STATE=f"{PROFILE}/commons/data/ocas-praxis/ingest_state.json"
-MON_STATE="<hermes-root>/commons/data/monitor_state/journal_ingest_state.json"
+MON_STATE=f"{PROFILE}/commons/data/monitor_state/journal_ingest_state.json"
+MON_STATE_PROFILE=f"{PROFILE}/commons/data/monitor_state/journal_ingest_state.json"
 def in_store(p, rel):
     with open(p) as f: return any(rel in ln for ln in f)
 print("named journal in PRAXIS+DISPATCH eval stores:", in_store(PRAXIS_EV, named), in_store(DISPATCH_EV, named))
-st=json.load(open(PRAXIS_STATE)); mon=json.load(open(MON_STATE))
+st=json.load(open(PRAXIS_STATE))
+mr=json.load(open(MON_STATE)); mp=json.load(open(MON_STATE_PROFILE))
 lir_dt=datetime.datetime.fromisoformat(st["last_ingest_run"].replace("Z","+00:00"))
-mon_dt=datetime.datetime.fromtimestamp(mon["latest_mtime"], tz=datetime.timezone.utc)
+mon_dt=datetime.datetime.fromtimestamp(mr["latest_mtime"], tz=datetime.timezone.utc)
+monp_dt=datetime.datetime.fromtimestamp(mp["latest_mtime"], tz=datetime.timezone.utc)
 max_mt=0.0
 for skill in os.listdir(JDIR):
     d=os.path.join(JDIR, skill, DATE)
@@ -275,12 +279,15 @@ for skill in os.listdir(JDIR):
         if fn.endswith(".json"): max_mt=max(max_mt, os.path.getmtime(os.path.join(d, fn)))
 max_dt=datetime.datetime.fromtimestamp(max_mt, tz=datetime.timezone.utc)
 print("praxis last_ingest_run >= max today mtime :", lir_dt >= max_dt)
-print("monitor latest_mtime   >= max today mtime :", mon_dt >= max_dt)
-for p in [f"{PROFILE}/commons/data/ocas-dispatch/last_email_check_owner.json",
-          f"{PROFILE}/commons/data/ocas-dispatch/last_email_check.json",
-          f"{PROFILE}/commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json",
-          f"{PROFILE}/commons/data/ocas-dispatch/last_email_check_indigo.json"]:
-    print(f"email {p.split('/')[-1]:50s} verified_second_wave={json.load(open(p)).get('verified_second_wave')}")
+print("monitor ROOT    latest_mtime >= max       :", mon_dt >= max_dt)
+print("monitor PROFILE latest_mtime >= max       :", monp_dt >= max_dt)
+# gate [3] REQUIRED set (closure_closeout_check.py 2026-07-17 correction) — all must be True
+required=["owner/last_email_check.json","last_email_check_owner.json",
+           "last_email_check_indigo.json","last_email_check_mx_indigo_karasu_gmail_com.json"]
+for fn in required:
+    p=f"{PROFILE}/commons/data/ocas-dispatch/{fn}"
+    print(f"email (required) {fn:50s} verified_second_wave={json.load(open(p)).get('verified_second_wave')}")
+# warn-only (null expected, do NOT block closure): last_email_check.json, last_email_check_owner.json
 ```
 
 Plus: `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` must print `0`, and

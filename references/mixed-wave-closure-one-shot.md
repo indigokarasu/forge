@@ -77,15 +77,23 @@ structural rules confirmed working:
    per-skill `os.listdir(commons/journals/<skill>/<DATE>/)` walk (NO recursive glob — self-nested
    symlinks emit false positives). A value derived only from `new_files` leaves a post-sweep
    heartbeat below coverage → the dispatcher re-fires the same wave forever.
-8. **Re-affirm email second-wave (BOTH accounts, via authoritative flat paths)** via full-file
-   `json.load` + `json.dump` (never `patch` — duplicate-key JSON corruption): set
-   `verified_second_wave: true`, `last_dispatch: NOW`, `last_dispatch_wave: dispatch-wave-<TS>`,
-   `last_dispatch_email_classification: second-wave`. **Re-affirm owner AND indigo** — a closure that
-   only re-affirms `owner` leaves `indigo`'s `verified_second_wave` as `None` and the indigo account
-   re-fires (observed live 2026-07-16T16:45Z). Use the flat paths from `select_email_state.py`, NOT the
-   stale `owner/last_email_check.json` subdirectory path:
-   - owner: `commons/data/ocas-dispatch/last_email_check_owner.json`
-   - indigo: `commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json`
+8. **Re-affirm email second-wave via the EXACT files `closure_closeout_check.py`
+   (corrected 2026-07-17) requires** — its `required_email` list, NOT the stale
+   `select_email_state.py` flat-path guidance which names the WRONG owner file and
+   omits three of the four required ones. Via full-file `json.load` + `json.dump`
+   (never `patch` — duplicate-key JSON corruption): set `verified_second_wave: true`,
+   `last_dispatch: NOW`, `last_dispatch_wave: dispatch-wave-<TS>`,
+   `last_dispatch_email_classification: second-wave` on EACH of these four:
+   - `commons/data/ocas-dispatch/owner/last_email_check.json`        (owner, required)
+   - `commons/data/ocas-dispatch/last_email_check_owner.json`        (owner, required)
+   - `commons/data/ocas-dispatch/last_email_check_indigo.json`       (indigo, required)
+   - `commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json` (indigo, required)
+   **DO NOT re-affirm the two WARN-only files** — `last_email_check.json` and
+   `last_email_check_owner.json` — these are top-level GWS snapshots that
+   stay `null` under the monitor re-fire bug; the verifier WARNs on them but they must NOT gate
+   closure. Reaffirming them is harmless but pointless; the four above are load-bearing.
+   **Re-affirm owner AND indigo** — a closure that only re-affirms `owner` leaves `indigo`'s
+   `verified_second_wave` as `None` and the indigo account re-fires (observed live 2026-07-16T16:45Z).
    **Inbox untouched** — hard rule on email second-wave: no reads, no drafts, no sends (owner inbox
    write-prohibited 2026-06-24; Indigo archive-only, never modify via this closure).
 9. **Convergence sweep** — `python3 skills/ocas-forge/scripts/closure_convergence_sweep.py --date <DATE>`,
