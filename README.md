@@ -1,7 +1,7 @@
 # forge
 
 <p align="center">
-<img src="./assets/readme/hero.svg" width="100%" alt="Forge: skill architect and builder — six-phase pipeline for designing, scoping, building, and validating agent skills.">
+<img src="./assets/readme/hero.jpg" width="100%" alt="Forge: skill architect and builder — six-phase pipeline for designing, scoping, building, and validating agent skills.">
 </p>
 
 forge — Forge: skill architect and builder — six-phase pipeline for designing, scoping, building, and validating agent skills.
