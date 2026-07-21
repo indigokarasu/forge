@@ -1,22 +1,12 @@
 # forge
 
 <p align="center">
-<img src="./assets/readme/hero.jpg" width="100%" alt="Forge: skill architect and builder — six-phase pipeline for designing, scoping, building, and validating agent skills.">
+  <img src="./assets/readme/hero.jpg" width="100%" alt="Forge: skill architect and builder — designs, scopes, builds, and validates new OCAS skills">
 </p>
 
-forge — Forge: skill architect and builder — six-phase pipeline for designing, scoping, building, and validating agent skills.
+Forge is the design and build pipeline for new OCAS skills. It runs a mandatory six-phase process: scope, structure, author, validate, test, and publish. Skills are classified by size — shortcut (20–120 lines), workflow (80–250 lines), or system (150–300 lines) — and the pipeline enforces the structural rules for each class.
 
-
-> Tell it what you need. It does the work.
-
-## What it does
-
-Forge is the only place where new OCAS skills are designed and built. Rather than generating a plan or brief, it runs a mandatory six-phase internal pipeline before writing a single file. Skills are classified by type — shortcut (20-120 lines), workflow (80-250 lines), or system (150-300 lines) — and each type has its own structural expectations. Mentor routes improvement proposals to Forge via journal payloads.
-
-## Dependencies
-
-- [Mentor](https://github.com/indigokarasu/mentor) — receives VariantProposal and VariantDecision files
-
----
-
-*forge is part of the [OCAS Agent Suite](https://github.com/indigokarasu).*
+**Capabilities:**
+- Six-phase skill construction pipeline
+- Size-class enforcement with line budgets
+- Reference file generation for SKILL.md, scripts/, and templates
