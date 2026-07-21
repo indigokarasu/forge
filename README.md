@@ -1,4 +1,4 @@
-# ⚒️ Forge
+# Forge
 
   <img src="./assets/readme/hero.jpg" width="100%" alt="Forge: skill architect and builder — designs, scopes, builds, and validates new OCAS skills">
 
