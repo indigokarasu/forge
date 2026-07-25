@@ -26,7 +26,7 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
     equivalents) and only WARNS on the two top-level GWS-snapshot files
     (last_email_check.json, last_email_check_owner.json),
     which stay null under the documented monitor re-fire bug and are the
-    known-uncloseable gate. Requiring them made every owner closure fail
+    known-uncloseable gate. Requiring them made every operator closure fail
     gate [3] regardless of real state.
 """
 import os, sys, json, argparse, datetime
