@@ -58,12 +58,12 @@ USAGE
 import json, os, sys, argparse, glob
 from datetime import datetime, timezone
 
-PROFILE = "<hermes-home>"
+PROFILE = "<hermes-home>/profiles/indigo"
 JDIR = os.path.join(PROFILE, "commons/journals")
 PRAXIS_EVAL = os.path.join(PROFILE, "commons/data/ocas-praxis/journals_evaluated.jsonl")
 DISPATCH_EVAL = os.path.join(PROFILE, "commons/data/ocas-dispatch/journals_evaluated.jsonl")
 STATE_PATH = os.path.join(PROFILE, "commons/data/ocas-praxis/ingest_state.json")
-QUEUE_FILE = "<hermes-root>/commons/data/monitor_queue.jsonl"
+QUEUE_FILE = "<hermes-home>/commons/data/monitor_queue.jsonl"
 DATE = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 

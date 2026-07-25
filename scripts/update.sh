@@ -16,7 +16,7 @@ case "$1" in
     exit 0
     ;;
   "")
-    python3 <hermes-root>/scripts/skill_update.py ocas-forge
+    python3 <hermes-home>/scripts/skill_update.py ocas-forge
     ;;
   *)
     echo "Unknown argument: $1" >&2

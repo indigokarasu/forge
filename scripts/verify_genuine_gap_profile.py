@@ -38,7 +38,7 @@ if set(sys.argv[1:]) & _HELP_ARGS:
     print((__doc__ or "").strip() or "Usage: python3 verify_genuine_gap_profile.py [--date YYYY-MM-DD] [--json]")
     sys.exit(0)
 
-BASE = "<hermes-home>"
+BASE = "<hermes-home>/profiles/indigo"
 JD = os.path.join(BASE, "commons/journals")
 DISP = os.path.join(BASE, "commons/data/ocas-dispatch/journals_evaluated.jsonl")
 PRAX = os.path.join(BASE, "commons/data/ocas-praxis/journals_evaluated.jsonl")

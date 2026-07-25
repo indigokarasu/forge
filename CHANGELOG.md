@@ -132,4 +132,3 @@
   - schemas.md: latest
 - All changes reflect completion of Ontology Types audit for 24 OCAS skills
 - Forge now references finalized Skill Entity Extraction and Signal Emission tables
-
