@@ -4,7 +4,7 @@ Multi-skill dispatch pipeline runner (Forge + Mentor + Praxis).
 Called by ocas-dispatch when a `new_journals` dispatch fires.
 
 Usage:
-  python3 <hermes-home>/skills/ocas-forge/scripts/run_dispatch_pipeline.py --dispatch-ts 20260627T212600Z
+  python3 os.path.expanduser("~/.hermes")/profiles/indigo/skills/ocas-forge/scripts/run_dispatch_pipeline.py --dispatch-ts 20260627T212600Z
 
 This script:
 1. Reads ingest_state.json to classify genuine vs second-wave
@@ -12,8 +12,8 @@ This script:
 3. If second-wave: adds eval gaps, advances state, exits
 
 State files expected:
-  <hermes-home>/commons/data/ocas-praxis/ingest_state.json
-  <hermes-home>/commons/data/ocas-praxis/journals_evaluated.jsonl
+  os.path.expanduser("~/.hermes")/profiles/indigo/commons/data/ocas-praxis/ingest_state.json
+  os.path.expanduser("~/.hermes")/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl
 """
 
 import json
@@ -22,8 +22,8 @@ import sys
 import argparse
 from datetime import datetime, timezone
 
-JOURNALS_BASE = '<hermes-home>/commons/journals'
-PRAXIS_DATA = '<hermes-home>/commons/data/ocas-praxis'
+JOURNALS_BASE = 'os.path.expanduser("~/.hermes")/profiles/indigo/commons/journals'
+PRAXIS_DATA = 'os.path.expanduser("~/.hermes")/profiles/indigo/commons/data/ocas-praxis'
 EVAL_FILE = os.path.join(PRAXIS_DATA, 'journals_evaluated.jsonl')
 STATE_FILE = os.path.join(PRAXIS_DATA, 'ingest_state.json')
 
