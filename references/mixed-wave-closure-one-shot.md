@@ -35,6 +35,31 @@ the dispatcher fired `new_journals` + `new_emails` with a "process all three pip
 journal was already in both eval stores, state was already past it, and all 13 email threads were
 `in_evidence(structured)` action:none → closure-only, no pipeline re-run.
 
+## PREFERRED: tooled runner for full mixed waves (incl. taste) — added 2026-07-22
+
+When the wave also carries `taste_new_data` (or you simply want the deterministic, no-drift path),
+**prefer `skills/ocas-forge/scripts/run_mixed_wave_closure.py` over hand-rolling `/tmp/run_pipeline_*.py`**.
+It composes TS ONCE, reads every pipeline journal relpath from disk (no phantom eval lines), runs
+Forge no-op scan + Mentor heartbeat + Praxis ingest + optional Taste dedup, writes the dispatch-wave
+journal, bridges all (require-exists), convergence-sweeps, re-affirms email `verified_second_wave`,
+advances gate state, and asserts `=== gates ALL CLOSED ===` (exits non-zero if not).
+
+```bash
+python3 skills/ocas-forge/scripts/run_mixed_wave_closure.py \
+  --dispatch-ts 20260722T131614Z \
+  --new-files ocas-finch/2026-07-22/scan-1100.json ocas-finch/2026-07-22/daily-1310.json \
+             ocas-vesper/2026-07-22/r_20260722_0600.json \
+             ocas-custodian/2026-07-22/light-scan-2026-07-22T130716Z.json \
+  --taste-signals-before 5932 --taste-delta 625 --apply-taste
+```
+
+Flags: `--dispatch-ts` (dispatcher `detected_at`), `--new-files` (dispatcher `new_files` relpaths),
+`--taste-signals-before` (line count of `commons/data/ocas-taste/signals.jsonl` BEFORE dedup),
+`--taste-delta` (dispatcher `taste_new_data.changes.signals`), `--apply-taste` (apply the dedup;
+default dry-run only). The hand-rolled steps 1–11 below remain the authoritative reference if the
+script is unavailable or you need to deviate per-wave — but the script eliminates the two failure
+classes the steps warn about (cross-call timestamp drift, recomposed forge-scan relpath).
+
 ## One-shot orchestration pattern
 
 Write the whole sequence to a **run-unique** temp path such as `/tmp/run_pipeline_<TS>.py` (NOT inline `python3 -c`, NOT
@@ -50,7 +75,11 @@ structural rules confirmed working:
    **PITFALL — inline-heredoc timestamp scoping (observed 2026-07-16 closure):** The recommended form is a `/tmp/run_pipeline_<TS>.py` FILE run as `python3 /tmp/run_pipeline_<TS>.py` — module-level `TS`/`DATE`/`NOW` assignments persist for the whole run. If you instead run an INLINE `python3 <<'PYEOF'` heredoc with `TS=...`/`DATE=...`/`NOW=...` set as shell-prefix assignments in the same terminal command (e.g. `TS=$(date ...); python3 <<'PYEOF' ... 'dispatch-wave-'+TS ... PYEOF`), the Python subprocess does NOT inherit shell variables — you get `NameError: name 'TS' is not defined` on a later line. Fix: redefine `TS`/`DATE`/`NOW` INSIDE every heredoc block, OR (preferred) keep using the `/tmp/run_pipeline_<TS>.py` file form so the assignments live in-module.
 2. **Forge no-op scan** — count unprocessed `vp_*`/`vd_*` with `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` (bounded walk of `intake/` ONLY; excludes `intake/processed/`, the `proposals/` SOURCE MIRROR, and the top-level `processed/` dir). A hand-rolled recursive glob/`find` over the whole `ocas-forge` tree reintroduces the false-`genuine` trap (sweeps up `proposals/` + top-level `processed/`, both duplicate mirrors — bit a 2026-07-16 closure orchestrator, wrote `unprocessed_proposals: 11`/`genuine` when true value was 0). Write `ocas-forge/<DATE>/forge-scan-<TS>.json` with `unprocessed_proposals` = that count and `action: routine_no_op` iff count==0. Capture its relpath `FORGE_SCAN_REL` VERBATIM — recomposing `<TS>` for the bridge writes a phantom eval line.
 3. **Mentor heartbeat** — build the 3-day file list
+<<<<<<< Updated upstream
    (`find <hermes-home>/commons/journals/ <hermes-home>/profiles/indigo/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
+=======
+   (`find ~/.hermes/commons/journals/ ~/.hermes/profiles/indigo/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
+>>>>>>> Stashed changes
    and run `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
    (**stdin redirect, NOT a shell pipe** — `cat file | python3` trips `tirith:pipe_to_interpreter`
    and hangs the cron job at `approval_pending`). Capture the ACTUAL heartbeat journal by
@@ -65,6 +94,14 @@ structural rules confirmed working:
 6. **Bridge** — `python3 skills/ocas-forge/scripts/bridge_eval_inline.py <mentor_rel> <FORGE_SCAN_REL> <named_new_file> <DISPATCH_WAVE_REL> --action mixed_wave_<date> --require-exists`.
    `--require-exists` refuses to bridge a relpath whose file is missing (phantom guard). Bridge
    list order: the dispatch-wave journal must be on disk (step 5) before this step runs.
+   **INDEPENDENT FILENAMES (confirmed live 2026-07-22):** the forge-scan, mentor-light, and
+   named-journal relpaths each carry their OWN timestamp, NOT `<WAVE_TS>`. The forge-scan TS is
+   set by the Forge no-op block (step 2); the mentor-light TS is set by the heartbeat write (step 3);
+   the named journal TS is the dispatcher's. None of them equal the bridge/wave TS. Read every
+   relpath from disk (`ls`/`glob`) and bridge those EXACT strings. Recomposing
+   `ocas-forge/<DATE>/forge-scan-<WAVE_TS>.json` (or `mentor-light-<WAVE_TS>.json`) produces a
+   phantom eval line and fails closeout gate [1] (`named journal in PRAXIS+DISPATCH eval stores:
+   ...=False`). The wave journal itself is the only relpath that uses `<WAVE_TS>`.
    **Bridge output interpretation (confirmed 2026-07-15T22:14Z):** the script prints
    `bridged <rel> (praxis=<a1> dispatch=<a2>)` where `a1`/`a2` mean *added to that store* (boolean),
    NOT "present / healthy". After the Praxis ingest (step 4) has already registered the
@@ -117,9 +154,15 @@ today-dated relpaths that do not exist on disk, and drop the dangling lines:
 
 ```python
 import os, json
+<<<<<<< Updated upstream
 J = "<hermes-home>/profiles/indigo/commons/journals"
 for Ev in ["<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
            "<hermes-home>/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
+=======
+J = "~/.hermes/profiles/indigo/commons/journals"
+for Ev in ["~/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
+           "~/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
+>>>>>>> Stashed changes
     with open(Ev) as f:
         lines = f.readlines()
     out = [ln for ln in lines

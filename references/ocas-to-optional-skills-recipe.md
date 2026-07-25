@@ -31,9 +31,9 @@ etc.). Fix BEFORE opening the PR:
   ("Could not open the pull request"). Either a maintainer reopens, or open a
   FRESH PR from the updated branch. Don't burn a turn retrying reopen.
 - **HTTPS push fails for git, not gh.** `git push` to
-  `https://github.com/indigokarasu/<repo>.git` fails (no credential helper for
+  `https://github.com/<agent-handle>/<repo>.git` fails (no credential helper for
   git even though `gh` uses GH_TOKEN fine). Use SSH:
-  `git remote set-url origin git@github.com:indigokarasu/<repo>.git` then push.
+  `git remote set-url origin git@github.com:<agent-handle>/<repo>.git` then push.
   The SSH key is present and works.
 - **Audit regex false positives.** When writing a scanner for env-var config
   reads, ALL-CAPS *_PATH (e.g. TOKEN_PATH, DEFAULT_DB_PATH) and snake_case config
@@ -55,7 +55,7 @@ etc.). Fix BEFORE opening the PR:
 
 ## Push + PR
 
-- Commit from the indigokarasu fork (never directly to NousResearch).
+- Commit from the <agent-handle> fork (never directly to NousResearch).
 - Open PR against `NousResearch/hermes-agent:main` with the
   `optional-skills/...` path. Description states capability, not implementation;
   <=60 char summary line; no marketing words.

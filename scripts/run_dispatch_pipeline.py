@@ -122,7 +122,7 @@ def main():
     entries = [{"journal_id": f, "source": "dispatch-pipeline-runner", "timestamp": now_iso()} for f in missing]
     append_eval(entries)
 
-    state['journals_evaluated_count'] = state.get('journals_evaluated_count', 0) + len(missing)
+    state['journals_evaluated_count'] = (state.get('journals_evaluated_count') or 0) + len(missing)
 
     # Write no-op journals for each pipeline
     ts = now_ts()

@@ -48,4 +48,25 @@ downgraded on inspection (DoorDash order = transactional confirmation;
 Consulting reply = <operator> already responded; Profound screener = cron autonomous
 override, non-deadline/legal). The prior wave had truly done the work; the flag
 was honest, so advance + close was correct. The gate exists to catch the case
+<<<<<<< Updated upstream
 where it ISN'T — never close a mixed wave on the flag alone.
+=======
+where it ISN'T — never close a mixed wave on the flag alone.
+
+## Worked example — 2026-07-22 13:45Z closure (priority-80 security sign-in)
+A re-detection fire carried 14 <operator> threads (all `is_new: false`), including
+`<thread-id>` "New sign-in to your OpenAI account" flagged by the monitor
+heuristic as `priority: 80` / `intent: action_required`. The thread carried
+22 prior evidence lines, all `action: none`. Running `verify_evidence_threads.py`
+returned `in_evidence(structured)  action=none` for all 10 wave threads.
+Verdict: the downgrade is LEGITIMATE, not a dropped escalation — the sign-in is
+ChatGPT iOS from San Francisco (PDT), consistent with <operator>'s own device +
+location. Reason recorded in evidence: "security notification; no reply
+required." Because the structured `action=none` token is durable in
+`evidence.jsonl`, every subsequent re-detection wave re-verifies it and does NOT
+re-escalate — this is exactly the false-re-escalation the gate exists to
+prevent. Lesson: a provider "new sign-in" notice is a distinct category from a
+security-SCAN alert (GitGuardian/Snyk in the dispatch SKILL.md Security Alerts
+section); when the access source matches the owner's own device/location,
+`action: none` is correct and the gate confirms it.
+>>>>>>> Stashed changes

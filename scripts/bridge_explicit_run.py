@@ -27,7 +27,7 @@ WHAT IT DOES (single atomic run, all timestamps composed ONCE)
                  journal, every dispatcher new_file, dispatch-wave journal]
                  into BOTH eval files (praxis: journal_id, dispatch: filename).
 4. Dispatch    - write the dispatch-wave-<TS>.json meta-journal (classification
-                 mixed_genuine_no_op; NOT registered in eval per 2026-07-07 rule).
+                 mixed_genuine; NOT registered in eval per 2026-07-07 rule).
 5. State       - advance ingest_state.last_ingest_run to the MAX mtime of all
                  bridged journals, resync journals_evaluated_count /
                  last_eval_file_line to actual eval-file line counts.
@@ -226,7 +226,7 @@ def main():
         "summary": "Explicit-run new_journals dispatch: Forge scan no-op (%d proposals), "
                    "Mentor light heartbeat executed, journals re-registered in eval stores."
                    % len(unprocessed),
-        "classification": "mixed_genuine_no_op",
+        "classification": "mixed_genuine",
         "actions_taken": {
             "journals": {"eval_gaps_found": 0, "eval_gaps_registered": 0,
                          "pipelines_loaded": 2},
