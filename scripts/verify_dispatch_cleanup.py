@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Post-dispatch cleanup verifier for multi-skill dispatch pipelines.
-Usage: python3 <hermes-home>/skills/ocas-forge/scripts/verify_dispatch_cleanup.py
+Usage: python3 <hermes-home>/profiles/<profile>/skills/ocas-forge/scripts/verify_dispatch_cleanup.py
 
 Checks:
 1. All .json files with mtime > last_ingest_run are in journals_evaluated.jsonl
@@ -20,9 +20,9 @@ if set(sys.argv[1:]) & _HELP_ARGS:
     print((__doc__ or "").strip() or "Usage: python3 verify_dispatch_cleanup.py")
     sys.exit(0)
 
-JOURNALS_DIR = "<hermes-home>/commons/journals"
+JOURNALS_DIR = "<hermes-home>/profiles/<profile>/commons/journals"
 EVAL_FILE = os.path.join(JOURNALS_DIR, "ocas-praxis", "journals_evaluated.jsonl")
-STATE_FILE = "<hermes-home>/commons/data/ocas-praxis/ingest_state.json"
+STATE_FILE = "<hermes-home>/profiles/<profile>/commons/data/ocas-praxis/ingest_state.json"
 
 def main():
     # Load state

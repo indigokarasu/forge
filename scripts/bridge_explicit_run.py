@@ -44,7 +44,7 @@ bridged wave is safe.
 
 ENVIRONMENT
 -----------
-Paths are profile-scoped under <hermes-home>. Adjust PROFILE
+Paths are profile-scoped under <hermes-home>/profiles/indigo. Adjust PROFILE
 if run under a different profile.
 """
 
@@ -60,7 +60,7 @@ if set(sys.argv[1:]) & _HELP_ARGS:
     print((__doc__ or "").strip() or "Usage: python3 bridge_explicit_run.py --new-files <relpath> [...]")
     sys.exit(0)
 
-PROFILE = "<hermes-home>"
+PROFILE = "<hermes-home>/profiles/indigo"
 JDIR = os.path.join(PROFILE, "commons/journals")
 PRAXIS_EVAL = os.path.join(PROFILE, "commons/data/ocas-praxis/journals_evaluated.jsonl")
 DISPATCH_EVAL = os.path.join(PROFILE, "commons/data/ocas-dispatch/journals_evaluated.jsonl")
@@ -160,7 +160,7 @@ def main():
     # ---- Step 2: Mentor light heartbeat ----
     fl = "/tmp/mentor_files_3d.txt"
     subprocess.run(
-        "find <hermes-root>/commons/journals/ <hermes-home>/commons/journals/ "
+        "find <hermes-home>/commons/journals/ <hermes-home>/profiles/<profile>/commons/journals/ "
         "-name '*.json' -mtime -3 2>/dev/null | sort -u > %s" % fl, shell=True)
     hb = subprocess.run(["python3", MENTOR_SCRIPT], stdin=open(fl),
                         capture_output=True, text=True)

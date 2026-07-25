@@ -18,7 +18,7 @@ ocas-dispatch/scripts/ (it does not exist there).
 
 CORRECTED 2026-07-17 (closure blind-spot fixes):
   - Gate [2] now reads BOTH monitor copies (root + profile-relative). The
-    profile-relative copy (<hermes-home>/commons/.../journal_ingest_state.json)
+    profile-relative copy (<hermes-home>/profiles/<profile>/commons/.../journal_ingest_state.json)
     is what monitor_journals.py actually gates on; the root copy alone gave a
     false "closed" while the profile copy stayed stale and re-fired the wave.
   - Gate [3] now REQUIRES the dispatch-owned account copies
@@ -31,13 +31,13 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
 """
 import os, sys, json, argparse, datetime
 
-PROFILE = "<hermes-home>"
+PROFILE = "<hermes-home>/profiles/indigo"
 JDIR = os.path.join(PROFILE, "commons", "journals")
 PRAXIS_EV = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "journals_evaluated.jsonl")
 DISPATCH_EV = os.path.join(PROFILE, "commons", "data", "ocas-dispatch", "journals_evaluated.jsonl")
 PRAXIS_STATE = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "ingest_state.json")
 # TWO monitor copies (both must be advanced — see ocas-forge/ocas-dispatch SKILL.md)
-MON_STATE_ROOT = "<hermes-root>/commons/data/monitor_state/journal_ingest_state.json"
+MON_STATE_ROOT = "<hermes-home>/commons/data/monitor_state/journal_ingest_state.json"
 MON_STATE_PROFILE = os.path.join(PROFILE, "commons", "data", "monitor_state", "journal_ingest_state.json")
 EMAIL_DIR = os.path.join(PROFILE, "commons", "data", "ocas-dispatch")
 

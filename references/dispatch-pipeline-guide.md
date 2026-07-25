@@ -344,13 +344,13 @@ os.chdir('<hermes-home>/profiles/indigo')
 relpath = os.path.relpath(fpath, 'commons/journals')
 
 # WRONG — produces garbage with ../../ prefixes when CWD != profile root
-relpath = os.path.relpath(fpath, 'commons/journals')  # if CWD is /root, resolves to /root/commons/journals/
+relpath = os.path.relpath(fpath, 'commons/journals')  # if CWD is /root, resolves to <commons>/journals/
 
 # WRONG — produces "commons/journals/ocas-praxis/..." (still prefixed)
 relpath = os.path.relpath(fpath, '.')
 ```
 
-The cron working directory is `/root`, NOT the profile root. A relative base like `'commons/journals'` resolves against `/root/commons/journals/` (which doesn't exist), producing `../../../../../.hermes/profiles/indigo/commons/journals/...` paths. Always use absolute paths for relpath base dirs in cron scripts. Confirmed 2026-06-26 dispatch #169.
+The cron working directory is `/root`, NOT the profile root. A relative base like `'commons/journals'` resolves against `<commons>/journals/` (which doesn't exist), producing `../../../../../.hermes/profiles/indigo/commons/journals/...` paths. Always use absolute paths for relpath base dirs in cron scripts. Confirmed 2026-06-26 dispatch #169.
 
 **Gap backfill false positive from cross-directory relpath (confirmed 2026-06-27T23:20Z):** When the gap backfill `find` scans both `<hermes-home>/profiles/indigo/commons/journals/` and `<hermes-home>/commons/journals/` (the non-profile commons), `os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')` for commons files produces `../../../../commons/journals/ocas-mentor/...` paths. These NEVER match eval entries (which use clean `ocas-mentor/...` relative paths), so the gap scan reports ALL commons journals as "missing" — a false-positive list of 100+ entries.
 
@@ -701,7 +701,7 @@ Manual epoch calculations are a confirmed source of silent failures: the gap sca
 
 ### printf variable path mangling
 
-When writing JSON to eval files via `terminal()`, avoid embedding path variables in `printf` content that matches the redirect target. If `$VAR` is set to `/root/.../ocas-praxis/file` and then used in `printf '...' >> "$VAR"`, bash can lose track of variable boundaries in complex multi-statement calls, truncating the path (e.g., `/root/.../ocas-`).
+When writing JSON to eval files via `terminal()`, avoid embedding path variables in `printf` content that matches the redirect target. If `$VAR` is set to `<fs-root>/.../ocas-praxis/file` and then used in `printf '...' >> "$VAR"`, bash can lose track of variable boundaries in complex multi-statement calls, truncating the path (e.g., `<fs-root>/.../ocas-`).
 
 **Fix:** Use `write_file` (tool) + `python3` with `pathli(json, open(path, 'a'))` for appending. If shell append is required:
 1. Set variable in one call

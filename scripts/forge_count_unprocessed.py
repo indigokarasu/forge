@@ -28,7 +28,7 @@ if set(sys.argv[1:]) & _HELP_ARGS:
     sys.exit(0)
 
 
-PROFILE = "<hermes-home>"
+PROFILE = "<hermes-home>/profiles/indigo"
 ROOT = os.path.join(PROFILE, "commons", "data", "ocas-forge")
 INTAKE = os.path.join(ROOT, "intake")
 INTAKE_PROCESSED = os.path.join(INTAKE, "processed")
