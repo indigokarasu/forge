@@ -31,8 +31,13 @@ SKILL.md YAML frontmatter must include:
 - [ ] `name` — hyphenated skill identifier
 - [ ] `description` — routing logic with trigger phrases, includes "Not for" exclusions
 - [ ] `license` — `MIT` for OCAS skills
+<<<<<<< Updated upstream
 - [ ] `metadata.author` — `Indigo Karasu`
 - [ ] `metadata.email` — `<third-party-or-user-email>`
+=======
+- [ ] `metadata.author` — `<agent-name>`
+- [ ] `metadata.email` — `<agent-email>`
+>>>>>>> Stashed changes
 - [ ] `metadata.version` — semver string (e.g. `"1.1.0"`)
 - [ ] `metadata.tags` — list of lowercase tags
 - [ ] `metadata.category` — skill category (`ocas`, `infrastructure`, `workflow`, etc.)
@@ -68,15 +73,20 @@ SKILL.md YAML frontmatter must include:
   "name": "ocas-{skill}",
   "version": "X.Y.Z",
   "description": "...",
+<<<<<<< Updated upstream
   "author": "Indigo Karasu",
   "email": "<third-party-or-user-email>",
+=======
+  "author": "<agent-name>",
+  "email": "<agent-email>",
+>>>>>>> Stashed changes
   "skill_type": "shortcut|workflow|system",
   "filesystem": {
     "read": ["{agent_root}/commons/data/{skill-id}/"],
     "write": ["{agent_root}/commons/data/{skill-id}/"]
   },
   "self_update": {
-    "source": "https://github.com/indigokarasu/{repo}",
+    "source": "https://github.com/<agent-handle>/{repo}",
     "mechanism": "version-checked tarball from GitHub via gh CLI",
     "command": "{skill}.update",
     "requires_binaries": ["gh", "tar", "..."]
@@ -163,12 +173,12 @@ Audit checklist:
 
 ## GitHub Sync Checklist
 
-- [ ] `gh repo create indigokarasu/{repo} --private --description "..."`
+- [ ] `gh repo create <agent-handle>/{repo} --private --description "..."`
 - [ ] `git init` (if no repo) or verify existing remote
-- [ ] `git remote add origin https://github.com/indigokarasu/{repo}.git`
+- [ ] `git remote add origin https://github.com/<agent-handle>/{repo}.git`
 - [ ] `git add -A && git commit -m "..."` with conventional commit message
 - [ ] `git branch -m main && git push -u origin main`
-- [ ] Verify: `gh repo view indigokarasu/{repo} --json visibility` → `PRIVATE`
+- [ ] Verify: `gh repo view <agent-handle>/{repo} --json visibility` → `PRIVATE`
 
 ## Audit Workflow
 

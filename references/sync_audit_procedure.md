@@ -9,7 +9,7 @@ This is NOT a separate command — it's the pattern `forge.audit` + `forge.sync`
 ## Procedure
 
 1. List all local ocas-* skills: `ls ~/.hermes/skills/ocas-*/`
-2. List all remote repos: `gh repo list indigokarasu --json name`
+2. List all remote repos: `gh repo list <agent-handle> --json name`
 3. For each local skill:
    a. Check if `.git` exists → if not, needs repo creation
    b. Check dirty state: `git status --porcelain`

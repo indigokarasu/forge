@@ -6,7 +6,11 @@ Use when a prior sibling wave already wrote `dispatch-wave-<EXISTINGTS>.json`
 `mixed_genuine_no_op` and skipped the explicit-run pipelines (no `forge-scan-*` for the
 window, `last_ingest_run` stale).
 
+<<<<<<< Updated upstream
 All paths profile-scoped under `<hermes-home>/profiles/indigo`. Run from that dir.
+=======
+All paths profile-scoped under `~/.hermes/profiles/indigo`. Run from that dir.
+>>>>>>> Stashed changes
 
 ## 1. Confirm the recovery trigger
 ```

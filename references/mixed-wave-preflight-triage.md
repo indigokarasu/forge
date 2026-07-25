@@ -22,7 +22,11 @@ Run BEFORE any pipeline step. Prints the recommended mode.
 ```python
 python3 << 'PYEOF'
 import os, json, datetime
+<<<<<<< Updated upstream
 PROFILE="<hermes-home>/profiles/indigo"
+=======
+PROFILE="~/.hermes/profiles/indigo"
+>>>>>>> Stashed changes
 JDIR=f"{PROFILE}/commons/journals"
 PRAXIS_EV=f"{PROFILE}/commons/data/ocas-praxis/journals_evaluated.jsonl"
 DISPATCH_EV=f"{PROFILE}/commons/data/ocas-dispatch/journals_evaluated.jsonl"

@@ -8,7 +8,11 @@ Skill design and construction for Hermes Agent. Runs a mandatory eight-phase pip
 **Version:** 3.7.1
 **Type:** system
 **Layer:** Architecture
+<<<<<<< Updated upstream
 **Author:** Indigo Karasu
+=======
+**Author:** <agent-name>
+>>>>>>> Stashed changes
 
 ---
 

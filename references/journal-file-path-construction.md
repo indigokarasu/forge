@@ -7,7 +7,11 @@ When writing journal files, they MUST land in the date-subdirectory matching the
 ```bash
 TS=$(date -u +%Y%m%dT%H%M%SZ)
 DATE_DIR=$(date -u +%Y-%m-%d)
+<<<<<<< Updated upstream
 JOURNAL_DIR="<hermes-home>/profiles/indigo/commons/journals/ocas-forge/${DATE_DIR}"
+=======
+JOURNAL_DIR="~/.hermes/profiles/indigo/commons/journals/ocas-forge/${DATE_DIR}"
+>>>>>>> Stashed changes
 mkdir -p "$JOURNAL_DIR"
 cat > "$JOURNAL_DIR/forge-scan-${TS}.json" << EOF
 {"run_id": "forge-scan-${TS}", ...}
@@ -20,18 +24,31 @@ Using the skill root directory instead of the date subdirectory:
 
 ```bash
 # WRONG — file lands in parent, not date subdir
+<<<<<<< Updated upstream
 FORGE_DIR="<hermes-home>/profiles/indigo/commons/journals/ocas-forge"
 cat > "$FORGE_DIR/forge-scan-${TS}.json" << EOF
 ```
 
 This produces `<hermes-home>/profiles/indigo/commons/journals/ocas-forge/forge-scan-20260625T234355Z.json` instead of the correct `<hermes-home>/profiles/indigo/commons/journals/ocas-forge/2026-06-25/forge-scan-20260625T234355Z.json`.
+=======
+FORGE_DIR="~/.hermes/profiles/indigo/commons/journals/ocas-forge"
+cat > "$FORGE_DIR/forge-scan-${TS}.json" << EOF
+```
+
+This produces `~/.hermes/profiles/indigo/commons/journals/ocas-forge/forge-scan-20260625T234355Z.json` instead of the correct `~/.hermes/profiles/indigo/commons/journals/ocas-forge/2026-06-25/forge-scan-20260625T234355Z.json`.
+>>>>>>> Stashed changes
 
 **Why it matters:** The dispatcher scans date subdirectories for new journals. Files in the parent directory are invisible to the dispatcher's date-based mtime comparison, but they DO appear in `ls` output and can confuse manual audits. They also break the convention that all journals live in `YYYY-MM-DD/` subdirectories.
 
 **Recovery:** If you catch the mistake immediately:
 ```bash
+<<<<<<< Updated upstream
 mv <hermes-home>/profiles/indigo/commons/journals/ocas-forge/forge-scan-TS.json \
    <hermes-home>/profiles/indigo/commons/journals/ocas-forge/2026-06-25/forge-scan-TS.json
+=======
+mv ~/.hermes/profiles/indigo/commons/journals/ocas-forge/forge-scan-TS.json \
+   ~/.hermes/profiles/indigo/commons/journals/ocas-forge/2026-06-25/forge-scan-TS.json
+>>>>>>> Stashed changes
 ```
 
 **Prevention:** Always include `/${DATE_DIR}` in the path. The `mkdir -p` call should use the full path including the date subdirectory, not just the skill root.

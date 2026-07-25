@@ -30,7 +30,7 @@ Search the OCAS skill library and other skill registries for packages that cover
 **Sources (in priority order):**
 
 1. **Local OCAS skills** — `skills_list` + `skill_view` for any `ocas-*` skill with domain overlap
-2. **GitHub OCAS repos** — `gh search repos "ocas-* user:indigokarasu" --json fullName,description,url`
+2. **GitHub OCAS repos** — `gh search repos "ocas-* user:<agent-handle>" --json fullName,description,url`
 3. **AgentSkill.sh** — `agentskill search <keywords>` (already installed)
 4. **SkillsMP** — API: https://skillsmp.com/docs/api (key below)
 5. **LobeHub** — `lobehub search <keywords>` (see https://lobehub.com/cli)

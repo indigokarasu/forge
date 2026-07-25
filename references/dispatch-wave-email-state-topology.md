@@ -9,12 +9,21 @@ Under `commons/data/ocas-dispatch/`, email triage state is spread across MULTIPL
 | File | `account` field | `verified_second_wave` (pre-closure) |
 |------|----------------|--------------------------------------|
 | `last_email_check.json` | null | None |
+<<<<<<< Updated upstream
 | `last_email_check_<account-identity>_gmail_com.json` | null | None |
 | `last_email_check_owner.json` | <user-google-email> | True |
 | `owner/last_email_check.json` | null | True |
 | `last_email_check_mx_indigo_karasu_gmail_com.json` | <third-party-or-user-email> | True |
 | `last_email_check_indigo.json` | <third-party-or-user-email> | True |
 | `indigo/last_email_check.json` | <third-party-or-user-email> | False |
+=======
+| `last_email_check_<account-identity>_gmail_com.json` | null | None |
+| `last_email_check_owner.json` | <user-google-email> | True |
+| `owner/last_email_check.json` | null | True |
+| `last_email_check_mx_indigo_karasu_gmail_com.json` | <agent-email> | True |
+| `last_email_check_indigo.json` | <agent-email> | True |
+| `indigo/last_email_check.json` | <agent-email> | False |
+>>>>>>> Stashed changes
 
 ## What the verifier checks
 

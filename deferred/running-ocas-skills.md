@@ -105,7 +105,11 @@ chmod +x ~/.hermes/commons/data/{skill-name}/scripts/*.py
 
 ```bash
 hermes cron create --name {skill-name}:task --skill {skill-name} "0 6 * * *" "command"
+<<<<<<< Updated upstream
 hermes cron create --name {skill-name}:scan --skill {skill-name} "0 6 * * *" "cd <hermes-home>/commons/data/{skill-name} && source venv/bin/activate && python3 scripts/scan.py"
+=======
+hermes cron create --name {skill-name}:scan --skill {skill-name} "0 6 * * *" "cd ~/.hermes/commons/data/{skill-name} && source venv/bin/activate && python3 scripts/scan.py"
+>>>>>>> Stashed changes
 ```
 
 ### Common pitfalls

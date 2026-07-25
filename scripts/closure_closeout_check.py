@@ -22,12 +22,25 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
     is what monitor_journals.py actually gates on; the root copy alone gave a
     false "closed" while the profile copy stayed stale and re-fired the wave.
   - Gate [3] now REQUIRES the dispatch-owned account copies
+<<<<<<< Updated upstream
     (owner/last_email_check.json, last_email_check_owner.json, and the indigo
     equivalents) and only WARNS on the two top-level GWS-snapshot files
     (last_email_check.json, last_email_check_owner.json),
     which stay null under the documented monitor re-fire bug and are the
     known-uncloseable gate. Requiring them made every operator closure fail
     gate [3] regardless of real state.
+=======
+    (owner/last_email_check.json, last_email_check_owner.json, last_email_check_indigo.json)
+    and only WARNS on the three top-level GWS-snapshot files
+    (last_email_check.json, last_email_check_owner.json,
+    last_email_check_mx_indigo_karasu_gmail_com.json), which stay null under the
+    documented monitor re-fire bug and are the known-uncloseable gate. Requiring
+    them made every the operator AND every Indigo-account closure fail gate [3] regardless
+    of real state. The full-address snapshot copies (both owner_ and indigo_
+    variants) are WARN, not required — corrected 2026-07-22: the indigo GWS-snapshot
+    was wrongly in the required list, causing a spurious "gates STALE" on every
+    combined/multi-account closure that included Indigo threads.
+>>>>>>> Stashed changes
 """
 import os, sys, json, argparse, datetime
 
@@ -118,15 +131,20 @@ def main():
     #    REQUIRE the dispatch-owned account copies (these actually hold True).
     #    WARN-only on the two top-level GWS snapshots (known un-closeable gate
     #    under the monitor re-fire bug — they stay null and must not block).
+    # NOTE: the full-address GWS-snapshot copies (owner and
+    # mx_indigo_karasu_gmail_com) stay null under the monitor re-fire bug and are
+    # WARN-class, NOT blocking (see ocas-dispatch SKILL.md gate [3] note). Only the
+    # dispatch-owned account copies hold True. Requiring the Indigo GWS snapshot made
+    # every Indigo-account closure report a spurious "gates STALE" headline.
     required_email = [
         "owner/last_email_check.json",
         "last_email_check_owner.json",
         "last_email_check_indigo.json",
-        "last_email_check_mx_indigo_karasu_gmail_com.json",
     ]
     warn_email = [
         "last_email_check.json",
         "last_email_check_owner.json",
+        "last_email_check_mx_indigo_karasu_gmail_com.json",
     ]
     for fn in required_email:
         p = os.path.join(EMAIL_DIR, fn)
