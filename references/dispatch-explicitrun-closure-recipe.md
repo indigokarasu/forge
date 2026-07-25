@@ -34,7 +34,7 @@ Gather three facts for the dispatcher's `new_files`:
 `bridge_explicit_run.py` writes a WRONG-ACCOUNT `email_triage` stub
 (`indigo_inbox`, `threads_reviewed:0`). Per the SKILL.md line ~316 rule, AFTER it
 returns `DONE`, `write_file`-patch the dispatch-wave journal's `email_triage`
-block to name the REAL account (`google-workspace-user`), record
+block to name the REAL account (`<user-google-email>`), record
 `threads_reviewed` + classification, and add a `journal_pipeline` block
 (forge/mentor/praxis `ran:true`) recording the real pipeline execution. Do NOT
 mint a second wave journal.

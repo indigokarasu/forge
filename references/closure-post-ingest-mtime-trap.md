@@ -46,7 +46,7 @@ then re-run the full close sequence:
 
 ```python
 import os, glob, json, datetime
-ROOT = "<hermes-home>"
+ROOT = "<hermes-home>/profiles/indigo"
 DATE = "2026-07-17"
 mt = max(os.path.getmtime(p) for d in [
     f"{ROOT}/commons/journals/ocas-praxis/{DATE}",
@@ -85,7 +85,7 @@ Expect `[2] praxis last_ingest_run >= max today mtime : True` and `gates ALL CLO
 ## Note on email second-wave
 
 The two top-level GWS-snapshot files (`last_email_check.json`,
-`last_email_check_owner.json`) report `verified_second_wave: null` under the
+`last_email_check_<account-identity>_gmail_com.json`) report `verified_second_wave: null` under the
 monitor re-fire bug. The 2026-07-17 `closure_closeout_check.py` correction reads BOTH monitor
 copies and warns on those two top-level files but REQUIRES only the dispatch-owned account copies
 (`owner/last_email_check.json`, `last_email_check_owner.json`, indigo equivalents) — those are the

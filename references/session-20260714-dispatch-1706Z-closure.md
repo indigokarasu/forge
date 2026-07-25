@@ -1,7 +1,7 @@
 # Dispatch closure — 2026-07-14T17:06Z (second-wave re-detection; concurrent wave already closed)
 
 ## Trigger
-Cron dispatcher returned `has_work: true` with two items: `new_journals` (2 files) + `new_emails` (9 owner + 3 Indigo threads). Detected at 16:55:06Z.
+Cron dispatcher returned `has_work: true` with two items: `new_journals` (2 files) + `new_emails` (9 <operator> + 3 the agent threads). Detected at 16:55:06Z.
 
 ## Classification (all second-wave)
 - **Journals:** both `new_files` (`dispatch-wave-20260714T165052Z.json`, `mentor-light-20260714T165010Z.json`) already present in BOTH eval stores → journal second-wave.

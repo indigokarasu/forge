@@ -179,7 +179,7 @@ This applies to: OAuth token files, API keys, client secrets, refresh tokens, an
 
 Security scanners also flag **descriptions** of credential structure and token status — not just code. These must be extracted to reference files too:
 
-- **Credential file paths** (`kalshi_creds.json`, `wallet.json`, `google-workspace-user.json`, etc.) → credential-file reference
+- **Credential file paths** (`kalshi_creds.json`, `wallet.json`, `<user-google-email>.json`, etc.) → credential-file reference
 - **Token status** (which token is broken, error types like `invalid_grant`, `AUTH_SCOPE_MISMATCH` false positives) → `references/token_status.md`
 - **Config defaults that name credential files or API key setup steps** → `references/config-default.json` (machine-readable) + pointer from SKILL.md
 - **Wallet/account setup commands** (`eth-account`, `py_clob_client`, API key creation) → `references/account-creation.md`
@@ -187,7 +187,7 @@ Security scanners also flag **descriptions** of credential structure and token s
 
 **Pattern:** When a section describes *what credentials exist* or *where they live*, move it to a reference file and replace with a one-line pointer.
 
-**Example (May 2026):** Bones' SKILL.md had a config-default description naming platforms and trading settings inline. Dispatch's fallback cascade named `google-workspace-user.json` directly, and its Gotchas repeated the `mx.indigo.karasu@gmail.com.json` path with error details. All moved to reference files:
+**Example (May 2026):** Bones' SKILL.md had a config-default description naming platforms and trading settings inline. Dispatch's fallback cascade named `<user-google-email>.json` directly, and its Gotchas repeated the `<third-party-or-user-email>.json` path with error details. All moved to reference files:
 - Config description → `references/config-default.json`
 - Token paths/status → `references/token_status.md`
 - Wallet setup → `references/account-creation.md`

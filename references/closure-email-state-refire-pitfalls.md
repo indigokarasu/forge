@@ -6,7 +6,7 @@ Two pitfalls surfaced during the 2026-07-16T2145Z mixed Mode-C closure (owner `n
 
 **Observation:** While a manual closure re-flagged `verified_second_wave=True` on the two top-level gws-snapshot files, the scheduled `dispatcher.py` (and/or `monitor_email.py`) FIRED AGAIN ~60s into the run and rewrote both files as pure gws snapshots (raw `new_threads` payload), dropping the `verified_second_wave` field entirely (Null). The verifier's `[3]` gate then read None.
 
-**Which files survive:** the dispatch-OWNED owner copies — `owner/last_email_check.json` and `last_email_check_owner.json` — are NOT the gws-scan output destinations and stayed `True`. Only the two top-level `{EMAIL_DIR}/last_email_check.json` and `{EMAIL_DIR}/last_email_check_owner.json` get clobbered (those are the `monitor_email.py` scan destinations).
+**Which files survive:** the dispatch-OWNED owner copies — `owner/last_email_check.json` and `last_email_check_owner.json` — are NOT the gws-scan output destinations and stayed `True`. Only the two top-level `{EMAIL_DIR}/last_email_check.json` and `{EMAIL_DIR}/last_email_check_<account-identity>_gmail_com.json` get clobbered (those are the `monitor_email.py` scan destinations).
 
 **Mitigation / recipe:**
 1. Re-flag the two top-level owner files AND re-run `closure_closeout_check.py` in the SAME Python script (via `subprocess`), so the verifier reads the flag before the next dispatcher tick (minimize the clobber window).
@@ -20,7 +20,7 @@ Two pitfalls surfaced during the 2026-07-16T2145Z mixed Mode-C closure (owner `n
 **Why:** the topology doc says "key on path, not the `account` field" — but the *reverse* trap is real too: keying only on basename `last_email_check.json` collides across accounts because BOTH `owner` and `indigo` subdirs contain a file of that exact name.
 
 **Mitigation:** during an account-specific closure, target that account's files by EXPLICIT path/glob that excludes the other account's subdir:
-- owner: `last_email_check.json`, `last_email_check_owner.json`, `owner/last_email_check.json`, `last_email_check_owner.json`
-- Indigo: `last_email_check_mx_indigo_karasu_gmail_com.json`, `last_email_check_indigo.json`, `indigo/last_email_check.json`
+- <operator>: `last_email_check.json`, `last_email_check_<account-identity>_gmail_com.json`, `owner/last_email_check.json`, `last_email_check_owner.json`
+- the agent: `last_email_check_mx_indigo_karasu_gmail_com.json`, `last_email_check_indigo.json`, `indigo/last_email_check.json`
 
 Never blanket-flip a recursive `**/last_email_check*.json` during a single-account closure. If you do over-flip, restore the other account's file from its prior true value (indigo's genuine `false` here — it was a real `action:none` triage from 20260716T161444Z, not second-wave).

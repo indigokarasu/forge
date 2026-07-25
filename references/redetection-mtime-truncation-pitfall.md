@@ -30,7 +30,7 @@ Recompute the mtime programmatically — never copy a literal:
 
 ```python
 import os, glob, json, datetime
-ROOT = "<hermes-home>"
+ROOT = "<hermes-home>/profiles/indigo"
 mt = max(os.path.getmtime(p)
          for p in glob.glob(f"{ROOT}/commons/journals/*/2026-07-16/*.json"))
 NEW = mt + 1.0   # >=1s pad absorbs any heartbeat landing during/after write

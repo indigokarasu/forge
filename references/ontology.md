@@ -35,7 +35,7 @@ Represents a real-world actor.
 
 Subclasses:
 - **Person** — a human individual
-- **AI** — a synthetic individual or agent (e.g., Indigo)
+- **AI** — a synthetic individual or agent (e.g., the agent)
 
 Required fields:
 - `id` — unique identifier (UUID)

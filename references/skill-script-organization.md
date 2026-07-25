@@ -20,7 +20,7 @@ skills/<name>/
 The cron system requires script paths relative to `~/.hermes/scripts/`. Use **symlinks** (not wrappers):
 
 ```
-ln -s <hermes-root>/skills/<name>/scripts/<script> <hermes-root>/scripts/<script>
+ln -s <hermes-home>/skills/<name>/scripts/<script> <hermes-home>/scripts/<script>
 ```
 
 The canonical copy lives in the skill dir. The symlink in `~/.hermes/scripts/` is for cron compatibility.

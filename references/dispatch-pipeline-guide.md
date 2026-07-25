@@ -13,8 +13,8 @@ The dispatcher can only detect *new journal files* — not whether they've been 
 
 There are TWO eval files. Both must exist and both must be checked:
 ```bash
-PRAXIS_EVAL="<hermes-home>/commons/data/ocas-praxis/journals_evaluated.jsonl"
-DISPATCH_EVAL="<hermes-home>/commons/data/ocas-dispatch/journals_evaluated.jsonl"
+PRAXIS_EVAL="<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl"
+DISPATCH_EVAL="<hermes-home>/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"
 ```
 The praxis eval file is authoritative for "has this been content-evaluated?" The dispatch eval file is authoritative for "has a dispatch wave registered this?" A journal can be in one but NOT the other.
 
@@ -79,7 +79,7 @@ last_ingest_dt = datetime.datetime.fromisoformat(state["last_ingest_run"].replac
 2. **Promotional/survey reminders** — Health app survey completions (Verily Me), marketing re-engagement campaigns, service completion nudges (2026-06-28T01:35Z)
 3. **Automated notifications** — Cloudflare usage alerts, GitHub commit notifications, CI/CD completions
 
-Classification rule: if `is_new: true` AND content is promotional/automated/third-party (not a direct request, question, or commitment involving owner) → `action:none`. This is distinct from second-wave re-detection (`is_new: false`) but produces the same no-op outcome.
+Classification rule: if `is_new: true` AND content is promotional/automated/third-party (not a direct request, question, or commitment involving <operator>) → `action:none`. This is distinct from second-wave re-detection (`is_new: false`) but produces the same no-op outcome.
 
 **Important — dispatch-wave eval registration (clarification, confirmed 2026-07-07):** The dispatch-wave meta-journal is not a *content* journal and needs no *behavioral* evaluation (do NOT run forge-scan/mentor/praxis event extraction on it). HOWEVER, to prevent the next dispatcher scan from re-detecting it as a "new file" and re-processing it, it MUST still be registered in BOTH eval files as third-wave mitigation: in the PRAXIS eval with `action_taken: "no_signal"` (reason `"dispatch.wave meta-journal, mixed_genuine_no_op"`), and in the DISPATCH eval with `action_taken: "dispatch_output_skip"`. This matches the established pattern — prior waves registered their own dispatch-wave in the praxis eval as `no_signal`. Skipping this registration creates a re-detection loop where the next wave re-classifies the meta-journal as a genuine gap. Only the `new_files` (cron/light journals from other pipelines) need full content-eval entries; the dispatch-wave needs only the lightweight third-wave registration above.
 
@@ -194,7 +194,7 @@ Security scanning services (GitGuardian, Snyk, Dependabot, etc.) send alert emai
 
 ### Eval File Location (authoritative)
 
-The eval file is at: `<hermes-home>/commons/data/ocas-praxis/journals_evaluated.jsonl`
+The eval file is at: `<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl`
 
 There are legacy copies at `commons/journals/ocas-praxis/journals_evaluated.jsonl` and `commons/data/praxis/journals_evaluated.jsonl` — these are NOT the authoritative copy. Always use the path above for both reads and writes.
 
@@ -337,10 +337,10 @@ Each entry: one JSON object per line, relative path (no absolute paths). **Field
 
 ```python
 # CORRECT (cron-safe, works regardless of CWD)
-relpath = os.path.relpath(fpath, '<hermes-home>/commons/journals')
+relpath = os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')
 
 # CORRECT (if you've os.chdir'd to profile root first)
-os.chdir('<hermes-home>')
+os.chdir('<hermes-home>/profiles/indigo')
 relpath = os.path.relpath(fpath, 'commons/journals')
 
 # WRONG — produces garbage with ../../ prefixes when CWD != profile root
@@ -352,9 +352,9 @@ relpath = os.path.relpath(fpath, '.')
 
 The cron working directory is `/root`, NOT the profile root. A relative base like `'commons/journals'` resolves against `/root/commons/journals/` (which doesn't exist), producing `../../../../../.hermes/profiles/indigo/commons/journals/...` paths. Always use absolute paths for relpath base dirs in cron scripts. Confirmed 2026-06-26 dispatch #169.
 
-**Gap backfill false positive from cross-directory relpath (confirmed 2026-06-27T23:20Z):** When the gap backfill `find` scans both `<hermes-home>/commons/journals/` and `<hermes-root>/commons/journals/` (the non-profile commons), `os.path.relpath(fpath, '<hermes-home>/commons/journals')` for commons files produces `../../../../commons/journals/ocas-mentor/...` paths. These NEVER match eval entries (which use clean `ocas-mentor/...` relative paths), so the gap scan reports ALL commons journals as "missing" — a false-positive list of 100+ entries.
+**Gap backfill false positive from cross-directory relpath (confirmed 2026-06-27T23:20Z):** When the gap backfill `find` scans both `<hermes-home>/profiles/indigo/commons/journals/` and `<hermes-home>/commons/journals/` (the non-profile commons), `os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')` for commons files produces `../../../../commons/journals/ocas-mentor/...` paths. These NEVER match eval entries (which use clean `ocas-mentor/...` relative paths), so the gap scan reports ALL commons journals as "missing" — a false-positive list of 100+ entries.
 
-**Fix:** During gap backfill, ALWAYS check the eval file by **filename only** (`grep -qF "$basename" eval_file`) rather than by full path. If the basename is found anywhere in the eval file, the journal is already tracked — skip. Do NOT add the `../../../../commons/journals/...` version as a new entry. Better: skip the `<hermes-root>/commons/journals/` directory entirely in the gap scan — it is monitored by a different dispatcher instance.
+**Fix:** During gap backfill, ALWAYS check the eval file by **filename only** (`grep -qF "$basename" eval_file`) rather than by full path. If the basename is found anywhere in the eval file, the journal is already tracked — skip. Do NOT add the `../../../../commons/journals/...` version as a new entry. Better: skip the `<hermes-home>/commons/journals/` directory entirely in the gap scan — it is monitored by a different dispatcher instance.
 
 **Symptom:** Gap scan reports 120+ "missing" journals, all with `../../../../commons/j...` prefixes. Manual verification of 5 random entries shows 100% already in eval under clean relative paths. This is a path format false positive, not genuine gaps.
 
@@ -647,7 +647,7 @@ now = datetime.now(timezone.utc)  # AttributeError: module has no 'now'
 
 ```python
 # CORRECT — absolute path, CWD-independent
-relpath = os.path.relpath(fpath, '<hermes-home>/commons/journals')
+relpath = os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')
 
 # WRONG — relative base resolves against CWD (/root in cron), not profile root
 relpath = os.path.relpath(fpath, 'commons/journals')
@@ -660,9 +660,9 @@ The `write_file` tool silently wraps long lines (~80 chars), splitting Python st
 ```python
 # Written via write_file (long lines):
 DISPATCH_J_DIR = "/rootfiles/indigo/commons/journals/ocas-dispatch/2026-06-30"
-#     ↑ WRONG: "<hermes-root>/profiles/..." was split at ~80 chars
+#     ↑ WRONG: "<hermes-home>/profiles/..." was split at ~80 chars
 
-PRAXIS_EVAL = "<hermes-home>/commons/data/ocas-praxis/journals_evalPRAXIS_EVAL = "<hermes-home>/commons/data/ocas-prauated.jsonl"
+PRAXIS_EVAL = "<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evalPRAXIS_EVAL = "<hermes-home>/profiles/indigo/commons/data/ocas-prauated.jsonl"
 #                                                 ↑ WRONG: two assignments merged into one line
 ```
 

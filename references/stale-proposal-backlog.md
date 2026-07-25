@@ -13,10 +13,10 @@ Forge's dispatch integration says "scan for unprocessed proposals/decisions" but
 
 ```bash
 # Find proposals older than 30 days in proposals/
-find <hermes-home>/commons/data/ocas-forge/proposals/ -name "vp_*.json" -mtime +30
+find <hermes-home>/profiles/indigo/commons/data/ocas-forge/proposals/ -name "vp_*.json" -mtime +30
 
 # Cross-reference against processed/ and intake/processed/
-FORGE_DATA="<hermes-home>/commons/data/ocas-forge"
+FORGE_DATA="<hermes-home>/profiles/indigo/commons/data/ocas-forge"
 for f in "$FORGE_DATA/proposals"/vp_*.json; do
     base=$(basename "$f")
     if ! grep -q "$base" "$FORGE_DATA/intake/processed/"*.json "$FORGE_DATA/processed/"*.json 2>/dev/null; then
@@ -63,7 +63,7 @@ When the stale backlog is detected during an **explicit-run override** dispatch 
 
 - Write the no-op forge-scan journal with `stale_proposals_skipped: N` (per the format above).
 - Add a `notes` entry to the dispatch-wave journal summarizing the count and age range.
-- **Surface it in the delivered dispatch report** under an "Items needing your attention" section. The user (owner) should decide whether to process, archive, or retire the backlog — Forge must not auto-build variant packages autonomously in a cron run (that could create GitHub repos/PRs without human review).
+- **Surface it in the delivered dispatch report** under an "Items needing your attention" section. The user (<operator>) should decide whether to process, archive, or retire the backlog — Forge must not auto-build variant packages autonomously in a cron run (that could create GitHub repos/PRs without human review).
 
 **Threshold:** 12 files (2026-07-13 session) is below the 20+ archive threshold but still worth flagging. Use judgment: any stale backlog ≥ ~10 files that recurs across dispatches is worth a one-line flag.
 

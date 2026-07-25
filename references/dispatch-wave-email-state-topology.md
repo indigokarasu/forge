@@ -1,6 +1,6 @@
 # Dispatch-wave closure: email-state file topology
 
-Observed 2026-07-16 during a second-wave email closure (owner account, all `is_new:false`).
+Observed 2026-07-16 during a second-wave email closure (<operator> account, all `is_new:false`).
 
 ## The files
 
@@ -9,19 +9,19 @@ Under `commons/data/ocas-dispatch/`, email triage state is spread across MULTIPL
 | File | `account` field | `verified_second_wave` (pre-closure) |
 |------|----------------|--------------------------------------|
 | `last_email_check.json` | null | None |
-| `last_email_check_owner.json` | null | None |
-| `last_email_check_owner.json` | google-workspace-user | True |
+| `last_email_check_<account-identity>_gmail_com.json` | null | None |
+| `last_email_check_owner.json` | <user-google-email> | True |
 | `owner/last_email_check.json` | null | True |
-| `last_email_check_mx_indigo_karasu_gmail_com.json` | mx.indigo.karasu@gmail.com | True |
-| `last_email_check_indigo.json` | mx.indigo.karasu@gmail.com | True |
-| `indigo/last_email_check.json` | mx.indigo.karasu@gmail.com | False |
+| `last_email_check_mx_indigo_karasu_gmail_com.json` | <third-party-or-user-email> | True |
+| `last_email_check_indigo.json` | <third-party-or-user-email> | True |
+| `indigo/last_email_check.json` | <third-party-or-user-email> | False |
 
 ## What the verifier checks
 
 `scripts/closure_closeout_check.py --named <rel> --date <DATE>` only inspects FOUR email-state files for its `[3]` gate:
 
 - `last_email_check.json`
-- `last_email_check_owner.json`
+- `last_email_check_<account-identity>_gmail_com.json`
 - `last_email_check_mx_indigo_karasu_gmail_com.json`
 - `last_email_check_indigo.json`
 
