@@ -4,7 +4,7 @@
 Dispatch-triggered journal scan at 2026-06-22T08:19Z. Clean scan — no unprocessed vp/vd files.
 
 ## Execution
-- Data root: `<hermes-home>/commons/data/ocas-forge/`
+- Data root: `<hermes-home>/profiles/indigo/commons/data/ocas-forge/`
 - Unprocessed files in data root: 0
 - All vp/vd files already in `processed/` or `intake/processed/`
 - Result: `no_op` — no work to do

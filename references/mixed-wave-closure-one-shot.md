@@ -50,7 +50,7 @@ structural rules confirmed working:
    **PITFALL — inline-heredoc timestamp scoping (observed 2026-07-16 closure):** The recommended form is a `/tmp/run_pipeline_<TS>.py` FILE run as `python3 /tmp/run_pipeline_<TS>.py` — module-level `TS`/`DATE`/`NOW` assignments persist for the whole run. If you instead run an INLINE `python3 <<'PYEOF'` heredoc with `TS=...`/`DATE=...`/`NOW=...` set as shell-prefix assignments in the same terminal command (e.g. `TS=$(date ...); python3 <<'PYEOF' ... 'dispatch-wave-'+TS ... PYEOF`), the Python subprocess does NOT inherit shell variables — you get `NameError: name 'TS' is not defined` on a later line. Fix: redefine `TS`/`DATE`/`NOW` INSIDE every heredoc block, OR (preferred) keep using the `/tmp/run_pipeline_<TS>.py` file form so the assignments live in-module.
 2. **Forge no-op scan** — count unprocessed `vp_*`/`vd_*` with `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` (bounded walk of `intake/` ONLY; excludes `intake/processed/`, the `proposals/` SOURCE MIRROR, and the top-level `processed/` dir). A hand-rolled recursive glob/`find` over the whole `ocas-forge` tree reintroduces the false-`genuine` trap (sweeps up `proposals/` + top-level `processed/`, both duplicate mirrors — bit a 2026-07-16 closure orchestrator, wrote `unprocessed_proposals: 11`/`genuine` when true value was 0). Write `ocas-forge/<DATE>/forge-scan-<TS>.json` with `unprocessed_proposals` = that count and `action: routine_no_op` iff count==0. Capture its relpath `FORGE_SCAN_REL` VERBATIM — recomposing `<TS>` for the bridge writes a phantom eval line.
 3. **Mentor heartbeat** — build the 3-day file list
-   (`find <hermes-root>/commons/journals/ <hermes-home>/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
+   (`find <hermes-home>/commons/journals/ <hermes-home>/profiles/indigo/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
    and run `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
    (**stdin redirect, NOT a shell pipe** — `cat file | python3` trips `tirith:pipe_to_interpreter`
    and hangs the cron job at `approval_pending`). Capture the ACTUAL heartbeat journal by
@@ -89,13 +89,13 @@ structural rules confirmed working:
    - `commons/data/ocas-dispatch/last_email_check_indigo.json`       (indigo, required)
    - `commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json` (indigo, required)
    **DO NOT re-affirm the two WARN-only files** — `last_email_check.json` and
-   `last_email_check_owner.json` — these are top-level GWS snapshots that
+   `last_email_check_<account-identity>_gmail_com.json` — these are top-level GWS snapshots that
    stay `null` under the monitor re-fire bug; the verifier WARNs on them but they must NOT gate
    closure. Reaffirming them is harmless but pointless; the four above are load-bearing.
    **Re-affirm owner AND indigo** — a closure that only re-affirms `owner` leaves `indigo`'s
    `verified_second_wave` as `None` and the indigo account re-fires (observed live 2026-07-16T16:45Z).
-   **Inbox untouched** — hard rule on email second-wave: no reads, no drafts, no sends (owner inbox
-   write-prohibited 2026-06-24; Indigo archive-only, never modify via this closure).
+   **Inbox untouched** — hard rule on email second-wave: no reads, no drafts, no sends (<operator> inbox
+   write-prohibited 2026-06-24; the agent archive-only, never modify via this closure).
 9. **Convergence sweep** — `python3 skills/ocas-forge/scripts/closure_convergence_sweep.py --date <DATE>`,
    iterate until it prints `GAPS BRIDGED: 0`.
 10. **Optional but safe** — `python3 skills/ocas-mentor/scripts/correct_active_skills_30d.py`
@@ -117,9 +117,9 @@ today-dated relpaths that do not exist on disk, and drop the dangling lines:
 
 ```python
 import os, json
-J = "<hermes-home>/commons/journals"
-for Ev in ["<hermes-home>/commons/data/ocas-praxis/journals_evaluated.jsonl",
-           "<hermes-home>/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
+J = "<hermes-home>/profiles/indigo/commons/journals"
+for Ev in ["<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
+           "<hermes-home>/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
     with open(Ev) as f:
         lines = f.readlines()
     out = [ln for ln in lines

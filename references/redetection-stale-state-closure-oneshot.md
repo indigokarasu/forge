@@ -12,7 +12,7 @@ Confirmed live occurrences: 2026-07-14T14:59Z, 2026-07-15T21:20Z, 2026-07-16T03:
 ```python
 python3 << 'PYEOF'
 import os, json, datetime
-PROFILE="<hermes-home>"
+PROFILE="<hermes-home>/profiles/indigo"
 JDIR=f"{PROFILE}/commons/journals"
 PRAXIS_EV=f"{PROFILE}/commons/data/ocas-praxis/journals_evaluated.jsonl"
 DISPATCH_EV=f"{PROFILE}/commons/data/ocas-dispatch/journals_evaluated.jsonl"
@@ -61,7 +61,7 @@ If MODE C: do NOT load Forge/Mentor/Praxis. Do NOT run `praxis_ingest_run.py`. D
 
 ```bash
 DATE=2026-07-16   # date of the re-detected journal
-SCRIPTS=<hermes-home>/skills/ocas-forge/scripts
+SCRIPTS=<hermes-home>/profiles/indigo/skills/ocas-forge/scripts
 # 1. Convergence sweep (ungated) — loop until it bridges 0
 while true; do
   out=$(python3 "$SCRIPTS/closure_convergence_sweep.py" --date "$DATE" 2>&1)
@@ -78,7 +78,7 @@ may land during the sweep):
 ```python
 python3 << 'PYEOF'
 import os, json, datetime
-PROFILE="<hermes-home>"
+PROFILE="<hermes-home>/profiles/indigo"
 JDIR=f"{PROFILE}/commons/journals"
 STATE=f"{PROFILE}/commons/data/ocas-praxis/ingest_state.json"
 DATE="2026-07-16"
@@ -109,7 +109,7 @@ The closure sequence above advances `commons/data/ocas-praxis/ingest_state.json`
 (`last_ingest_run`). That file does NOT gate `monitor_journals.py`. The monitor reads a
 SEPARATE state file:
 
-    <hermes-root>/commons/data/monitor_state/journal_ingest_state.json   (key: "latest_mtime")
+    <hermes-home>/commons/data/monitor_state/journal_ingest_state.json   (key: "latest_mtime")
 
 `monitor_journals.py` enqueues a `new_journals` item whenever the max on-disk journal mtime
 exceeds `journal_ingest_state.json.latest_mtime`. If that file is stale (below the max journal
@@ -126,7 +126,7 @@ Advance BOTH in the same closure (and in every post-advance re-sweep re-advance)
 
 ```python
 import os, json, datetime
-MON_STATE="<hermes-root>/commons/data/monitor_state/journal_ingest_state.json"
+MON_STATE="<hermes-home>/commons/data/monitor_state/journal_ingest_state.json"
 mt=max_mt   # the max today-journal mtime computed above
 ms={}
 if os.path.exists(MON_STATE): ms=json.load(open(MON_STATE))
@@ -146,7 +146,7 @@ state to the new max mtime and sweep again. Iterate until `GAPS BRIDGED: 0`, THE
 
 ```bash
 DATE=2026-07-16
-SCRIPTS=<hermes-home>/skills/ocas-forge/scripts
+SCRIPTS=<hermes-home>/profiles/indigo/skills/ocas-forge/scripts
 while true; do
   out=$(python3 "$SCRIPTS/closure_convergence_sweep.py" --date "$DATE" 2>&1)
   echo "$out" | tail -2
@@ -155,7 +155,7 @@ while true; do
   # re-advance state to new max mtime
   python3 << 'PYEOF'
 import os, json, datetime
-PROFILE="<hermes-home>"
+PROFILE="<hermes-home>/profiles/indigo"
 JDIR=f"{PROFILE}/commons/journals"; STATE=f"{PROFILE}/commons/data/ocas-praxis/ingest_state.json"
 DATE="2026-07-16"
 max_mt=0.0
@@ -178,7 +178,7 @@ python3 "$SCRIPTS/verify_genuine_gap_profile.py" --date "$DATE" 2>&1 | tail -2
 
 Re-affirm the account state file. Re-read the FULL file first, then write the complete object
 (never `patch` — duplicate-key JSON corruption pitfall). No inbox reads, no drafts, no sends
-(owner inbox hard rule 2026-06-24).
+(<operator> inbox hard rule 2026-06-24).
 
 **Re-affirm BOTH accounts — never just one.** The re-fire loop enqueues `new_emails` for the
 owner AND indigo accounts together; a closure that only re-affirms `owner` leaves `indigo`'s
@@ -187,12 +187,12 @@ Observed live 2026-07-16T16:45Z: a prior closure advanced `owner`'s state but le
 `verified_second_wave` = None; this session had to re-affirm `indigo` separately.
 
 **Account-field identity check (pitfall, confirmed 2026-07-16T19:24Z closure):** the `account`
-field INSIDE these state files can be MISLABELED — a owner file
-(`last_email_check_owner.json` and/or top-level `last_email_check.json`) was
-found carrying `account: mx.indigo.karasu@gmail.com` (Indigo's address), a pre-existing residual
+field INSIDE these state files can be MISLABELED — a <operator> file
+(`last_email_check_<account-identity>_gmail_com.json` and/or top-level `last_email_check.json`) was
+found carrying `account: <third-party-or-user-email>` (the agent's address), a pre-existing residual
 error. A closure script that only `set-if-absent` PRESERVES the mislabel silently. **Fix:** derive
-the expected account from the file's intended owner — owner flat + top-level = `google-workspace-user`;
-indigo flat + top-level = `mx.indigo.karasu@gmail.com` — and EXPLICITLY REPAIR any mismatch (overwrite
+the expected account from the file's intended owner — owner flat + top-level = `<user-google-email>`;
+indigo flat + top-level = `<third-party-or-user-email>` — and EXPLICITLY REPAIR any mismatch (overwrite
 the wrong value rather than skipping when present). Routing keys off the FILENAME, not this field, so
 the mislabel stays silent until something reads `account` for identity — correct it on sight.
 
@@ -200,7 +200,7 @@ the mislabel stays silent until something reads `account` for identity — corre
 The 2026-07-17 verifier REQUIRES exactly four dispatch-owned email-state files for gate [3] and only
 **WARNS** on the two top-level GWS-snapshot files. Re-affirm ONLY the four required in the code block
 below. Do NOT use the older 2026-07-15 "authoritative flat paths" set
-(`last_email_check_owner.json` + top-level `last_email_check.json`) — the verifier
+(`last_email_check_<account-identity>_gmail_com.json` + top-level `last_email_check.json`) — the verifier
 only WARNS on those two and REQUIRES these four instead. **Following the old flat-only set leaves
 gate [3] failing** (the verifier requires `owner/last_email_check.json` + `last_email_check_owner.json`,
 which the old prose omitted), so the wave re-fires forever. **SUPERSEDES the 2026-07-15
@@ -209,13 +209,13 @@ which the old prose omitted), so the wave re-fires forever. **SUPERSEDES the 202
 - required (satisfies gate [3]): `owner/last_email_check.json`, `last_email_check_owner.json`,
   `last_email_check_indigo.json`, `last_email_check_mx_indigo_karasu_gmail_com.json`
 - warn-only (do NOT rely on to close; they stay null under the monitor re-fire bug):
-  `last_email_check.json`, `last_email_check_owner.json`
+  `last_email_check.json`, `last_email_check_<account-identity>_gmail_com.json`
 
 ```python
 import json, datetime, os
 NOW=datetime.datetime.now(datetime.timezone.utc)
 TS=NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
-DISP="<hermes-home>/commons/data/ocas-dispatch"
+DISP="<hermes-home>/profiles/indigo/commons/data/ocas-dispatch"
 note=("MODE C mixed re-detection closure: journal already evaluated (GENUINE GAP=0), both state "
       "gates advanced. All threads is_new:false and verified present in evidence.jsonl (Path A). "
       "No inbox reads/drafts/sends (READ-ONLY + 2026-06-24 hard rule). Re-affirmed verified_second_wave.")
@@ -243,7 +243,7 @@ for acct, p in files:
 
 The email re-fire loop itself is NOT stoppable by the state file — `monitor_email.py` enqueues whenever
 `actionable > 0` regardless of `is_new`, and the inbox stays unread (write prohibited). The state
-re-affirm suppresses the WORK each cycle; flag the root cause for owner authorization to fix at source
+re-affirm suppresses the WORK each cycle; flag the root cause for <operator> authorization to fix at source
 (gate monitor on `has_new`, or count only `is_new` threads as actionable).
 
 ## Final verification (close-out self-check)
@@ -253,7 +253,7 @@ that leaves any single gate stale re-fires the wave. Every condition below must 
 
 ```python
 import os, json, datetime
-PROFILE="<hermes-home>"
+PROFILE="<hermes-home>/profiles/indigo"
 JDIR=f"{PROFILE}/commons/journals"
 DATE="2026-07-16"  # date of the re-detected journal
 named=f"ocas-mentor/{DATE}/mentor-light-20260716T184039Z.json"  # <- the wave's named journal (example)
@@ -287,7 +287,7 @@ required=["owner/last_email_check.json","last_email_check_owner.json",
 for fn in required:
     p=f"{PROFILE}/commons/data/ocas-dispatch/{fn}"
     print(f"email (required) {fn:50s} verified_second_wave={json.load(open(p)).get('verified_second_wave')}")
-# warn-only (null expected, do NOT block closure): last_email_check.json, last_email_check_owner.json
+# warn-only (null expected, do NOT block closure): last_email_check.json, last_email_check_<account-identity>_gmail_com.json
 ```
 
 Plus: `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` must print `0`, and

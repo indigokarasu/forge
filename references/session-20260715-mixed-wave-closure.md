@@ -34,7 +34,7 @@ to actually execute even when the content is routine/already-evaluated.
 
 Constants (profile-scoped, absolute paths — cron cwd is `/root`, not profile root):
 ```
-PROFILE   = <hermes-home>
+PROFILE   = <hermes-home>/profiles/indigo
 JDIR      = PROFILE/commons/journals
 PRAXIS_EV = PROFILE/commons/data/ocas-praxis/journals_evaluated.jsonl
 DISPATCH_EV= PROFILE/commons/data/ocas-dispatch/journals_evaluated.jsonl
@@ -60,7 +60,7 @@ EMAIL_ST  = PROFILE/commons/data/ocas-dispatch/owner/last_email_check.json
    AGAIN 2026-07-15 even though the parent SKILL.md carries the warning — the
    recipe MUST carry the caution inline. See "Phantom eval entry" below.
 
-3. **Mentor heartbeat**: `find <hermes-root>/commons/journals/ PROFILE/commons/journals/
+3. **Mentor heartbeat**: `find <hermes-home>/commons/journals/ PROFILE/commons/journals/
    -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_3d.txt`; run
    `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
    (stdin redirect — NOT a shell pipe — to dodge the pipe-to-interpreter cron guard).

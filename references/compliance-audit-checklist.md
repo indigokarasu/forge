@@ -32,7 +32,7 @@ SKILL.md YAML frontmatter must include:
 - [ ] `description` — routing logic with trigger phrases, includes "Not for" exclusions
 - [ ] `license` — `MIT` for OCAS skills
 - [ ] `metadata.author` — `Indigo Karasu`
-- [ ] `metadata.email` — `mx.indigo.karasu@gmail.com`
+- [ ] `metadata.email` — `<third-party-or-user-email>`
 - [ ] `metadata.version` — semver string (e.g. `"1.1.0"`)
 - [ ] `metadata.tags` — list of lowercase tags
 - [ ] `metadata.category` — skill category (`ocas`, `infrastructure`, `workflow`, etc.)
@@ -69,7 +69,7 @@ SKILL.md YAML frontmatter must include:
   "version": "X.Y.Z",
   "description": "...",
   "author": "Indigo Karasu",
-  "email": "mx.indigo.karasu@gmail.com",
+  "email": "<third-party-or-user-email>",
   "skill_type": "shortcut|workflow|system",
   "filesystem": {
     "read": ["{agent_root}/commons/data/{skill-id}/"],

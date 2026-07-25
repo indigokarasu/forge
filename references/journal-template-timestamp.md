@@ -6,7 +6,7 @@ Forge scan journals use a dual-timestamp naming pattern: the filename carries a 
 
 ```bash
 TS=$(date -u +%Y%m%dT%H%M%SZ)
-JOURNAL_DIR="<hermes-home>/commons/journals/ocas-forge/$(date -u +%Y-%m-%d)"
+JOURNAL_DIR="<hermes-home>/profiles/indigo/commons/journals/ocas-forge/$(date -u +%Y-%m-%d)"
 mkdir -p "$JOURNAL_DIR"
 
 cat > "$JOURNAL_DIR/forge-scan-${TS}.json" << 'EOF'

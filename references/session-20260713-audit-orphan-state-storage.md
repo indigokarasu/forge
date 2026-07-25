@@ -5,8 +5,8 @@ prints only "Forge skill audit starting" and writes no report file; the manual
 audit is the real procedure).
 
 ## Setup
-- Profile: `indigo` (`<hermes-home>/skills/`).
-- Default profile (`<hermes-root>/skills/`) also holds `ocas-critique/` and
+- Profile: `indigo` (`<hermes-home>/profiles/indigo/skills/`).
+- Default profile (`<hermes-home>/skills/`) also holds `ocas-critique/` and
   `ocas-10xeng-autofix/` remnants — off-limits without explicit cross-profile
   authorization; flagged only.
 

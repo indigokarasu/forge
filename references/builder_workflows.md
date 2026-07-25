@@ -42,13 +42,13 @@ For each gap found, write the missing file or add the missing section. Use consi
 **CRITICAL**: Only sync skills that are OCAS-authored. Before creating any repo or pushing any skill:
 
 1. **Verify the skill name starts with `ocas-`**. If it doesn't, STOP. Do not create a repo, do not push, do not sync. This is the single most important guardrail.
-2. **Verify the author is Indigo Karasu or the operator**. Read `metadata.author` from SKILL.md frontmatter. If the author is anyone else (e.g. `agentskill-sh`, `NousResearch`, `anthropics`), STOP.
+2. **Verify the author is Indigo Karasu or <operator> <operator-last>**. Read `metadata.author` from SKILL.md frontmatter. If the author is anyone else (e.g. `agentskill-sh`, `NousResearch`, `anthropics`), STOP.
 3. **Check against known 3rd-party skills**. Never push these to GitHub under indigokarasu:
    - `api-integration`, `google-workspace`, `review-skill`, `deployment`, `docker-management`, `email-sending`, `git-operations`, `json-formatting`, `csv-parsing`, `database-operations`, `execute-code`, `unit-testing`, `web-extract`, `learn`, `terminal-run`, `title-sessions`, `voice-call`
    - Any `prism-*`, `reflexion-*`, `cek-*` skill (these are from the hermes-agent repo, not OCAS)
-   - Any skill with `metadata.author` that isn't `Indigo Karasu` or `the operator`
+   - Any skill with `metadata.author` that isn't `Indigo Karasu` or `<operator> <operator-last>`
 4. **Check for duplicates**. Before creating a new repo, list existing repos with `gh repo list indigokarasu`. If a repo with the same name (or a close variant like `vpn` vs `ocas-vpn`) already exists, use the existing one. Don't create a duplicate.
-5. **Default to private**. All new repos must be created with `--private`. Never use `--public` unless owner explicitly asks.
+5. **Default to private**. All new repos must be created with `--private`. Never use `--public` unless <operator> explicitly asks.
 
 For each verified OCAS skill:
 1. `gh repo create indigokarasu/{repo} --private` (if no remote exists)
@@ -69,7 +69,7 @@ See `compliance-audit-checklist.md` for the complete checklist.
 
 2. **Pull latest from GitHub.**
    ```bash
-   cd <hermes-root>/skills/ocas-PARENT
+   cd <hermes-home>/skills/ocas-PARENT
    git stash
    git pull origin main
    ```
@@ -80,7 +80,7 @@ See `compliance-audit-checklist.md` for the complete checklist.
 
 5. **Create branch, commit, push, open PR.**
    ```bash
-   cd <hermes-root>/skills/ocas-PARENT
+   cd <hermes-home>/skills/ocas-PARENT
    git checkout -b merge/orphan-skill-name
    git add SKILL.md
    git commit -m "Merge orphan skill: orphan-skill-name into ocas-parent"
@@ -90,15 +90,15 @@ See `compliance-audit-checklist.md` for the complete checklist.
 
 6. **Delete orphan locally.**
    ```bash
-   rm -rf <hermes-root>/skills/orphan-skill-name
-   rm -rf <hermes-root>/skills/category/orphan-skill-name
+   rm -rf <hermes-home>/skills/orphan-skill-name
+   rm -rf <hermes-home>/skills/category/orphan-skill-name
    ```
 
 7. **Update memory** so future sessions know the orphan no longer exists independently.
 
 ### Pitfalls
 
-- **Protected files**: `<hermes-root>/.env` cannot be edited with the `patch` tool — use `terminal` with `sed -i`.
+- **Protected files**: `<hermes-home>/.env` cannot be edited with the `patch` tool — use `terminal` with `sed -i`.
 - **Git stash conflicts**: always `git stash` before pulling. If `stash pop` fails after a merge, resolve manually.
 - **Divergent branches**: some repos may have diverged. Use `git config pull.rebase false` or `git rebase origin/main`.
 - **For-loop `cd` breaks**: running `cd` inside a bash `for` loop breaks after the first iteration because subsequent `cd` calls become relative. Run each pull as a separate command with full paths.
@@ -121,7 +121,7 @@ See `compliance-audit-checklist.md` for the complete checklist.
    find ~/.hermes/skills -name "SKILL.md" | while read file; do
        skill_dir=$(dirname "$file")
        rel_path=${skill_dir#$HOME/.hermes/skills/}
-       repo_path="<hermes-root>/hermes-agent/skills/$rel_path"
+       repo_path="<hermes-home>/hermes-agent/skills/$rel_path"
        if [ -d "$repo_path" ]; then
            diff_output=$(diff -rq "$skill_dir" "$repo_path")
            if [ -n "$diff_output" ]; then
@@ -138,7 +138,7 @@ See `compliance-audit-checklist.md` for the complete checklist.
    find ~/.hermes/skills -name "SKILL.md" | while read file; do
        skill_dir=$(dirname "$file")
        rel_path=${skill_dir#$HOME/.hermes/skills/}
-       repo_path="<hermes-root>/hermes-agent/skills/$rel_path"
+       repo_path="<hermes-home>/hermes-agent/skills/$rel_path"
        if [ ! -d "$repo_path" ] || [ -n "$(diff -rq "$skill_dir" "$repo_path")" ]; then
            mkdir -p "$repo_path"
            cp -r "$skill_dir/." "$repo_path/"
@@ -148,7 +148,7 @@ See `compliance-audit-checklist.md` for the complete checklist.
 
 3. **Fork-and-PR workflow.**
    ```bash
-   cd <hermes-root>/hermes-agent
+   cd <hermes-home>/hermes-agent
    git checkout -b skill-updates-$(date +%Y%m%d)
    git add skills/
    git commit -m "OCAS: Sync local skill changes to repository"

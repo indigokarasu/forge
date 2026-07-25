@@ -41,11 +41,11 @@ See `ocas-dispatch` `references/email-evidence-verification-gap.md` and
 evidence.jsonl before trusting second-wave email classification."
 
 ## What the 2026-07-17 closure confirmed
-A re-detection fire carried 10 owner threads (all `is_new: false`; monitor
+A re-detection fire carried 10 <operator> threads (all `is_new: false`; monitor
 heuristically flagged 3 high-priority). The verifier showed all 10 genuinely
 present with `action=none` tokens — including the high-priority ones correctly
 downgraded on inspection (DoorDash order = transactional confirmation;
-Consulting reply = owner already responded; Profound screener = cron autonomous
+Consulting reply = <operator> already responded; Profound screener = cron autonomous
 override, non-deadline/legal). The prior wave had truly done the work; the flag
 was honest, so advance + close was correct. The gate exists to catch the case
 where it ISN'T — never close a mixed wave on the flag alone.

@@ -73,11 +73,11 @@ run_id). Never mint a new `dispatch-wave-*.json` (re-fires the dispatcher).
 - `dispatch-wave-20260714T042154Z.json` rewritten (`state_updated:true`).
 - `last_ingest_run` → `2026-07-14T04:49:21Z`.
 - Verification: 0 phantoms; all bridged 1:1 in both eval stores; post-cleanup 0 gaps.
-- Email: 4 owner threads all `is_new:false`/informational, already `action:none` in
+- Email: 4 <operator> threads all `is_new:false`/informational, already `action:none` in
   evidence.jsonl → second-wave, no triage/sends.
 
 ## Email side note
-All 4 owner threads were second-wave (`is_new:false`). Per hard rule, no triage/drafts/inbox
+All 4 <operator> threads were second-wave (`is_new:false`). Per hard rule, no triage/drafts/inbox
 modification even under explicit-run. `verify_evidence_threads.py` confirmed structured
 `action:none` in evidence.jsonl. No Chronicle-worthy signals (expert-network solicitations +
 stale vendor thread + routine pharmacy notification).
@@ -111,7 +111,7 @@ Recovery (hand-run, verified):
 3. Rewrote existing `dispatch-wave-20260714T121923Z.json` (same run_id) via `write_file`:
    `state_updated:true`, `outcome: fifth_wave_redetection_no_op_recovery_closed`, corrected
    `email_triage` block (account `owner`, `actionable:0`, classification `second-wave`). Do NOT mint new.
-4. Stamped email state: BOTH `last_email_check_owner.json` (sanitized canonical the
+4. Stamped email state: BOTH `last_email_check_<account-identity>_gmail_com.json` (sanitized canonical the
    dispatcher reads — had stale `actionable:5`) AND `last_email_check_owner.json` (friendly — had
    `actionable:0`) set to `actionable:0`, `last_dispatch` set, stale-false-positive note. The dispatcher
    reads the sanitized-named file, so it MUST be stamped or the false `actionable:5` re-fires.

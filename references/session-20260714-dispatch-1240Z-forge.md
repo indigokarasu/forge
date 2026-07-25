@@ -8,7 +8,7 @@ appears after the prior recovery closed.
 Dispatcher fired `new_journals` (explicit-run override: "run Forge journal scan / run Mentor
 light heartbeat / run Praxis journal ingest") + `new_emails` at 2026-07-14T12:40Z.
 - Journal `new_file`: `ocas-mentor/2026-07-14/mentor-light-20260714T123550Z.json` → ALREADY in BOTH eval stores.
-- Email: 5 owner threads, all `is_new:false`.
+- Email: 5 <operator> threads, all `is_new:false`.
 
 ## Context — prior recovery
 The 12:21Z recovery wave (`dispatch-wave-20260714T121923Z.json`, rewritten
@@ -41,7 +41,7 @@ producing genuinely-new outputs (`forge-scan-20260714T124439Z.json`,
 6. Advanced `last_ingest_run` to max mtime of wave work (12:44:49); resynced counters to 21,174.
 7. Convergence re-sweep (mtime >= last_ingest_run): 0 gaps.
 8. Email: all `is_new=false` → second-wave. Stamped BOTH
-   `last_email_check_owner.json` (canonical the dispatcher reads) +
+   `last_email_check_<account-identity>_gmail_com.json` (canonical the dispatcher reads) +
    `last_email_check_owner.json` to `actionable:0` + `last_dispatch`.
 9. Wrote `dispatch-wave-20260714T124439Z.json` (renamed from a malformed
    `dispatch-wave-20260714T1244.json` — see SKILL.md gotcha).

@@ -30,7 +30,7 @@ absent → every bridged journal reported as a PHANTOM.
 and check `os.path.exists(os.path.join(JOURNALS_ROOT, rel))`.
 
 (Profile-scoped path is `{agent_root}/commons/journals/`; legacy root
-`<hermes-root>/commons/journals/` also carries a stale copy. Prefer the
+`<hermes-home>/commons/journals/` also carries a stale copy. Prefer the
 profile path for the authoritative check. Both must be the anchor, not
 `commons/` alone.)
 

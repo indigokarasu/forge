@@ -30,7 +30,7 @@ After the genuine ingest (and after `gap_backfill.py` if you ran it), run a full
 scan:
 
 1. Glob `commons/journals/ocas-*/YYYY-MM-DD/*.json` (profile-scoped:
-   `<hermes-home>/commons/journals/`).
+   `<hermes-home>/profiles/indigo/commons/journals/`).
 2. Skip `dispatch-wave-*` meta-journals (they are bridged separately).
 3. For every on-disk file, require membership in BOTH stores:
    - praxis-eval store, key `journal_id` = `ocas-<skill>/<DATE>/<file>.json`
