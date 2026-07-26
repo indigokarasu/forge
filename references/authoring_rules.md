@@ -187,11 +187,7 @@ Security scanners also flag **descriptions** of credential structure and token s
 
 **Pattern:** When a section describes *what credentials exist* or *where they live*, move it to a reference file and replace with a one-line pointer.
 
-<<<<<<< Updated upstream
-**Example (May 2026):** Bones' SKILL.md had a config-default description naming platforms and trading settings inline. Dispatch's fallback cascade named `<user-google-email>.json` directly, and its Gotchas repeated the `<third-party-or-user-email>.json` path with error details. All moved to reference files:
-=======
 **Example (May 2026):** Bones' SKILL.md had a config-default description naming platforms and trading settings inline. Dispatch's fallback cascade named `<user-google-email>.json` directly, and its Gotchas repeated the `<agent-email>.json` path with error details. All moved to reference files:
->>>>>>> Stashed changes
 - Config description → `references/config-default.json`
 - Token paths/status → `references/token_status.md`
 - Wallet setup → `references/account-creation.md`
@@ -559,11 +555,7 @@ metadata:
 
 The `author` field lives under `metadata:` in the YAML frontmatter (not at the top level). When editing authors, always search for both `metadata:` → `author:` and top-level `author:` — some older skills may have it in the wrong location.
 
-<<<<<<< Updated upstream
-**Author normalization:** All skills authored by Indigo Karasu should use the canonical form `Indigo Karasu (indigokarasu)`. When normalizing, be careful with skills that already have the full form — a naive find/replace of `Indigo Karasu` will double the suffix (e.g., `Indigo Karasu (indigokarasu) (indigokarasu)`). Always check for the full form first.
-=======
 **Author normalization:** All skills authored by <agent-name> should use the canonical form `<agent-name> (<agent-handle>)`. When normalizing, be careful with skills that already have the full form — a naive find/replace of `<agent-name>` will double the suffix (e.g., `<agent-name> (<agent-handle>) (<agent-handle>)`). Always check for the full form first.
->>>>>>> Stashed changes
 
 **Hermes-specific metadata (from [Nous Research docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)):**
 - `metadata.hermes.tags` — array of tag strings for `skills_list` grouping

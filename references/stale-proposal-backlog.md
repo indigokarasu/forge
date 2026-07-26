@@ -13,17 +13,10 @@ Forge's dispatch integration says "scan for unprocessed proposals/decisions" but
 
 ```bash
 # Find proposals older than 30 days in proposals/
-<<<<<<< Updated upstream
 find <hermes-home>/profiles/indigo/commons/data/ocas-forge/proposals/ -name "vp_*.json" -mtime +30
 
 # Cross-reference against processed/ and intake/processed/
 FORGE_DATA="<hermes-home>/profiles/indigo/commons/data/ocas-forge"
-=======
-find ~/.hermes/profiles/indigo/commons/data/ocas-forge/proposals/ -name "vp_*.json" -mtime +30
-
-# Cross-reference against processed/ and intake/processed/
-FORGE_DATA="~/.hermes/profiles/indigo/commons/data/ocas-forge"
->>>>>>> Stashed changes
 for f in "$FORGE_DATA/proposals"/vp_*.json; do
     base=$(basename "$f")
     if ! grep -q "$base" "$FORGE_DATA/intake/processed/"*.json "$FORGE_DATA/processed/"*.json 2>/dev/null; then

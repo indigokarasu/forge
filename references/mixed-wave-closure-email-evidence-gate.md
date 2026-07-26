@@ -48,9 +48,6 @@ downgraded on inspection (DoorDash order = transactional confirmation;
 Consulting reply = <operator> already responded; Profound screener = cron autonomous
 override, non-deadline/legal). The prior wave had truly done the work; the flag
 was honest, so advance + close was correct. The gate exists to catch the case
-<<<<<<< Updated upstream
-where it ISN'T — never close a mixed wave on the flag alone.
-=======
 where it ISN'T — never close a mixed wave on the flag alone.
 
 ## Worked example — 2026-07-22 13:45Z closure (priority-80 security sign-in)
@@ -69,4 +66,3 @@ prevent. Lesson: a provider "new sign-in" notice is a distinct category from a
 security-SCAN alert (GitGuardian/Snyk in the dispatch SKILL.md Security Alerts
 section); when the access source matches the owner's own device/location,
 `action: none` is correct and the gate confirms it.
->>>>>>> Stashed changes

@@ -64,18 +64,10 @@ ALWAYS, after any closure/state-advance script exits:
 
 ## Reproduction (post-fix regression guard)
 ```bash
-<<<<<<< Updated upstream
 cd <hermes-home>/profiles/indigo/skills/ocas-forge
 python3 scripts/dispatch_redetection_close.py \
   --new-files ocas-mentor/2026-07-15/mentor-light-20260715T212021Z.json \
   --wave-run-id wave-redet-20260715T2120Z
 python3 -c "import json; s=json.load(open('<hermes-home>/profiles/indigo/commons/data/ocas-praxis/ingest_state.json')); print(s['last_ingest_run'])"
-=======
-cd ~/.hermes/profiles/indigo/skills/ocas-forge
-python3 scripts/dispatch_redetection_close.py \
-  --new-files ocas-mentor/2026-07-15/mentor-light-20260715T212021Z.json \
-  --wave-run-id wave-redet-20260715T2120Z
-python3 -c "import json; s=json.load(open('~/.hermes/profiles/indigo/commons/data/ocas-praxis/ingest_state.json')); print(s['last_ingest_run'])"
->>>>>>> Stashed changes
 # expect 2026-07-15T21:25:19.381925+00:00 (NOT 1970-01-01)
 ```

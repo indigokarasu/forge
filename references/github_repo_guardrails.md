@@ -27,11 +27,7 @@ Everything else defaults to private on creation but CAN be made public by asking
 
 Before creating ANY GitHub repo, verify:
 
-<<<<<<< Updated upstream
-1. **Author check.** Read `metadata.author` from the skill's frontmatter. If the author is not `Indigo Karasu`, `<operator> <operator-last>`, or `indigokarasu`, **STOP.**
-=======
 1. **Author check.** Read `metadata.author` from the skill's frontmatter. If the author is not `<agent-name>`, `<user>`, or `<agent-handle>`, **STOP.**
->>>>>>> Stashed changes
 2. **OCAS prefix check.** Only skills with an `ocas-` prefix in `~/.hermes/skills/` get repos.
 3. **Bundled skill check.** If the skill name matches a known hermes-agent built-in (`api-integration`, `google-workspace`, `deployment`, `docker-management`, `email-sending`, `git-operations`, `json-formatting`, `csv-parsing`, `database-operations`, `execute-code`, `unit-testing`, `web-extract`, `learn`, `terminal-run`, `title-sessions`, `voice-call`, `prism-*`, `reflexion-*`, `cek-*`), **STOP.**
 4. **Duplicate check.** Run `gh repo list` first. If a repo with the same or similar name exists, use the existing one. Ask <operator> which to keep if ambiguous.

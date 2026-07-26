@@ -13,13 +13,8 @@ The dispatcher can only detect *new journal files* — not whether they've been 
 
 There are TWO eval files. Both must exist and both must be checked:
 ```bash
-<<<<<<< Updated upstream
 PRAXIS_EVAL="<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl"
 DISPATCH_EVAL="<hermes-home>/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"
-=======
-PRAXIS_EVAL="~/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl"
-DISPATCH_EVAL="~/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"
->>>>>>> Stashed changes
 ```
 The praxis eval file is authoritative for "has this been content-evaluated?" The dispatch eval file is authoritative for "has a dispatch wave registered this?" A journal can be in one but NOT the other.
 
@@ -199,11 +194,7 @@ Security scanning services (GitGuardian, Snyk, Dependabot, etc.) send alert emai
 
 ### Eval File Location (authoritative)
 
-<<<<<<< Updated upstream
 The eval file is at: `<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl`
-=======
-The eval file is at: `~/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl`
->>>>>>> Stashed changes
 
 There are legacy copies at `commons/journals/ocas-praxis/journals_evaluated.jsonl` and `commons/data/praxis/journals_evaluated.jsonl` — these are NOT the authoritative copy. Always use the path above for both reads and writes.
 
@@ -346,7 +337,6 @@ Each entry: one JSON object per line, relative path (no absolute paths). **Field
 
 ```python
 # CORRECT (cron-safe, works regardless of CWD)
-<<<<<<< Updated upstream
 relpath = os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')
 
 # CORRECT (if you've os.chdir'd to profile root first)
@@ -355,34 +345,16 @@ relpath = os.path.relpath(fpath, 'commons/journals')
 
 # WRONG — produces garbage with ../../ prefixes when CWD != profile root
 relpath = os.path.relpath(fpath, 'commons/journals')  # if CWD is /root, resolves to <commons>/journals/
-=======
-relpath = os.path.relpath(fpath, '~/.hermes/profiles/indigo/commons/journals')
-
-# CORRECT (if you've os.chdir'd to profile root first)
-os.chdir('~/.hermes/profiles/indigo')
-relpath = os.path.relpath(fpath, 'commons/journals')
-
-# WRONG — produces garbage with ../../ prefixes when CWD != profile root
-relpath = os.path.relpath(fpath, 'commons/journals')  # if CWD is /root, resolves to <fs-root>/commons/journals/
->>>>>>> Stashed changes
 
 # WRONG — produces "commons/journals/ocas-praxis/..." (still prefixed)
 relpath = os.path.relpath(fpath, '.')
 ```
 
-<<<<<<< Updated upstream
 The cron working directory is `/root`, NOT the profile root. A relative base like `'commons/journals'` resolves against `<commons>/journals/` (which doesn't exist), producing `../../../../../.hermes/profiles/indigo/commons/journals/...` paths. Always use absolute paths for relpath base dirs in cron scripts. Confirmed 2026-06-26 dispatch #169.
 
 **Gap backfill false positive from cross-directory relpath (confirmed 2026-06-27T23:20Z):** When the gap backfill `find` scans both `<hermes-home>/profiles/indigo/commons/journals/` and `<hermes-home>/commons/journals/` (the non-profile commons), `os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')` for commons files produces `../../../../commons/journals/ocas-mentor/...` paths. These NEVER match eval entries (which use clean `ocas-mentor/...` relative paths), so the gap scan reports ALL commons journals as "missing" — a false-positive list of 100+ entries.
 
 **Fix:** During gap backfill, ALWAYS check the eval file by **filename only** (`grep -qF "$basename" eval_file`) rather than by full path. If the basename is found anywhere in the eval file, the journal is already tracked — skip. Do NOT add the `../../../../commons/journals/...` version as a new entry. Better: skip the `<hermes-home>/commons/journals/` directory entirely in the gap scan — it is monitored by a different dispatcher instance.
-=======
-The cron working directory is `/root`, NOT the profile root. A relative base like `'commons/journals'` resolves against `<fs-root>/commons/journals/` (which doesn't exist), producing `../../../../../.hermes/profiles/indigo/commons/journals/...` paths. Always use absolute paths for relpath base dirs in cron scripts. Confirmed 2026-06-26 dispatch #169.
-
-**Gap backfill false positive from cross-directory relpath (confirmed 2026-06-27T23:20Z):** When the gap backfill `find` scans both `~/.hermes/profiles/indigo/commons/journals/` and `~/.hermes/commons/journals/` (the non-profile commons), `os.path.relpath(fpath, '~/.hermes/profiles/indigo/commons/journals')` for commons files produces `../../../../commons/journals/ocas-mentor/...` paths. These NEVER match eval entries (which use clean `ocas-mentor/...` relative paths), so the gap scan reports ALL commons journals as "missing" — a false-positive list of 100+ entries.
-
-**Fix:** During gap backfill, ALWAYS check the eval file by **filename only** (`grep -qF "$basename" eval_file`) rather than by full path. If the basename is found anywhere in the eval file, the journal is already tracked — skip. Do NOT add the `../../../../commons/journals/...` version as a new entry. Better: skip the `~/.hermes/commons/journals/` directory entirely in the gap scan — it is monitored by a different dispatcher instance.
->>>>>>> Stashed changes
 
 **Symptom:** Gap scan reports 120+ "missing" journals, all with `../../../../commons/j...` prefixes. Manual verification of 5 random entries shows 100% already in eval under clean relative paths. This is a path format false positive, not genuine gaps.
 
@@ -675,11 +647,7 @@ now = datetime.now(timezone.utc)  # AttributeError: module has no 'now'
 
 ```python
 # CORRECT — absolute path, CWD-independent
-<<<<<<< Updated upstream
 relpath = os.path.relpath(fpath, '<hermes-home>/profiles/indigo/commons/journals')
-=======
-relpath = os.path.relpath(fpath, '~/.hermes/profiles/indigo/commons/journals')
->>>>>>> Stashed changes
 
 # WRONG — relative base resolves against CWD (/root in cron), not profile root
 relpath = os.path.relpath(fpath, 'commons/journals')
@@ -692,15 +660,9 @@ The `write_file` tool silently wraps long lines (~80 chars), splitting Python st
 ```python
 # Written via write_file (long lines):
 DISPATCH_J_DIR = "/rootfiles/indigo/commons/journals/ocas-dispatch/2026-06-30"
-<<<<<<< Updated upstream
 #     ↑ WRONG: "<hermes-home>/profiles/..." was split at ~80 chars
 
 PRAXIS_EVAL = "<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evalPRAXIS_EVAL = "<hermes-home>/profiles/indigo/commons/data/ocas-prauated.jsonl"
-=======
-#     ↑ WRONG: "~/.hermes/profiles/..." was split at ~80 chars
-
-PRAXIS_EVAL = "~/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evalPRAXIS_EVAL = "~/.hermes/profiles/indigo/commons/data/ocas-prauated.jsonl"
->>>>>>> Stashed changes
 #                                                 ↑ WRONG: two assignments merged into one line
 ```
 

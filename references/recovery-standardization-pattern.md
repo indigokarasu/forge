@@ -40,8 +40,4 @@ After all subagents complete:
 - Customize Recovery Behavior to reference skill's actual patterns (not generic copy-paste)
 - AUDIT skills need gap checks only, not full rewrites
 - On-demand skills: gap detection is N/A
-<<<<<<< Updated upstream
 - Storage layout paths vary by skill (some use `{agent_root}/commons/data/`, others `<hermes-home>/data/`)
-=======
-- Storage layout paths vary by skill (some use `{agent_root}/commons/data/`, others `~/.hermes/data/`)
->>>>>>> Stashed changes

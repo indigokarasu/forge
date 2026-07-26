@@ -31,13 +31,8 @@ SKILL.md YAML frontmatter must include:
 - [ ] `name` — hyphenated skill identifier
 - [ ] `description` — routing logic with trigger phrases, includes "Not for" exclusions
 - [ ] `license` — `MIT` for OCAS skills
-<<<<<<< Updated upstream
-- [ ] `metadata.author` — `Indigo Karasu`
-- [ ] `metadata.email` — `<third-party-or-user-email>`
-=======
 - [ ] `metadata.author` — `<agent-name>`
 - [ ] `metadata.email` — `<agent-email>`
->>>>>>> Stashed changes
 - [ ] `metadata.version` — semver string (e.g. `"1.1.0"`)
 - [ ] `metadata.tags` — list of lowercase tags
 - [ ] `metadata.category` — skill category (`ocas`, `infrastructure`, `workflow`, etc.)
@@ -73,13 +68,8 @@ SKILL.md YAML frontmatter must include:
   "name": "ocas-{skill}",
   "version": "X.Y.Z",
   "description": "...",
-<<<<<<< Updated upstream
-  "author": "Indigo Karasu",
-  "email": "<third-party-or-user-email>",
-=======
   "author": "<agent-name>",
   "email": "<agent-email>",
->>>>>>> Stashed changes
   "skill_type": "shortcut|workflow|system",
   "filesystem": {
     "read": ["{agent_root}/commons/data/{skill-id}/"],
