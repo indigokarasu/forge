@@ -22,14 +22,6 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
     is what monitor_journals.py actually gates on; the root copy alone gave a
     false "closed" while the profile copy stayed stale and re-fired the wave.
   - Gate [3] now REQUIRES the dispatch-owned account copies
-<<<<<<< Updated upstream
-    (owner/last_email_check.json, last_email_check_owner.json, and the indigo
-    equivalents) and only WARNS on the two top-level GWS-snapshot files
-    (last_email_check.json, last_email_check_owner.json),
-    which stay null under the documented monitor re-fire bug and are the
-    known-uncloseable gate. Requiring them made every operator closure fail
-    gate [3] regardless of real state.
-=======
     (owner/last_email_check.json, last_email_check_owner.json, last_email_check_indigo.json)
     and only WARNS on the three top-level GWS-snapshot files
     (last_email_check.json, last_email_check_owner.json,
@@ -40,7 +32,6 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
     variants) are WARN, not required — corrected 2026-07-22: the indigo GWS-snapshot
     was wrongly in the required list, causing a spurious "gates STALE" on every
     combined/multi-account closure that included Indigo threads.
->>>>>>> Stashed changes
 """
 import os, sys, json, argparse, datetime
 

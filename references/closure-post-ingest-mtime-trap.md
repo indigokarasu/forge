@@ -46,11 +46,7 @@ then re-run the full close sequence:
 
 ```python
 import os, glob, json, datetime
-<<<<<<< Updated upstream
 ROOT = "<hermes-home>/profiles/indigo"
-=======
-ROOT = "~/.hermes/profiles/indigo"
->>>>>>> Stashed changes
 DATE = "2026-07-17"
 mt = max(os.path.getmtime(p) for d in [
     f"{ROOT}/commons/journals/ocas-praxis/{DATE}",

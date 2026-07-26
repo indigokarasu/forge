@@ -4,11 +4,7 @@
 Dispatch-triggered journal scan at 2026-06-21T04:22Z. Clean scan — all 11 proposal files already processed.
 
 ## Execution
-<<<<<<< Updated upstream
 - Data root: `<hermes-home>/profiles/indigo/commons/data/ocas-forge/`
-=======
-- Data root: `~/.hermes/profiles/indigo/commons/data/ocas-forge/`
->>>>>>> Stashed changes
 - Proposals in `proposals/`: 11 (all already in `intake/processed/`)
 - Unprocessed files: 0
 - Result: `no_op` — no work to do

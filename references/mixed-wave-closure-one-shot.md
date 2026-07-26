@@ -75,11 +75,7 @@ structural rules confirmed working:
    **PITFALL — inline-heredoc timestamp scoping (observed 2026-07-16 closure):** The recommended form is a `/tmp/run_pipeline_<TS>.py` FILE run as `python3 /tmp/run_pipeline_<TS>.py` — module-level `TS`/`DATE`/`NOW` assignments persist for the whole run. If you instead run an INLINE `python3 <<'PYEOF'` heredoc with `TS=...`/`DATE=...`/`NOW=...` set as shell-prefix assignments in the same terminal command (e.g. `TS=$(date ...); python3 <<'PYEOF' ... 'dispatch-wave-'+TS ... PYEOF`), the Python subprocess does NOT inherit shell variables — you get `NameError: name 'TS' is not defined` on a later line. Fix: redefine `TS`/`DATE`/`NOW` INSIDE every heredoc block, OR (preferred) keep using the `/tmp/run_pipeline_<TS>.py` file form so the assignments live in-module.
 2. **Forge no-op scan** — count unprocessed `vp_*`/`vd_*` with `python3 skills/ocas-forge/scripts/forge_count_unprocessed.py` (bounded walk of `intake/` ONLY; excludes `intake/processed/`, the `proposals/` SOURCE MIRROR, and the top-level `processed/` dir). A hand-rolled recursive glob/`find` over the whole `ocas-forge` tree reintroduces the false-`genuine` trap (sweeps up `proposals/` + top-level `processed/`, both duplicate mirrors — bit a 2026-07-16 closure orchestrator, wrote `unprocessed_proposals: 11`/`genuine` when true value was 0). Write `ocas-forge/<DATE>/forge-scan-<TS>.json` with `unprocessed_proposals` = that count and `action: routine_no_op` iff count==0. Capture its relpath `FORGE_SCAN_REL` VERBATIM — recomposing `<TS>` for the bridge writes a phantom eval line.
 3. **Mentor heartbeat** — build the 3-day file list
-<<<<<<< Updated upstream
    (`find <hermes-home>/commons/journals/ <hermes-home>/profiles/indigo/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
-=======
-   (`find ~/.hermes/commons/journals/ ~/.hermes/profiles/indigo/commons/journals/ -name '*.json' -mtime -3 | sort -u > /tmp/mentor_files_<TS>.txt`)
->>>>>>> Stashed changes
    and run `python3 skills/ocas-mentor/scripts/cron-heartbeat-light.py < /tmp/mentor_files_3d.txt`
    (**stdin redirect, NOT a shell pipe** — `cat file | python3` trips `tirith:pipe_to_interpreter`
    and hangs the cron job at `approval_pending`). Capture the ACTUAL heartbeat journal by
@@ -154,15 +150,9 @@ today-dated relpaths that do not exist on disk, and drop the dangling lines:
 
 ```python
 import os, json
-<<<<<<< Updated upstream
 J = "<hermes-home>/profiles/indigo/commons/journals"
 for Ev in ["<hermes-home>/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
            "<hermes-home>/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
-=======
-J = "~/.hermes/profiles/indigo/commons/journals"
-for Ev in ["~/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
-           "~/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl"]:
->>>>>>> Stashed changes
     with open(Ev) as f:
         lines = f.readlines()
     out = [ln for ln in lines

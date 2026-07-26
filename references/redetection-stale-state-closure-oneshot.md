@@ -12,11 +12,7 @@ Confirmed live occurrences: 2026-07-14T14:59Z, 2026-07-15T21:20Z, 2026-07-16T03:
 ```python
 python3 << 'PYEOF'
 import os, json, datetime
-<<<<<<< Updated upstream
 PROFILE="<hermes-home>/profiles/indigo"
-=======
-PROFILE="~/.hermes/profiles/indigo"
->>>>>>> Stashed changes
 JDIR=f"{PROFILE}/commons/journals"
 PRAXIS_EV=f"{PROFILE}/commons/data/ocas-praxis/journals_evaluated.jsonl"
 DISPATCH_EV=f"{PROFILE}/commons/data/ocas-dispatch/journals_evaluated.jsonl"
@@ -65,11 +61,7 @@ If MODE C: do NOT load Forge/Mentor/Praxis. Do NOT run `praxis_ingest_run.py`. D
 
 ```bash
 DATE=2026-07-16   # date of the re-detected journal
-<<<<<<< Updated upstream
 SCRIPTS=<hermes-home>/profiles/indigo/skills/ocas-forge/scripts
-=======
-SCRIPTS=~/.hermes/profiles/indigo/skills/ocas-forge/scripts
->>>>>>> Stashed changes
 # 1. Convergence sweep (ungated) — loop until it bridges 0
 while true; do
   out=$(python3 "$SCRIPTS/closure_convergence_sweep.py" --date "$DATE" 2>&1)
@@ -86,11 +78,7 @@ may land during the sweep):
 ```python
 python3 << 'PYEOF'
 import os, json, datetime
-<<<<<<< Updated upstream
 PROFILE="<hermes-home>/profiles/indigo"
-=======
-PROFILE="~/.hermes/profiles/indigo"
->>>>>>> Stashed changes
 JDIR=f"{PROFILE}/commons/journals"
 STATE=f"{PROFILE}/commons/data/ocas-praxis/ingest_state.json"
 DATE="2026-07-16"
@@ -121,11 +109,7 @@ The closure sequence above advances `commons/data/ocas-praxis/ingest_state.json`
 (`last_ingest_run`). That file does NOT gate `monitor_journals.py`. The monitor reads a
 SEPARATE state file:
 
-<<<<<<< Updated upstream
     <hermes-home>/commons/data/monitor_state/journal_ingest_state.json   (key: "latest_mtime")
-=======
-    ~/.hermes/commons/data/monitor_state/journal_ingest_state.json   (key: "latest_mtime")
->>>>>>> Stashed changes
 
 `monitor_journals.py` enqueues a `new_journals` item whenever the max on-disk journal mtime
 exceeds `journal_ingest_state.json.latest_mtime`. If that file is stale (below the max journal
@@ -142,11 +126,7 @@ Advance BOTH in the same closure (and in every post-advance re-sweep re-advance)
 
 ```python
 import os, json, datetime
-<<<<<<< Updated upstream
 MON_STATE="<hermes-home>/commons/data/monitor_state/journal_ingest_state.json"
-=======
-MON_STATE="~/.hermes/commons/data/monitor_state/journal_ingest_state.json"
->>>>>>> Stashed changes
 mt=max_mt   # the max today-journal mtime computed above
 ms={}
 if os.path.exists(MON_STATE): ms=json.load(open(MON_STATE))
@@ -166,11 +146,7 @@ state to the new max mtime and sweep again. Iterate until `GAPS BRIDGED: 0`, THE
 
 ```bash
 DATE=2026-07-16
-<<<<<<< Updated upstream
 SCRIPTS=<hermes-home>/profiles/indigo/skills/ocas-forge/scripts
-=======
-SCRIPTS=~/.hermes/profiles/indigo/skills/ocas-forge/scripts
->>>>>>> Stashed changes
 while true; do
   out=$(python3 "$SCRIPTS/closure_convergence_sweep.py" --date "$DATE" 2>&1)
   echo "$out" | tail -2
@@ -179,11 +155,7 @@ while true; do
   # re-advance state to new max mtime
   python3 << 'PYEOF'
 import os, json, datetime
-<<<<<<< Updated upstream
 PROFILE="<hermes-home>/profiles/indigo"
-=======
-PROFILE="~/.hermes/profiles/indigo"
->>>>>>> Stashed changes
 JDIR=f"{PROFILE}/commons/journals"; STATE=f"{PROFILE}/commons/data/ocas-praxis/ingest_state.json"
 DATE="2026-07-16"
 max_mt=0.0
@@ -215,21 +187,12 @@ Observed live 2026-07-16T16:45Z: a prior closure advanced `owner`'s state but le
 `verified_second_wave` = None; this session had to re-affirm `indigo` separately.
 
 **Account-field identity check (pitfall, confirmed 2026-07-16T19:24Z closure):** the `account`
-<<<<<<< Updated upstream
-field INSIDE these state files can be MISLABELED — a <operator> file
-(`last_email_check_<account-identity>_gmail_com.json` and/or top-level `last_email_check.json`) was
-found carrying `account: <third-party-or-user-email>` (the agent's address), a pre-existing residual
-error. A closure script that only `set-if-absent` PRESERVES the mislabel silently. **Fix:** derive
-the expected account from the file's intended owner — owner flat + top-level = `<user-google-email>`;
-indigo flat + top-level = `<third-party-or-user-email>` — and EXPLICITLY REPAIR any mismatch (overwrite
-=======
 field INSIDE these state files can be MISLABELED — a <operator> file
 (`last_email_check_<account-identity>_gmail_com.json` and/or top-level `last_email_check.json`) was
 found carrying `account: <agent-email>` (the agent's address), a pre-existing residual
 error. A closure script that only `set-if-absent` PRESERVES the mislabel silently. **Fix:** derive
 the expected account from the file's intended owner — owner flat + top-level = `<user-google-email>`;
 indigo flat + top-level = `<agent-email>` — and EXPLICITLY REPAIR any mismatch (overwrite
->>>>>>> Stashed changes
 the wrong value rather than skipping when present). Routing keys off the FILENAME, not this field, so
 the mislabel stays silent until something reads `account` for identity — correct it on sight.
 
@@ -252,11 +215,7 @@ which the old prose omitted), so the wave re-fires forever. **SUPERSEDES the 202
 import json, datetime, os
 NOW=datetime.datetime.now(datetime.timezone.utc)
 TS=NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
-<<<<<<< Updated upstream
 DISP="<hermes-home>/profiles/indigo/commons/data/ocas-dispatch"
-=======
-DISP="~/.hermes/profiles/indigo/commons/data/ocas-dispatch"
->>>>>>> Stashed changes
 note=("MODE C mixed re-detection closure: journal already evaluated (GENUINE GAP=0), both state "
       "gates advanced. All threads is_new:false and verified present in evidence.jsonl (Path A). "
       "No inbox reads/drafts/sends (READ-ONLY + 2026-06-24 hard rule). Re-affirmed verified_second_wave.")
@@ -294,11 +253,7 @@ that leaves any single gate stale re-fires the wave. Every condition below must 
 
 ```python
 import os, json, datetime
-<<<<<<< Updated upstream
 PROFILE="<hermes-home>/profiles/indigo"
-=======
-PROFILE="~/.hermes/profiles/indigo"
->>>>>>> Stashed changes
 JDIR=f"{PROFILE}/commons/journals"
 DATE="2026-07-16"  # date of the re-detected journal
 named=f"ocas-mentor/{DATE}/mentor-light-20260716T184039Z.json"  # <- the wave's named journal (example)
