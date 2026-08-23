@@ -35,13 +35,13 @@ CORRECTED 2026-07-17 (closure blind-spot fixes):
 """
 import os, sys, json, argparse, datetime
 
-PROFILE = "<hermes-home>/profiles/indigo"
+PROFILE = os.environ.get("HERMES_HOME", os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo")))
 JDIR = os.path.join(PROFILE, "commons", "journals")
 PRAXIS_EV = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "journals_evaluated.jsonl")
 DISPATCH_EV = os.path.join(PROFILE, "commons", "data", "ocas-dispatch", "journals_evaluated.jsonl")
 PRAXIS_STATE = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "ingest_state.json")
 # TWO monitor copies (both must be advanced — see ocas-forge/ocas-dispatch SKILL.md)
-MON_STATE_ROOT = "<hermes-home>/commons/data/monitor_state/journal_ingest_state.json"
+MON_STATE_ROOT = os.environ.get("HERMES_HOME", os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo"))).replace("/profiles/indigo", "/commons/data/monitor_state/journal_ingest_state.json")
 MON_STATE_PROFILE = os.path.join(PROFILE, "commons", "data", "monitor_state", "journal_ingest_state.json")
 EMAIL_DIR = os.path.join(PROFILE, "commons", "data", "ocas-dispatch")
 
