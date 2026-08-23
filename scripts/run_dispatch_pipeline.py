@@ -22,8 +22,8 @@ import sys
 import argparse
 from datetime import datetime, timezone
 
-JOURNALS_BASE = 'os.path.expanduser("~/.hermes")/profiles/indigo/commons/journals'
-PRAXIS_DATA = 'os.path.expanduser("~/.hermes")/profiles/indigo/commons/data/ocas-praxis'
+JOURNALS_BASE = os.path.expanduser('~/.hermes/profiles/indigo/commons/journals')
+PRAXIS_DATA = os.path.expanduser('~/.hermes/profiles/indigo/commons/data/ocas-praxis')
 EVAL_FILE = os.path.join(PRAXIS_DATA, 'journals_evaluated.jsonl')
 STATE_FILE = os.path.join(PRAXIS_DATA, 'ingest_state.json')
 

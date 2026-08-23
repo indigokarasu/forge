@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 OPERATOR_EMAIL = os.environ.get("OCAS_OPERATOR_EMAIL", "operator@example.com")
 """
 Complete mixed-wave dispatch closure runner (Forge + Mentor + Praxis + Taste).

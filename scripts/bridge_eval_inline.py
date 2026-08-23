@@ -17,7 +17,7 @@ Usage:
 """
 import os, sys, json, argparse
 
-PROFILE = "<hermes-home>/profiles/indigo"
+PROFILE = os.environ.get("HERMES_HOME", os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo")))
 JDIR = os.path.join(PROFILE, "commons", "journals")
 PRAXIS_EV = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "journals_evaluated.jsonl")
 DISPATCH_EV = os.path.join(PROFILE, "commons", "data", "ocas-dispatch", "journals_evaluated.jsonl")
