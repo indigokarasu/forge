@@ -22,8 +22,8 @@
    - Recomputed `max_mtime` across ALL `commons/journals/*/2026-07-22/*.json` via `os.path.getmtime`.
    - Set `latest_mtime = max_mt + 2.0` and `last_ingest_run = <max ISO + pad>` for:
      - `~/.hermes/commons/data/monitor_state/journal_ingest_state.json`
-     - `~/.hermes/profiles/indigo/commons/data/monitor_state/journal_ingest_state.json`
-     - `~/.hermes/profiles/indigo/commons/data/ocas-praxis/ingest_state.json`
+     - `$HERMES_HOME/../indigo/commons/data/monitor_state/journal_ingest_state.json`
+     - `$HERMES_HOME/../indigo/commons/data/ocas-praxis/ingest_state.json`
    - Used programmatic recomputation; did NOT hand-type float/ISO literals.
 10. Re-ran `closure_convergence_sweep.py` → 0 additions; re-ran `closure_closeout_check.py` → `=== gates ALL CLOSED ===`.
     - Gate [2] for both monitor copies and praxis `last_ingest_run`: True.

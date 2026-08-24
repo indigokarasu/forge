@@ -48,7 +48,7 @@ Write last_ingest_run as an ISO string derived from advance_ts, plus the raw flo
 ### 4. Advance BOTH monitor copies
 Overwrite both:
 - ~/.hermes/commons/data/monitor_state/journal_ingest_state.json
-- ~/.hermes/profiles/indigo/commons/data/monitor_state/journal_ingest_state.json
+- $HERMES_HOME/../indigo/commons/data/monitor_state/journal_ingest_state.json
 
 Set latest_mtime = advance_ts and checked_at to the same ISO timestamp.
 

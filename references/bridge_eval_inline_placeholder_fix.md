@@ -18,8 +18,8 @@ import json
 JOURNAL = "ocas-mentor/2026-07-27/mentor-light-20260727T154546Z.json"
 ENTRY = json.dumps({"journal_id": JOURNAL, "evaluated_at": "2026-07-27T15:52:09.944704+00:00", "action_taken": "dispatch-new_journals-bridge", "source": "dispatcher"}) + "\n"
 for path in [
-    "/root/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl",
-    "/root/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl",
+    "$HERMES_HOME/commons/data/ocas-praxis/journals_evaluated.jsonl",
+    "$HERMES_HOME/commons/data/ocas-dispatch/journals_evaluated.jsonl",
 ]:
     with open(path, "a") as f:
         f.write(ENTRY)

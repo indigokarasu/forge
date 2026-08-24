@@ -160,7 +160,7 @@ def main():
     # ---- Step 2: Mentor light heartbeat ----
     fl = "/tmp/mentor_files_3d.txt"
     subprocess.run(
-        "find /root/.hermes/commons/journals/ /root/.hermes/profiles/indigo/commons/journals/ "
+        "find " + os.path.expanduser("~/.hermes/commons/journals/") + " " + os.path.join(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes/profiles/indigo")), "commons/journals/") + " "
         "-name '*.json' -mtime -3 2>/dev/null | sort -u > %s" % fl, shell=True)
     hb = subprocess.run(["python3", MENTOR_SCRIPT], stdin=open(fl),
                         capture_output=True, text=True)

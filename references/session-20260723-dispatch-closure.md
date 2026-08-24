@@ -15,11 +15,11 @@ from both eval stores, leaving gate [2] (state advance) stale.
 ## Diagnosis sequence (reproducible)
 
 ```bash
-cd ~/.hermes/profiles/indigo
+cd $HERMES_HOME/../indigo
 
 # 1. Monitor state vs newest journal mtime — re-fire root cause
 cat ~/.hermes/commons/data/monitor_state/journal_ingest_state.json
-cat ~/.hermes/profiles/indigo/commons/data/monitor_state/journal_ingest_state.json
+cat $HERMES_HOME/../indigo/commons/data/monitor_state/journal_ingest_state.json
 stat -c '%Y %n' commons/journals/ocas-dispatch/2026-07-23/dispatch-wave-20260723T042044Z.json
 
 # 2. Named wave already in both eval stores?
@@ -54,7 +54,7 @@ actually carries `gap_detected: true` or an evaluated-event list is a real gap.
 ## Closure sequence (verified, reaches `=== gates ALL CLOSED ===`)
 
 ```bash
-cd ~/.hermes/profiles/indigo
+cd $HERMES_HOME/../indigo
 
 # A. MANDATORY email-evidence gate (mixed wave)
 python3 skills/ocas-dispatch/scripts/verify_evidence_threads.py \
@@ -88,7 +88,7 @@ python3 skills/ocas-forge/scripts/closure_closeout_check.py \
 ## Email triage (cron autonomous, <operator> acct)
 
 - Thread `<thread-id>` "Re: Roller shade - <operator-last>" (Daniel Ringkamp /
-  bb-hi.com) → `action:none`. Confirmed already `in_evidence(structured) action=none`.
+  example-co.test) → `action:none`. Confirmed already `in_evidence(structured) action=none`.
 - No draft, no reply, inbox untouched (hard rule 2026-06-24). Not legal/financial/
   urgent → no escalation. Nothing Chronicle-worthy (informational only).
 

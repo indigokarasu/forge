@@ -48,6 +48,18 @@ PRAX = os.path.join(BASE, "commons/data/ocas-praxis/journals_evaluated.jsonl")
 EXCLUDED_SKILLS = {"ocas-custodian"}
 
 
+def norm_rel(v):
+    # Normalize historical key variants: strip leading "journals/",
+    # "commons/journals/", and "profiles/indigo/commons/journals/" prefixes so
+    # membership checks match the bare relpath used by bridge writers.
+    if not isinstance(v, str):
+        return v
+    for p in ("profiles/indigo/commons/journals/", "commons/journals/", "journals/"):
+        if v.startswith(p):
+            return norm_rel(v[len(p):])
+    return v
+
+
 def load_membership(path, key):
     s = set()
     if os.path.exists(path):
@@ -62,7 +74,7 @@ def load_membership(path, key):
                     continue
                 v = e.get(key)
                 if v:
-                    s.add(v)
+                    s.add(norm_rel(v))
     return s
 
 
@@ -70,8 +82,9 @@ def main():
     date = sys.argv[sys.argv.index("--date") + 1] if "--date" in sys.argv else datetime.now(timezone.utc).strftime("%Y-%m-%d")
     as_json = "--json" in sys.argv
 
-    disp_set = load_membership(DISP, "filename")
-    prax_set = load_membership(PRAX, "journal_id")
+    # Accept any known key ("filename", "journal_id", "journal").
+    disp_set = load_membership(DISP, "filename") | load_membership(DISP, "journal_id") | load_membership(DISP, "journal") | load_membership(DISP, "journal_file")
+    prax_set = load_membership(PRAX, "journal_id") | load_membership(PRAX, "journal") | load_membership(PRAX, "filename") | load_membership(PRAX, "journal_file")
 
     gaps = []
     for skill in sorted(os.listdir(JD)):

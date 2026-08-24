@@ -17,15 +17,15 @@ When closure scripts crash, verify gates manually in this order:
 ### Gate [1]: Named journal in both eval stores
 ```bash
 # Check praxis eval store
-grep -c "MENTOR_REL" /root/.hermes/profiles/indigo/commons/data/ocas-praxis/journals_evaluated.jsonl
+grep -c "MENTOR_REL" $HERMES_HOME/commons/data/ocas-praxis/journals_evaluated.jsonl
 # Check dispatch eval store
-grep -c "MENTOR_REL" /root/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl
+grep -c "MENTOR_REL" $HERMES_HOME/commons/data/ocas-dispatch/journals_evaluated.jsonl
 ```
 Use bare relpath (NO `commons/journals/` prefix). If missing, bridge manually:
 ```bash
 python3 -c "
 import json
-eval_path = '/root/.hermes/profiles/indigo/commons/data/ocas-dispatch/journals_evaluated.jsonl'
+eval_path = '$HERMES_HOME/commons/data/ocas-dispatch/journals_evaluated.jsonl'
 entry = {'journal_id': 'RELPATH', 'evaluated_at': 'NOW_ISO', 'action_taken': 'cross_skill_mitigation'}
 with open(eval_path, 'a') as f:
     f.write(json.dumps(entry) + '\n')
@@ -37,7 +37,7 @@ with open(eval_path, 'a') as f:
 # Compute max mtime programmatically (never hand-type)
 python3 -c "
 import os, glob
-max_mtime = max(os.path.getmtime(p) for p in glob.glob('/root/.hermes/profiles/indigo/commons/journals/*/2026-07-27/*.json'))
+max_mtime = max(os.path.getmtime(p) for p in glob.glob('$HERMES_HOME/commons/journals/*/2026-07-27/*.json'))
 print(f'max_mtime: {max_mtime}')
 print(f'max_mtime + 2s pad: {max_mtime + 2.0}')
 "
@@ -47,10 +47,10 @@ print(f'max_mtime + 2s pad: {max_mtime + 2.0}')
 ### Gate [3]: verified_second_wave re-asserted
 ```bash
 # Check all 4 state files have verified_second_wave: true
-for f in /root/.hermes/profiles/indigo/commons/data/ocas-dispatch/last_email_check_jared_zimmerman_gmail_com.json \
-         /root/.hermes/profiles/indigo/commons/data/ocas-dispatch/last_email_check_indigo.json \
-         /root/.hermes/profiles/indigo/commons/data/ocas-dispatch/last_email_check.json \
-         /root/.hermes/profiles/indigo/commons/data/ocas-dispatch/last_email_check_mx_indigo_karasu_gmail_com.json; do
+for f in $HERMES_HOME/commons/data/ocas-dispatch/last_email_check_<operator-account>.json \
+         $HERMES_HOME/commons/data/ocas-dispatch/last_email_check_indigo.json \
+         $HERMES_HOME/commons/data/ocas-dispatch/last_email_check.json \
+         $HERMES_HOME/commons/data/ocas-dispatch/last_email_check_<operator-account>.json; do
   python3 -c "import json; d=json.load(open('$f')); print('$f:', d.get('verified_second_wave'))"
 done
 ```
