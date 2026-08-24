@@ -20,8 +20,8 @@
 3. Repeat step 2 until the post-run tail is small; residual few carry to next wave.
 
 ## Pitfall: monitor-state verification via relative `cat` is misleading
-- Monitor state has TWO authoritative copies: root `~/.hermes/commons/data/monitor_state/journal_ingest_state.json` AND profile `~/.hermes/profiles/indigo/commons/data/monitor_state/journal_ingest_state.json`.
-- A relative `cat profiles/indigo/commons/...` from cwd `~/.hermes/profiles/indigo` resolved to a **STALE mirror** (printed 07-23 value) while the absolute read showed the advanced 03:43:54Z value. `advance_gate_state.py` output and `closure_closeout_check.py` gate [2] (both read absolute copies) are authoritative.
+- Monitor state has TWO authoritative copies: root `~/.hermes/commons/data/monitor_state/journal_ingest_state.json` AND profile `$HERMES_HOME/../indigo/commons/data/monitor_state/journal_ingest_state.json`.
+- A relative `cat profiles/indigo/commons/...` from cwd `$HERMES_HOME/../indigo` resolved to a **STALE mirror** (printed 07-23 value) while the absolute read showed the advanced 03:43:54Z value. `advance_gate_state.py` output and `closure_closeout_check.py` gate [2] (both read absolute copies) are authoritative.
 - **Always trust `closure_closeout_check.py` gate [2] over a hand-rolled relative-path `cat`.** Verify with absolute paths only.
 
 ## Outcome

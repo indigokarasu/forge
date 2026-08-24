@@ -21,7 +21,7 @@ correct shape:
 If you MUST compute max mtime yourself, replicate exactly
 `os.path.join(root, skill, DATE)` over BOTH
 `~/.hermes/commons/journals` and
-`~/.hermes/profiles/indigo/commons/journals`.
+`$HERMES_HOME/../indigo/commons/journals`.
 
 ## Canonical re-detection closure sequence (verified 2026-07-23)
 1. **Pre-flight named journal:** `grep -c <named_rel> commons/data/ocas-praxis/journals_evaluated.jsonl` AND `.../ocas-dispatch/journals_evaluated.jsonl`. If both ≥1 → named journal is a no-op (already processed). Do NOT re-run Forge/Mentor/Praxis for it.

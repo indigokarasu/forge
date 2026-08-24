@@ -36,6 +36,18 @@ PRAX = os.path.join(BASE, "commons/data/ocas-praxis/journals_evaluated.jsonl")
 EXCLUDED = {"ocas-custodian"}
 
 
+def norm_rel(v):
+    # Normalize historical key variants: strip leading "journals/",
+    # "commons/journals/", and "profiles/indigo/commons/journals/" prefixes so
+    # membership checks match the bare relpath the sweep writes/checks.
+    if not isinstance(v, str):
+        return v
+    for p in ("profiles/indigo/commons/journals/", "commons/journals/", "journals/"):
+        if v.startswith(p):
+            return norm_rel(v[len(p):])
+    return v
+
+
 def load_membership(path, key):
     s = set()
     if os.path.exists(path):
@@ -50,7 +62,7 @@ def load_membership(path, key):
                     continue
                 v = e.get(key)
                 if v:
-                    s.add(v)
+                    s.add(norm_rel(v))
     return s
 
 
@@ -70,8 +82,14 @@ def main():
     date = (sys.argv[sys.argv.index("--date") + 1]
             if "--date" in sys.argv
             else datetime.now(timezone.utc).strftime("%Y-%m-%d"))
-    disp_set = load_membership(DISP, "filename")
-    prax_set = load_membership(PRAX, "journal_id")
+    # Dispatch store historically has entries keyed BOTH ways ("filename" from
+    # this script, "journal_id" from bridge_eval_inline.py/manual bridges).
+    # Accept either key or the sweep loops forever on entries whose substring
+    # dedup guard (append_unique) blocks re-appending under the other key.
+    # Dispatch store has entries keyed "filename", "journal_id", OR "journal"
+    # (different bridge writers). Accept all three or the sweep loops forever.
+    disp_set = load_membership(DISP, "filename") | load_membership(DISP, "journal_id") | load_membership(DISP, "journal") | load_membership(DISP, "journal_file")
+    prax_set = load_membership(PRAX, "journal_id") | load_membership(PRAX, "journal") | load_membership(PRAX, "filename") | load_membership(PRAX, "journal_file")
     added = 0
     for skill in sorted(os.listdir(JD)):
         if not skill.startswith("ocas-") or skill in EXCLUDED:

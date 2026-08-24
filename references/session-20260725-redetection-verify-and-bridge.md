@@ -17,7 +17,7 @@ can appear 100+ times from stale/unstructured lines while still lacking a real
 `action=` decision. ALWAYS use the verifier:
 
 ```bash
-cd ~/.hermes/profiles/indigo
+cd $HERMES_HOME/../indigo
 python3 skills/ocas-dispatch/scripts/verify_evidence_threads.py \
   --evidence commons/data/ocas-dispatch/evidence.jsonl \
   <thread_id_1> <thread_id_2> ...

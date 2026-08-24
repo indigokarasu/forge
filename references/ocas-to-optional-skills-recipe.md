@@ -21,9 +21,9 @@ etc.). Fix BEFORE opening the PR:
 ## Gotchas that actually bit us (encode these, don't relearn them)
 
 - **Divergent copies.** A skill can live in several places that drift:
-  the running script (`~/.hermes/profiles/<profile>/scripts/<x>.py`, invoked by
+  the running script (`$HERMES_HOME/../<profile>/scripts/<x>.py`, invoked by
   cron via a wrapper .sh), the skill-bundled copy
-  (`~/.hermes/profiles/<profile>/skills/ocas-<x>/scripts/<x>.py`), the PR tree
+  (`$HERMES_HOME/../<profile>/skills/ocas-<x>/scripts/<x>.py`), the PR tree
   (`optional-skills/.../scripts/<x>.py`), and possibly a `<fs-root>/<repo>/skills/`
   snapshot. Editing only one leaves the live behavior unchanged. Fix ALL
   relevant copies; verify the one the cron actually runs.
