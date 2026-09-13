@@ -1,0 +1,21 @@
+name: ocas-forge
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'SKILL.md'
+      - 'scripts/*.py'
+      - 'tests/*.py'
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run smoke tests
+        run: python3 -m pytest tests/ -v
