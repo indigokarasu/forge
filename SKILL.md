@@ -8,7 +8,7 @@ includes:
 - scripts/**
 metadata:
   author: Indigo Karasu (indigokarasu)
-  version: 3.7.2
+  version: "3.8.0"
   hermes:
     category: software-development
     tags:
@@ -73,6 +73,13 @@ Forge is the only authorized skill builder in OCAS. Without it, agents would cre
 **Absorption first:** If an existing skill already owns the domain, add content as a `references/` doc or `scripts/` file — do NOT create a new skill. See `references/enforcement_durability.md`.
 
 **Research is mandatory for ALL operations** — not just new builds. When improving an existing skill, you MUST research external sources for new patterns.
+
+**Pre-Build Quality Linters** (embedded in the Validate step, per `spec-ocas-skill-improvements.md` §5.1):
+1. **Frontmatter verification** — validate required metadata fields (`name`, `description`, `version`, `author`).
+2. **Incident-log shape detection** — flag skill descriptions / reference bodies overly dense in ephemeral issue numbers or quoted chat transcripts instead of generalizable rules.
+3. **Reference sprawl check** — fail the build if `references/` exceeds 60 files.
+4. **Config vs env separation** — reject scripts that read behavioral configuration from `os.environ` instead of `skills.config.<key>` in `config.yaml` (reserving env vars strictly for credentials/secrets).
+Run all four before a new package is marked valid; a failing linter blocks promotion to production.
 
 ## Commands
 

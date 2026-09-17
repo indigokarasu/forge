@@ -1,5 +1,11 @@
 ## [2.7.1] - 2026-04-26
 
+## [3.8.0] - 2026-09-16
+
+### Added
+- **Pre-build quality linters** — frontmatter verification, incident-log shape detection, reference-sprawl check (max 60 files), and config-vs-env separation, embedded in the Validate step; a failing linter blocks promotion to production.
+
+
 ### Changed
 - Version alignment: SKILL.md frontmatter, CHANGELOG.md, and GitHub release tag now in sync per spec-ocas-skill-publishing.md. No functional change in this release.
 
