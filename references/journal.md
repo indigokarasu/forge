@@ -3,7 +3,7 @@
 Spec Version: 1.2.3
 Versioning Policy: Minor version increments only. Major versions avoided to maintain compatibility.
 
-Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Elephas and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.
+Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Chronicle and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.
 
 ---
 
@@ -70,7 +70,7 @@ observation_journal:
 
 Purpose: Record actions executed by the system. External side effects occurred.
 
-Used by: Praxis, Dispatch, Voyage, Rally (execution phase), Mentor, Vesper, Forge, Elephas, Weave (sync/writeback runs), Fellow
+Used by: Praxis, Dispatch, Voyage, Rally (execution phase), Mentor, Vesper, Forge, Chronicle, Weave (sync/writeback runs), Fellow
 
 Example:
 ```yaml
@@ -98,7 +98,7 @@ research_journal:
     - Neo4j
 ```
 
-Elephas ingests all journal types into Chronicle. Mentor reads all journal types for evaluation.
+Chronicle ingests all journal types into Chronicle. Mentor reads all journal types for evaluation.
 
 ---
 
@@ -324,7 +324,7 @@ skill_okrs:
 - `entity_resolution_accuracy` ≥ 0.90
 - `source_diversity` ≥ 6
 
-**ocas-elephas**
+**chronicle**
 - `promotion_precision` ≥ 0.90
 - `identity_merge_accuracy` ≥ 0.95
 - `candidate_queue_age` ≤ 24 hours
@@ -418,7 +418,7 @@ Every champion run must:
 skills execute tasks
 journals capture telemetry → ~/openclaw/journals/
 mentor reads journals for evaluation
-elephas reads journals for knowledge ingestion
+chronicle reads journals for knowledge ingestion
 forge builds variants from mentor proposals
 ```
 

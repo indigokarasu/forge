@@ -9,7 +9,7 @@ Forge kept creating standalone skills for content that belonged inside existing 
 | financial-sync | ocas-styx | references/financial-sync.md |
 | system-maintenance | ocas-custodian | references/system-maintenance.md |
 | ocas-expansion | ocas-weave | already in SKILL.md |
-| bower-mempalace-ingest | ocas-bower | already in scripts/ |
+| bower-the memory store-ingest | ocas-bower | already in scripts/ |
 | dispatch-status-from-files | ocas-dispatch | references/status_from_files.md |
 | weave-db-maintenance | ocas-weave | references/database_maintenance.md |
 

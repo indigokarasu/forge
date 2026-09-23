@@ -14,9 +14,9 @@ How to correctly execute OCAS skills — manually, via delegation, and via cron.
 
 2. **NEVER use `cronjob run` when the user says "run X now."** That triggers a cron schedule, not an immediate execution. Use `delegate_task` with the skill loaded (or run the logic directly if you have the tools).
 
-3. **When delegating an OCAS skill that depends on MCP tools (mempalace, spotify, etc.), you MUST either:**
+3. **When delegating an OCAS skill that depends on MCP tools (the memory store, spotify, etc.), you MUST either:**
    - Omit the `toolsets` parameter entirely so the child inherits ALL parent tools including MCP, OR
-   - Explicitly include the MCP toolset (e.g., `mcp-mempalace`) in the toolsets list.
+   - Explicitly include the MCP toolset (e.g., `mcp-the memory store`) in the toolsets list.
 
    If you pass only toolsets like `["terminal", "file", "web"]`, MCP tools are excluded and the subagent will **simulate or hallucinate** writes instead of performing them. This is the #1 cause of "ran but nothing happened" failures.
 
@@ -26,10 +26,9 @@ How to correctly execute OCAS skills — manually, via delegation, and via cron.
 
 ### Verification after skill runs
 
-After running a skill that writes to an external store (MemPalace, Weave, etc.):
+After running a skill that writes to an external store (the memory store, Weave, etc.):
 
 1. Check the store directly — not just the skill's journal. Journal writes mean nothing if the external call failed silently.
-2. For MemPalace: `mempalace status` (check drawer count), `mempalace search "<expected content>"`, and `~/.mempalace/wal/write_log.jsonl` (check recent timestamp).
 3. For the skill's own files: check `ingestion_log.jsonl` and `decisions.jsonl` in the data directory to confirm the processing cursor advanced.
 
 ### Delegate task pattern
@@ -44,7 +43,7 @@ delegate_task(
 
 If you must restrict toolsets, always include the MCP server the skill needs:
 ```
-toolsets=["terminal", "file", "mcp-mempalace"]  # explicit MCP inclusion
+toolsets=["terminal", "file", "mcp-the memory store"]  # explicit MCP inclusion
 ```
 
 ---

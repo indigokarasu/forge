@@ -40,7 +40,7 @@ Cross-cutting infrastructure with no single parent skill:
 | File | Purpose | Imported by |
 |------|---------|-------------|
 | `google_auth.py` | Shared OAuth helper | dispatch, taste, bower (9 scripts) |
-| `ladybug_client.py` | Shared DB client | elephas (2 scripts) |
+| `ladybug_client.py` | Shared DB client | chronicle (2 scripts) |
 | `update_<skill>.sh` | Skill update entry points | cron jobs |
 
 ## Dead code patterns

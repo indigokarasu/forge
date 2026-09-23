@@ -15,7 +15,7 @@ Changes from 1.5.1: verified all 24 OCAS skills have complete ontology type defi
 
 Changes from 1.5: added ocas-multipass and ocas-vibes to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; updated to reflect all 24 active OCAS skills as of 2026-04-04.
 
-Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership and Signal Emission tables; added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
+Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership and Signal Emission tables; added ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
 
 ---
 
@@ -23,7 +23,7 @@ Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership a
 
 This document defines the shared entity type hierarchy, relationship model, evidence model, time model, and identity resolution rules used across the OCAS ecosystem.
 
-Chronicle (Elephas) is the authoritative store for ontology instances. Skills that extract, reference, or query entities must use the types defined here.
+Chronicle (Chronicle) is the authoritative store for ontology instances. Skills that extract, reference, or query entities must use the types defined here.
 
 ---
 
@@ -48,7 +48,7 @@ Required fields:
 
 Optional identity resolution fields:
 - `possible_matches` — list of Entity ids flagged as possible duplicates
-- `merge_history` — list of merge event records. Format: `[{"merged_id": "...", "merged_at": "...", "merged_by": "ocas-elephas", "reason": "..."}]`
+- `merge_history` — list of merge event records. Format: `[{"merged_id": "...", "merged_at": "...", "merged_by": "chronicle", "reason": "..."}]`
 - `identity_state` — `distinct` (default) / `possible_match` / `confirmed_same`
 
 ### Identifier Vocabulary
@@ -221,13 +221,13 @@ Signals remain permanently attached as evidence after promotion.
 
 ### Signal Delivery
 
-Skills emit Signals by writing a JSON file to the Elephas intake directory:
+Skills emit Signals by writing a JSON file to the Chronicle intake directory:
 
 ```
-{agent_root}/commons/db/ocas-elephas/intake/{signal_id}.signal.json
+chronicle_remember(...)
 ```
 
-Elephas watches this directory and processes new files. After processing, files move to `intake/processed/`. Skills must not delete or modify files in either directory.
+Chronicle watches this directory and processes new files. After processing, files move to `intake/processed/`. Skills must not delete or modify files in either directory.
 
 Not all skills emit Signals. Skills that maintain standalone domain databases (Weave, Triage) operate independently. They may optionally emit Signals for Chronicle promotion, but this is not required for normal operation.
 
@@ -271,7 +271,7 @@ Ambiguous cases must preserve separation rather than silently collapsing records
 
 ## Skill Write Permissions
 
-**Only Elephas writes confirmed facts to Chronicle.** All other skills are read-only consumers.
+**Skills write their own confirmed facts to Chronicle**, each carrying its own `source_type` provenance. There is no broker.
 
 Skills that maintain their own domain databases (Weave, Triage) own and write exclusively to their own database files. No skill may open another skill's database as `READ_WRITE`.
 
@@ -306,28 +306,28 @@ Every skill that extracts, manages, or emits entities must map its outputs to th
 
 **Historical skill mappings (reference; skills not currently released):**
 
-Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+Skills not in this list do not extract entities and do not write to Chronicle. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
 - Skills that query Chronicle or Weave for entity context (read-only consumers) are not listed here — this table covers extraction and emission only.
-- Skills not listed above (Elephas, Praxis, Mentor, Forge, Fellow) do not extract entities from user data. Elephas is the Chronicle writer; others operate on skill-internal data.
+- Skills not listed above (Praxis, Mentor, Forge, Fellow) do not extract entities from user data. 
 
 ---
 
 ## Signal Emission Responsibilities
 
-Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
+Skills that extract entities write them to Chronicle directly. This table documents the expected emission pattern for each extracting skill.
 
 **Currently active OCAS skills (as of 2026-04-12):**
 
-| Skill | Emit Signals to Elephas? | Condition |
+| Skill | Writes to Chronicle? | Condition |
 |---|---|---|
 | ocas-forge | No | Skill architect; no entity signals |
 
 **Historical skill patterns (reference; skills not currently released):**
 
-Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 ---
 
@@ -345,6 +345,6 @@ Skills that extract entities (Sift, Scout, Look, Corvus, Thread, Weave, Taste, V
 
 Skills that query entities (Weave, Vesper, Dispatch, Taste, Voyage, Haiku) expect the types defined here when reading from Chronicle or Weave's social graph.
 
-Skills that emit Signals to Elephas must set `payload.type` to the ontology type of the primary entity in the signal (e.g., `Person`, `Place`, `Idea`).
+Skills that write to Chronicle must set `payload.type` to the ontology type of the primary entity in the signal (e.g., `Person`, `Place`, `Idea`).
 
-Elephas is the only skill that writes confirmed facts to Chronicle.
+Skills write their own confirmed facts to Chronicle, each with its own `source_type`.

@@ -23,7 +23,7 @@ Three sub-roots, one per data class:
 {agent_root}/commons/
   data/       — skill state, configuration, and JSONL logs
   journals/   — journal files (telemetry, OKR evaluation)
-  db/         — LadybugDB graph databases (Elephas and Weave only)
+  db/         — LadybugDB graph databases (Chronicle and Weave only)
 ```
 
 No skill writes outside `{agent_root}/commons/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
@@ -38,7 +38,7 @@ No skill writes outside `{agent_root}/commons/`. No skill writes inside the skil
 {agent_root}/commons/data/{skill-name}/
 ```
 
-The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `ocas-elephas`, `ocas-weave`.
+The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `chronicle`, `ocas-weave`.
 
 ### Required Structure
 
@@ -108,12 +108,12 @@ Champion and challenger runs for the same comparison group live in the same date
 {agent_root}/commons/db/{skill-name}/
 ```
 
-Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elephas` and `ocas-weave`.
+Only for skills that maintain LadybugDB graph databases. Currently: `chronicle` and `ocas-weave`.
 
 ### Structure
 
 ```
-{agent_root}/commons/db/ocas-elephas/
+{agent_root}/commons/db/chronicle/
   chronicle.lbug
   config.json
   staging/
@@ -217,10 +217,10 @@ Skills must not silently delete data. Expired data is removed by explicit mainte
 Skills must not read or write another skill's data or journal directory.
 
 Cross-skill data sharing uses only:
-- Chronicle queries (via `elephas.query`)
+- Chronicle queries (via `chronicle.query`)
 - Weave queries (read-only)
 - Defined intake directory drops (see `spec-ocas-interfaces.md`)
-- Journal emission and Elephas ingestion
+- Journal emission and Chronicle ingestion
 
 ---
 

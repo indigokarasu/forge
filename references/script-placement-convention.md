@@ -8,7 +8,7 @@
 
 Infrastructure scripts with no single parent skill stay in `~/.hermes/scripts/`:
 - `google_auth.py` — shared OAuth helper (imported by dispatch, taste, bower)
-- `ladybug_client.py` — shared DB client (imported by elephas)
+- `ladybug_client.py` — shared DB client (imported by chronicle)
 - `update_<skill>.sh` — skill update entry points (cron compatibility)
 
 ## Cron Compatibility Pattern

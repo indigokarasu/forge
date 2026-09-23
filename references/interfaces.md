@@ -28,14 +28,14 @@ All interface paths, file formats, and handoff contracts are defined here. Skill
 
 ---
 
-## Elephas Signal Intake
+## Chronicle Signal Intake
 
 ### Purpose
-Skills emit Signal observations to Elephas for Chronicle ingestion.
+Skills emit Signal observations to Chronicle for Chronicle ingestion.
 
 ### Path
 ```
-{agent_root}/commons/db/ocas-elephas/intake/{signal_id}.signal.json
+chronicle_remember(...)
 ```
 
 ### Producers
@@ -45,7 +45,7 @@ Any skill that observes entities, relationships, or events worth promoting to Ch
 Signal schema from `spec-ocas-shared-schemas.md`. The `.signal.json` extension distinguishes signal files from other intake files.
 
 ### Consumption
-Elephas scans this directory during every `elephas.ingest.journals` run. Processed files move to `intake/processed/`.
+The write is immediate; there is no intake directory and no scanning step.
 
 ### Notes
 Signal emission is optional for standalone skills (Weave, Triage). Chronicle is a downstream consumer, not an upstream dependency.
@@ -69,7 +69,7 @@ All skills (every run writes a journal).
 Mentor scans `{agent_root}/commons/journals/` recursively during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. It tracks which `run_id`s have already been ingested via its own ingestion log at `{agent_root}/commons/data/ocas-mentor/ingestion_log.jsonl`.
 
 ### Notes
-Mentor and Elephas are independent consumers of the same journal files. Neither blocks the other. Mentor reads for performance evaluation; Elephas reads to extract Chronicle candidates.
+Mentor and Chronicle are independent consumers of the same journal files. Neither blocks the other. Mentor reads for performance evaluation; Chronicle reads to extract Chronicle candidates.
 
 ---
 
@@ -254,14 +254,14 @@ Corvus reads Thread's research threads during analysis cycles as additional sign
 
 ---
 
-## Thread → Elephas Chronicle Candidate
+## Thread → Chronicle Chronicle Candidate
 
 ### Purpose
 Thread proposes stable research topics, interests, and source affinities as Chronicle candidates.
 
 ### Path
 ```
-{agent_root}/commons/db/ocas-elephas/intake/{candidate_id}.signal.json
+chronicle_remember(...)
 ```
 
 ### Producer
@@ -429,7 +429,6 @@ Recommended polling cadences:
 
 | Consumer | Intake | Recommended Cadence |
 |---|---|---|
-| Elephas | Signal intake | Every `elephas.ingest.journals` run (e.g., every 15 min) |
 | Mentor | Journals directory + Fellow CycleResults | Every `mentor.heartbeat.light` (e.g., every 15 min) |
 | Praxis | Behavioral signals from Corvus | Every Praxis scheduled pass or on-demand |
 | Forge | Variant proposals and decisions from Mentor | Every Forge cycle or on-demand |

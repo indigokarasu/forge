@@ -122,7 +122,7 @@ When a capability naturally belongs inside an existing umbrella skill, **do not 
 - Weave DB maintenance queries (weave-db-maintenance) → `references/database_maintenance.md` in `ocas-weave`
 - Dispatch status diagnostics (dispatch-status-from-files) → `references/status_from_files.md` in `ocas-dispatch`
 - Expansion pipeline (ocas-expansion) → already integrated in `ocas-weave/SKILL.md`
-- Bower mempalace ingest (bower-mempalace-ingest) → already in `ocas-bower/scripts/`
+- Bower the memory store ingest (bower-the memory store-ingest) → already in `ocas-bower/scripts/`
 
 ### 8. Keep SKILL.md under 500 lines
 
@@ -215,7 +215,7 @@ When a capability naturally belongs inside an existing umbrella skill, **do not 
 - Weave DB maintenance queries (weave-db-maintenance) → `references/database_maintenance.md` in `ocas-weave`
 - Dispatch status diagnostics (dispatch-status-from-files) → `references/status_from_files.md` in `ocas-dispatch`
 - Expansion pipeline (ocas-expansion) → already integrated in `ocas-weave/SKILL.md`
-- Bower mempalace ingest (bower-mempalace-ingest) → already in `ocas-bower/scripts/`
+- Bower the memory store ingest (bower-the memory store-ingest) → already in `ocas-bower/scripts/`
 
 ## Skill Types
 
@@ -313,7 +313,7 @@ Use **cron** for all background tasks. Hermes has no heartbeat mechanism.
 - Skills with heartbeat entries only: ocas-forge (intake poll)
 - Skills with cron jobs only: ocas-relay (update only)
 
-**Note:** This reflects the current OCAS ecosystem as of 2026-04-16. Additional skills (ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis, ocas-triage) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
+**Note:** This reflects the current OCAS ecosystem as of 2026-04-16. Additional skills (chronicle, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis, ocas-triage) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
 
 ### Idempotent registration
 
@@ -325,7 +325,7 @@ openclaw cron list   # check before registering
 
 In agent tool calls: list existing jobs, check for the target name, add only if absent.
 
-Job names follow the pattern `{skill-short}:{task-short}` for stable identification. Example: `elephas:ingest`, `vesper:morning`.
+Job names follow the pattern `{skill-short}:{task-short}` for stable identification. Example: `chronicle:ingest`, `vesper:morning`.
 
 ### SKILL.md declaration
 
@@ -411,7 +411,7 @@ Before creating a new skill, verify it does not conflict with the following acti
 - ocas-forge — skill design, construction, and validation
 - ocas-relay — device gateway, telemetry ingestion, permission management
 
-Legacy reference (archived/non-existent): ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-fellow, ocas-thread, ocas-custodian, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes, ocas-triage
+Legacy reference (archived/non-existent): ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, chronicle, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-fellow, ocas-thread, ocas-custodian, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes, ocas-triage
 
 Each skill build spec includes a Responsibility Boundary section.
 

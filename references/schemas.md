@@ -42,7 +42,7 @@ Every decision that changes behavior, triggers an external action, or produces a
 
 ## Signal
 
-Used by: skills that emit observations to be ingested by Elephas.
+Used by: skills that emit observations to be ingested by Chronicle.
 
 See `spec-ocas-ontology.md` for the full evidence model and signal delivery mechanism.
 
@@ -380,7 +380,7 @@ Vesper reads `top_movers`, `risk_flags`, `daily_return`, and `allocation_changes
 **Used by:** Taste (writes internally)
 **Written to:** `{agent_root}/commons/data/ocas-taste/signals.jsonl`
 
-This schema is Taste-internal. It is not emitted to Elephas. It represents a single observed consumption event.
+This schema is Taste-internal. It is not emitted to Chronicle. It represents a single observed consumption event.
 
 ```json
 {
