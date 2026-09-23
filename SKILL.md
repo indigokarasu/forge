@@ -77,7 +77,7 @@ Forge is the only authorized skill builder in OCAS. Without it, agents would cre
 
 **Research is mandatory for ALL operations** — not just new builds. When improving an existing skill, you MUST research external sources for new patterns.
 
-**Pre-Build Quality Linters** (embedded in the Validate step, per `spec-ocas-skill-improvements.md` §5.1):
+**Pre-Build Quality Linters** (embedded in the Validate step, per [[`spec-ocas-skill-improvements.md` ⚠️ Pending spec] ⚠️ Pending spec — not yet authored] §5.1):
 1. **Frontmatter verification** — validate required metadata fields (`name`, `description`, `version`, `author`).
 2. **Incident-log shape detection** — flag skill descriptions / reference bodies overly dense in ephemeral issue numbers or quoted chat transcripts instead of generalizable rules.
 3. **Reference sprawl check** — fail the build if `references/` exceeds 60 files.
