@@ -35,6 +35,9 @@ Skill architect and builder. Given a capability idea or broken package, runs a m
 
 Every build starts with absorption check, research, and classification before a single file is created.
 
+
+**Support files:** `references/support-file-map.md` indexes the bundled files not covered inline in this skill — check it before working from assumptions about what is (not) available.
+
 ## Why This Skill Exists
 
 Forge is the only authorized skill builder in OCAS. Without it, agents would create skills with inconsistent structure, missing frontmatter, no tests, and no cross-skill coordination. The rigid pipeline ensures every skill meets OCAS standards and doesn't duplicate existing work.
