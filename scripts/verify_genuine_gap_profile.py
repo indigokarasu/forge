@@ -82,9 +82,9 @@ def main():
     date = sys.argv[sys.argv.index("--date") + 1] if "--date" in sys.argv else datetime.now(timezone.utc).strftime("%Y-%m-%d")
     as_json = "--json" in sys.argv
 
-    # Accept any known key ("filename", "journal_id", "journal").
-    disp_set = load_membership(DISP, "filename") | load_membership(DISP, "journal_id") | load_membership(DISP, "journal") | load_membership(DISP, "journal_file")
-    prax_set = load_membership(PRAX, "journal_id") | load_membership(PRAX, "journal") | load_membership(PRAX, "filename") | load_membership(PRAX, "journal_file")
+    # Accept any known key ("filename", "journal_id", "journal", "relpath").
+    disp_set = load_membership(DISP, "filename") | load_membership(DISP, "journal_id") | load_membership(DISP, "journal") | load_membership(DISP, "journal_file") | load_membership(DISP, "relpath")
+    prax_set = load_membership(PRAX, "journal_id") | load_membership(PRAX, "journal") | load_membership(PRAX, "filename") | load_membership(PRAX, "journal_file") | load_membership(PRAX, "relpath")
 
     gaps = []
     for skill in sorted(os.listdir(JD)):
