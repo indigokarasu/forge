@@ -55,5 +55,3 @@ One line per bundled file that SKILL.md does not cover inline. Read entries rele
 | `references/workflow_plans.md` | OCAS Workflow Plans |
 | `scripts/advance_gate_state.py` | advance_gate_state.py — advance dispatch monitor + praxis ingest gate state. Used during mixed-wave / re-de... |
 | `scripts/classify_gap_journals.py` | classify_gap_journals.py — classify dispatch-closure genuine gaps as noop self-reference heartbeats vs genu... |
-| `scripts/update.sh` | update.sh — Local update helper for ocas-forge. |
-| `scripts/verify_dispatch_cleanup.py` | Post-dispatch cleanup verifier for multi-skill dispatch pipelines. Usage: python3 <hermes-home>/profiles/<p... |

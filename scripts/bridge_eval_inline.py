@@ -15,9 +15,9 @@ Usage:
   python3 scripts/bridge_eval_inline.py REL1 REL2 REL3 --action my_label
   python3 scripts/bridge_eval_inline.py REL1 --require-exists   # skip missing files
 """
-import os, sys, json, argparse
+import os, json, argparse
 
-PROFILE = os.environ.get("HERMES_HOME", os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo")))
+PROFILE = os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo"))
 JDIR = os.path.join(PROFILE, "commons", "journals")
 PRAXIS_EV = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "journals_evaluated.jsonl")
 DISPATCH_EV = os.path.join(PROFILE, "commons", "data", "ocas-dispatch", "journals_evaluated.jsonl")
