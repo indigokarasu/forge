@@ -6,6 +6,7 @@ on:
       - 'SKILL.md'
       - 'scripts/*.py'
       - 'tests/*.py'
+      - '.github/workflows/*.yml'
   pull_request:
     branches: [main]
 
