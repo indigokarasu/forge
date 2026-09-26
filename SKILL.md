@@ -1,4 +1,5 @@
 ---
+warning: 'FALSE TRIGGER RISK: Has had 100% false trigger rate on interactive loads (2/3 auto). This skill designs, builds, and validates Agent Skill packages — NOT for skill evaluation, variant proposals, or general skill-related queries. Only load when explicitly tasked with building a new skill from scratch. Added automatically on 2026-09-25.'
 name: ocas-forge
 description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory eight-phase pipeline. Default output is the finished installable package. Not for skill evaluation (use skilllab) or variant proposals (use ocas-mentor).'
 license: MIT
@@ -117,6 +118,7 @@ Run all four before a new package is marked valid; a failing linter blocks promo
 
 | Error | Handling |
 |-------|----------|
+| `closure_closeout_check.py` reports `[2] monitor ROOT ... : False (MISSING ...)` while `advance_gate_state.py` wrote a real file | The checker's `MON_STATE_ROOT` is derived via `HERMES_HOME.replace("/profiles/indigo", "/commons/data/...")`. When `HERMES_HOME=/root/.hermes` (no `/profiles/indigo` segment) the replace is a no-op and the path resolves to a nonexistent file, so the gate reads MISSING even though the real monitor copy is advanced. Do NOT re-advance and do NOT report STALE. Re-run with `HERMES_HOME=/root/.hermes/profiles/indigo` so the replace matches and the check reads the file that was actually written. Requires `=== gates ALL CLOSED ===`. |
 | `closure_closeout_check.py` crashes (FileNotFoundError – `<hermes-home>` placeholder) | Skip script. Manually verify gates: (1) grep bare relpath in both eval stores, (2) recompute max journal mtime programmatically + ≥2s pad, advance both monitor copies + praxis `ingest_state.json`, (3) re-assert `verified_second_wave` on all dispatch-owned files. |
 | `run_mixed_wave_closure.py` crashes (NameError: 'os') | Handle closure manually. Same manual procedure as above. |
 | `bridge_eval_inline.py` crashes (FileNotFoundError) | Manual JSONL append to both eval stores. |
