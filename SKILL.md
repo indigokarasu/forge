@@ -1,5 +1,5 @@
 ---
-warning: 'FALSE TRIGGER RISK: Has had 100% false trigger rate on interactive loads (2/3 auto). This skill designs, builds, and validates Agent Skill packages — NOT for skill evaluation, variant proposals, or general skill-related queries. Only load when explicitly tasked with building a new skill from scratch. Added automatically on 2026-09-25.'
+warning: 'FALSE TRIGGER RISK: rate CORRECTED 2026-09-26 from 100% (2/3) to 0% (0/3 interactive). All 3 interactive loads were user_prompted=true, i.e. explicitly requested, so an interactive false-trigger rate is not meaningful for this skill. The prior 100% also carried a miner bug that attributed the next 10 messages'' tools to every skill loaded in the same burst. Keep the warning as a note that this skill is safe to load on request; do not treat it as excluded.'
 name: ocas-forge
 description: 'Skill architect and builder. Designs, builds, and validates complete Agent Skill packages through a mandatory eight-phase pipeline. Default output is the finished installable package. Not for skill evaluation (use skilllab) or variant proposals (use ocas-mentor).'
 license: MIT

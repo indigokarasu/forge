@@ -41,7 +41,12 @@ PRAXIS_EV = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "journals_ev
 DISPATCH_EV = os.path.join(PROFILE, "commons", "data", "ocas-dispatch", "journals_evaluated.jsonl")
 PRAXIS_STATE = os.path.join(PROFILE, "commons", "data", "ocas-praxis", "ingest_state.json")
 # TWO monitor copies (both must be advanced — see ocas-forge/ocas-dispatch SKILL.md)
-MON_STATE_ROOT = os.environ.get("HERMES_HOME", os.path.join(os.path.expanduser("~"), ".hermes", "profiles", "indigo")).replace("/profiles/indigo", "/commons/data/monitor_state/journal_ingest_state.json")
+# HERMES_HOME may be /root/.hermes (the root) or /root/.hermes/profiles/indigo (the profile)
+# The root monitor state is always at /root/.hermes/commons/data/monitor_state/journal_ingest_state.json
+if os.environ.get("HERMES_HOME", "").endswith("/profiles/indigo"):
+    MON_STATE_ROOT = os.path.join(os.environ["HERMES_HOME"], "..", "..", "commons", "data", "monitor_state", "journal_ingest_state.json")
+else:
+    MON_STATE_ROOT = "/root/.hermes/commons/data/monitor_state/journal_ingest_state.json"
 MON_STATE_PROFILE = os.path.join(PROFILE, "commons", "data", "monitor_state", "journal_ingest_state.json")
 EMAIL_DIR = os.path.join(PROFILE, "commons", "data", "ocas-dispatch")
 
